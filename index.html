@@ -1,0 +1,1036 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<style>
+/* Base reset (matches the claude.ai artifact skeleton this page was built for) */
+:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+body{margin:0;font:14px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+img{max-width:100%}
+[hidden]{display:none!important}
+</style>
+<title>Ticket Triage Desk</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,700&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* Layout: a three-pane help desk (queue | ticket | triage). Anything Claude proposes is drawn in "pencil" (dashed graphite);
+   anything a person sets or approves is "ink" (solid teal). Approval inks the whole ticket. */
+:root{
+  --bg:#EDF0F3; --surface:#FFFFFF; --surface-2:#F4F6F9;
+  --ink:#16202B; --ink-2:#4B5766; --ink-3:#717D8C; --line:#D8DEE5; --line-2:#BFC8D2;
+  --accent:#0B6B6A; --accent-ink:#FFFFFF; --accent-soft:#DCEFED;
+  --pencil:#6B7785; --pencil-soft:#EEF1F4;
+  --warn:#8F4D00; --warn-soft:#FFF0D9; --crit:#B42318; --crit-soft:#FDE6E3; --ok:#1C7439; --ok-soft:#E1F3E6;
+  --hl-cat:#CFE5F5; --hl-urg:#FADDB8;
+  --shadow:0 1px 2px rgba(22,32,43,.06),0 6px 20px rgba(22,32,43,.05);
+  --f-display:"Bricolage Grotesque","IBM Plex Sans",system-ui,sans-serif;
+  --f-body:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;
+  --f-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0E1318; --surface:#151C24; --surface-2:#1B242E;
+  --ink:#E5EAF0; --ink-2:#A9B4C1; --ink-3:#7E8A98; --line:#28323D; --line-2:#3A4655;
+  --accent:#4CBDB8; --accent-ink:#04201F; --accent-soft:#123130;
+  --pencil:#97A3B1; --pencil-soft:#1E2731;
+  --warn:#F0B35C; --warn-soft:#382912; --crit:#FF8A7E; --crit-soft:#3A1916; --ok:#6CD08B; --ok-soft:#13301D;
+  --hl-cat:#1C3B52; --hl-urg:#4A3317;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25);
+  color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0E1318; --surface:#151C24; --surface-2:#1B242E;
+  --ink:#E5EAF0; --ink-2:#A9B4C1; --ink-3:#7E8A98; --line:#28323D; --line-2:#3A4655;
+  --accent:#4CBDB8; --accent-ink:#04201F; --accent-soft:#123130;
+  --pencil:#97A3B1; --pencil-soft:#1E2731;
+  --warn:#F0B35C; --warn-soft:#382912; --crit:#FF8A7E; --crit-soft:#3A1916; --ok:#6CD08B; --ok-soft:#13301D;
+  --hl-cat:#1C3B52; --hl-urg:#4A3317;
+  --shadow:0 1px 2px rgba(0,0,0,.3),0 6px 20px rgba(0,0,0,.25);
+  color-scheme:dark}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+button,input,textarea{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.mono{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+p{margin:0}
+
+.app{max-width:1480px;margin:0 auto;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:16px 40px;display:flex;flex-direction:column;gap:16px}
+
+/* Top bar */
+.topbar{display:flex;align-items:center;gap:10px 18px;flex-wrap:wrap}
+.brand{display:flex;align-items:center;gap:11px;margin-right:auto;min-width:0}
+.logo{width:30px;height:22px;border-radius:5px;background:var(--accent);position:relative;flex:none}
+.logo::before,.logo::after{content:"";position:absolute;top:7px;width:8px;height:8px;border-radius:50%;background:var(--bg)}
+.logo::before{left:-4px}.logo::after{right:-4px}
+.brand-name{font-family:var(--f-display);font-weight:700;font-size:19px;letter-spacing:-.015em;line-height:1.1}
+.brand-sub{font-size:12.5px;color:var(--ink-3)}
+.stats{display:flex;gap:6px 16px;flex-wrap:wrap;font-size:12.5px;color:var(--ink-2)}
+.stats b{font-family:var(--f-mono);font-weight:500;color:var(--ink)}
+.status{display:inline-flex;align-items:center;gap:7px;font-size:12.5px;padding:4px 10px;border-radius:999px;border:1px solid var(--line);background:var(--surface);color:var(--ink-2);white-space:nowrap}
+.status i{width:7px;height:7px;border-radius:50%;background:var(--ink-3)}
+.status.is-ready i{background:var(--ok)}
+.status.is-off i{background:var(--warn)}
+
+/* Columns */
+.cols{display:grid;grid-template-columns:272px minmax(0,1fr) minmax(0,440px);gap:16px;align-items:start}
+.pane{background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);min-width:0}
+.queue{position:sticky;top:16px}
+@media (max-width:1180px){.cols{grid-template-columns:250px minmax(0,1fr)}.triage{grid-column:2}}
+@media (max-width:760px){
+  .cols{grid-template-columns:minmax(0,1fr)}.triage{grid-column:auto}.queue{position:static}
+  .queue-list{flex-direction:row!important;overflow-x:auto;padding-bottom:10px!important;scroll-snap-type:x proximity}
+  .qitem{flex:0 0 232px;scroll-snap-align:start}
+  .q-foot{display:none}
+}
+
+/* Queue */
+.q-head{display:flex;align-items:center;justify-content:space-between;gap:8px;padding:14px 12px 10px 16px}
+.q-head h2{font-family:var(--f-display);font-weight:600;font-size:15px;margin:0}
+.q-count{font-family:var(--f-mono);font-size:12px;color:var(--ink-3);margin-left:6px;font-weight:400}
+.queue-list{display:flex;flex-direction:column;gap:2px;padding:0 8px 8px}
+.qitem{display:grid;gap:3px;text-align:left;width:100%;background:transparent;border:0;border-radius:8px;padding:10px 10px 10px 16px;position:relative;color:var(--ink)}
+.qitem::before{content:"";position:absolute;left:5px;top:12px;bottom:12px;width:3px;border-radius:3px;background:var(--sev,var(--line-2))}
+.qitem:hover{background:var(--surface-2)}
+.qitem.is-sel{background:var(--accent-soft)}
+.q-top{display:flex;justify-content:space-between;gap:8px;font-family:var(--f-mono);font-size:11.5px;color:var(--ink-3)}
+.q-from{font-size:12.5px;color:var(--ink-2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.q-subj{font-weight:600;font-size:13.5px;line-height:1.35;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.q-tags{display:flex;gap:5px;flex-wrap:wrap;margin-top:5px}
+.q-foot{padding:10px 16px 14px;border-top:1px solid var(--line);display:flex;justify-content:space-between;align-items:center;gap:8px;font-size:12px;color:var(--ink-3)}
+.tag{font-size:11.5px;line-height:1.5;padding:0 7px;border-radius:999px;border:1px solid var(--line-2);color:var(--ink-2);white-space:nowrap;background:var(--surface)}
+.tag-pencil{border-style:dashed;border-color:var(--pencil)}
+.tag-ink{border-color:var(--accent);color:var(--accent)}
+.tag-warn{background:var(--warn-soft);color:var(--warn);border-color:transparent}
+.tag-ok{background:var(--ok-soft);color:var(--ok);border-color:transparent}
+.tag-muted{color:var(--ink-3)}
+
+/* Buttons */
+.btn{background:var(--accent);color:var(--accent-ink);border:0;border-radius:8px;padding:9px 15px;font-weight:600;font-size:13.5px;white-space:nowrap}
+.btn:hover{filter:brightness(1.08)}
+.btn:disabled{background:var(--line);color:var(--ink-3);cursor:not-allowed;filter:none}
+.btn-ghost{background:var(--surface);border:1px solid var(--line-2);border-radius:8px;padding:7px 12px;font-size:13px;color:var(--ink);white-space:nowrap}
+.btn-ghost:hover{border-color:var(--ink-3)}
+.btn-ghost:disabled{color:var(--ink-3);cursor:not-allowed}
+.btn-sm{padding:5px 10px;font-size:12.5px;border-radius:7px}
+.btn-armed{border-color:var(--warn);color:var(--warn);background:var(--warn-soft)}
+.link{background:none;border:0;padding:0;color:var(--accent);text-decoration:underline;text-underline-offset:2px;font-size:12.5px}
+
+/* Mail */
+.mail{padding:22px 26px 26px}
+.eyebrow{font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);margin-bottom:6px;font-weight:600;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.mail h1{font-family:var(--f-display);font-weight:600;font-size:23px;line-height:1.2;letter-spacing:-.012em;margin:0 0 14px;text-wrap:balance}
+.from{display:flex;gap:12px;align-items:center;padding-bottom:16px;border-bottom:1px solid var(--line);margin-bottom:18px}
+.avatar{width:36px;height:36px;border-radius:50%;background:var(--surface-2);border:1px solid var(--line);display:grid;place-items:center;font-weight:600;font-size:13px;color:var(--ink-2);flex:none}
+.from-txt{min-width:0;display:grid;gap:1px}
+.from-name{font-weight:600}
+.from-meta{font-size:12.5px;color:var(--ink-3);overflow-wrap:anywhere}
+.body{white-space:pre-wrap;font-size:15px;line-height:1.68;max-width:66ch;overflow-wrap:anywhere}
+mark.ev{background:transparent;color:inherit;border-radius:2px;box-shadow:inset 0 -.45em 0 var(--hl-cat);transition:box-shadow .18s ease}
+mark.ev-urg{box-shadow:inset 0 -.45em 0 var(--hl-urg)}
+mark.ev.is-lit{box-shadow:inset 0 -1.5em 0 var(--hl-cat)}
+mark.ev-urg.is-lit{box-shadow:inset 0 -1.5em 0 var(--hl-urg)}
+.legend{display:flex;gap:6px 16px;flex-wrap:wrap;margin-top:22px;padding-top:14px;border-top:1px solid var(--line);font-size:12px;color:var(--ink-3)}
+.sw{display:inline-block;width:14px;height:8px;border-radius:2px;margin-right:6px;vertical-align:1px}
+.sw-cat{background:var(--hl-cat)}.sw-urg{background:var(--hl-urg)}
+
+/* Composer */
+.composer{display:grid;gap:14px}
+.composer .sub{color:var(--ink-2);max-width:60ch}
+.grid2{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px}
+.composer label{display:grid;gap:5px;font-size:12.5px;font-weight:600;color:var(--ink-2)}
+.composer label span{font-weight:400;color:var(--ink-3)}
+.composer input,.composer textarea{width:100%;border:1px solid var(--line-2);border-radius:8px;padding:9px 11px;background:var(--surface);font-weight:400;font-size:14px;color:var(--ink)}
+.composer textarea{min-height:220px;resize:vertical;line-height:1.55}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.spacer{flex:1}
+.form-err{color:var(--crit);font-size:13px}
+
+/* Triage panel */
+.triage{padding:18px 20px 20px;display:flex;flex-direction:column;gap:20px}
+.tp-head{display:flex;justify-content:space-between;align-items:flex-start;gap:10px;flex-wrap:wrap}
+.tp-head h2{font-family:var(--f-display);font-weight:600;font-size:18px;margin:0;letter-spacing:-.01em}
+.src{font-family:var(--f-mono);font-size:11.5px;color:var(--ink-3);margin-top:2px}
+.summary{color:var(--ink-2);padding:10px 12px;background:var(--surface-2);border-radius:8px;font-size:13.5px}
+.field{display:grid;gap:9px}
+.field-head{display:flex;align-items:center;gap:6px 12px;flex-wrap:wrap}
+.label{font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);font-weight:600}
+.conf{display:inline-flex;align-items:center;gap:6px;font-size:12px;color:var(--ink-2)}
+.conf .bar{width:46px;height:5px;border-radius:3px;background:var(--line);overflow:hidden}
+.conf .bar i{display:block;height:100%;background:var(--ink-3)}
+.conf-high .bar i{background:var(--ok)}
+.conf-low{color:var(--warn)}.conf-low .bar i{background:var(--warn)}
+.conf.is-past{opacity:.6}
+.by{margin-left:auto;font-size:12px;color:var(--ink-3);display:inline-flex;gap:8px;align-items:center}
+.by-you{color:var(--accent);font-weight:500}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chip{border:1.5px solid var(--line);background:var(--surface);border-radius:999px;padding:4px 11px;font-size:13px;display:inline-flex;align-items:center;gap:6px;color:var(--ink-2);line-height:1.4}
+.chip:hover:not(:disabled){border-color:var(--line-2);color:var(--ink)}
+.chip.is-pencil{border-style:dashed;border-color:var(--pencil);background:var(--pencil-soft);color:var(--ink);font-weight:500}
+.chip.is-ink{border-color:var(--accent);background:var(--accent);color:var(--accent-ink);font-weight:500}
+.chip:disabled{cursor:default}
+.chip:disabled:not(.is-ink):not(.is-pencil){opacity:.55}
+.chip .ai{font-family:var(--f-mono);font-size:10px;letter-spacing:.03em;padding:0 4px;border-radius:3px;border:1px dashed currentColor;line-height:1.35}
+.dot{width:7px;height:7px;border-radius:50%;flex:none}
+.lowconf{border:1px solid var(--warn);background:var(--warn-soft);border-radius:8px;padding:10px 12px;display:grid;gap:9px;font-size:13px}
+.lowconf p{color:var(--ink)}
+.sec{display:grid;gap:10px}
+.sec h3{margin:0;font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);font-weight:600}
+.sec-head{display:flex;justify-content:space-between;align-items:center;gap:8px;flex-wrap:wrap}
+.evlist{list-style:none;margin:0;padding:0;display:grid;gap:4px}
+.evitem{display:grid;grid-template-columns:auto minmax(0,1fr);gap:2px 10px;padding:7px 9px;border-radius:7px;cursor:default}
+.evitem.is-lit,.evitem:focus-visible{background:var(--surface-2)}
+.evtag{grid-row:span 2;align-self:start;font-size:10.5px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;padding:2px 6px;border-radius:4px;margin-top:2px}
+.evtag-cat{background:var(--hl-cat);color:var(--ink)}
+.evtag-urg{background:var(--hl-urg);color:var(--ink)}
+.evitem q{font-size:13.5px;color:var(--ink)}
+.evnote{font-size:12px;color:var(--ink-3)}
+.flags ul{margin:0;padding:0;list-style:none;display:grid;gap:6px}
+.flags li{display:flex;gap:9px;font-size:13px;color:var(--ink)}
+.flags li::before{content:"!";flex:none;width:17px;height:17px;border-radius:50%;background:var(--warn-soft);color:var(--warn);font-weight:700;font-size:11px;display:grid;place-items:center;margin-top:1px}
+.fine{font-size:12px;color:var(--ink-3)}
+
+.tone{display:inline-flex;border:1px solid var(--line-2);border-radius:8px;overflow:hidden}
+.tone button{border:0;background:var(--surface);padding:5px 10px;font-size:12.5px;color:var(--ink-2)}
+.tone button+button{border-left:1px solid var(--line-2)}
+.tone button[aria-pressed="true"]{background:var(--ink);color:var(--surface)}
+.ta-wrap{position:relative}
+#draft{width:100%;min-height:250px;resize:vertical;border:1.5px dashed var(--pencil);border-radius:9px;padding:12px 13px;background:var(--surface);color:var(--ink);font-size:14px;line-height:1.58;display:block}
+#draft.is-edited{border-style:solid;border-color:var(--line-2)}
+#draft.is-approved{border-style:solid;border-color:var(--accent);background:var(--surface-2)}
+.busy{position:absolute;inset:0;border-radius:9px;background:color-mix(in srgb,var(--surface) 82%,transparent);display:flex;align-items:center;justify-content:center;gap:12px;flex-wrap:wrap;font-size:13px;color:var(--ink-2)}
+.ph{display:flex;flex-wrap:wrap;gap:6px;align-items:center;font-size:12.5px;color:var(--ink-2)}
+.ph button{font-family:var(--f-mono);font-size:12px;border:1px dashed var(--warn);background:var(--warn-soft);color:var(--warn);border-radius:5px;padding:1px 7px}
+.ph-ok{color:var(--ok)}
+.notice{display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap;font-size:13px;padding:9px 11px;border-radius:8px;background:var(--surface-2);border:1px solid var(--line)}
+
+.gate{border-top:1px solid var(--line);padding-top:16px;display:flex;align-items:center;gap:10px 14px;flex-wrap:wrap}
+.blockers{list-style:none;margin:0;padding:0;font-size:12.5px;color:var(--ink-2);display:flex;flex-wrap:wrap;gap:3px 14px;flex:1;min-width:0}
+.blockers li{display:inline-flex;align-items:center;gap:6px}
+.blockers li::before{content:"";width:8px;height:8px;border-radius:50%;border:1.5px solid var(--warn)}
+.ready-note{flex:1;font-size:12.5px;color:var(--ok)}
+.gate .btn{margin-left:auto}
+.approved{flex:1 1 100%;display:grid;gap:10px;padding:12px 14px;border-radius:9px;background:var(--ok-soft)}
+.approved strong{color:var(--ok)}
+.approved p{font-size:13px;color:var(--ink)}
+
+/* Activity timeline, inside the email thread */
+.thread{margin-top:26px;padding-top:18px;border-top:1px solid var(--line);display:grid;gap:12px;max-width:66ch}
+.tl-head{margin:0;font-size:11.5px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-3);font-weight:600}
+.timeline{list-style:none;margin:0;padding:0;display:grid}
+.timeline li{display:grid;grid-template-columns:14px minmax(0,1fr) auto;gap:10px;align-items:start;padding:5px 0;font-size:13px;color:var(--ink-2);position:relative}
+.timeline li::before{content:"";position:absolute;left:6px;top:0;bottom:0;width:1px;background:var(--line)}
+.timeline li:first-child::before{top:12px}
+.timeline li:last-child::before{bottom:calc(100% - 12px)}
+.tl-dot{width:10px;height:10px;border-radius:50%;margin:5px 0 0 2px;background:var(--surface);border:1.5px dashed var(--pencil);position:relative;z-index:1}
+.timeline li.you .tl-dot{border:1.5px solid var(--accent);background:var(--accent)}
+.timeline li.you .tl-text{color:var(--ink)}
+.timeline time{font-family:var(--f-mono);font-size:11.5px;color:var(--ink-3);white-space:nowrap;padding-top:1px}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap}
+.reply{border:1.5px solid var(--accent);border-radius:10px;padding:14px 16px;display:grid;gap:10px;background:var(--surface)}
+.reply header{display:flex;gap:10px;align-items:center;font-size:13px;flex-wrap:wrap}
+.avatar-you{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-size:11px;width:32px;height:32px}
+.reply-body{white-space:pre-wrap;font-size:14px;line-height:1.6;color:var(--ink);overflow-wrap:anywhere}
+
+/* Not enough context */
+.needinfo{border:1.5px dashed var(--warn);background:var(--warn-soft);border-radius:9px;padding:12px 14px;display:grid;gap:8px;font-size:13px;color:var(--ink)}
+.needinfo ul{margin:0;padding-left:18px;display:grid;gap:3px}
+
+/* Draft rating */
+.rate{display:flex;align-items:center;gap:8px 10px;flex-wrap:wrap;font-size:13px;color:var(--ink)}
+.rate-opts{display:inline-flex;gap:6px;flex-wrap:wrap}
+.rate-opts button{border:1.5px solid var(--line-2);background:var(--surface);border-radius:999px;padding:3px 11px;font-size:12.5px;color:var(--ink-2)}
+.rate-opts button:hover{border-color:var(--ink-3);color:var(--ink)}
+.rate-opts button[aria-pressed="true"]{border-color:var(--accent);background:var(--accent);color:var(--accent-ink)}
+
+.banner{padding:11px 13px;border-radius:9px;font-size:13px;display:flex;gap:10px;align-items:center;justify-content:space-between;flex-wrap:wrap}
+.banner-err{background:var(--crit-soft);color:var(--ink);border:1px solid var(--crit)}
+.banner-info{background:var(--surface-2);border:1px solid var(--line);color:var(--ink-2)}
+.empty{display:grid;gap:12px;justify-items:start;padding:8px 0}
+.empty p{color:var(--ink-2)}
+
+.running{display:flex;gap:14px;align-items:center;padding:14px;border-radius:10px;border:1.5px dashed var(--pencil);background:var(--pencil-soft)}
+.running .rt{font-weight:600}
+.running > div{flex:1;min-width:0;display:grid;gap:2px}
+.spin{width:22px;height:22px;border-radius:50%;border:2.5px solid var(--line-2);border-top-color:var(--accent);animation:spin .8s linear infinite;flex:none}
+.skel{display:grid;gap:10px}
+.skel span{display:block;height:11px;border-radius:6px;background:linear-gradient(90deg,var(--surface-2),var(--line),var(--surface-2));background-size:200% 100%;animation:sh 1.4s ease-in-out infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+@keyframes sh{0%{background-position:100% 0}100%{background-position:-100% 0}}
+@media (prefers-reduced-motion:reduce){.spin,.skel span{animation:none}mark.ev{transition:none}}
+
+.steps{margin:0;padding-left:20px;display:grid;gap:10px;color:var(--ink-2);font-size:13.5px}
+.steps b{color:var(--ink)}
+.howto{display:grid;gap:12px}
+</style>
+</head>
+<body>
+<div class="app">
+  <header class="topbar">
+    <div class="brand">
+      <span class="logo" aria-hidden="true"></span>
+      <div>
+        <div class="brand-name">Triage Desk</div>
+        <div class="brand-sub">Ledgerline Support · demo workspace with example tickets</div>
+      </div>
+    </div>
+    <div class="stats" id="stats"></div>
+    <span class="status" id="status"></span>
+  </header>
+
+  <div class="cols">
+    <aside class="pane queue" aria-label="Inbox">
+      <div class="q-head">
+        <h2>Inbox<span class="q-count" id="q-count"></span></h2>
+        <button class="btn-ghost btn-sm" data-act="compose">+ New ticket</button>
+      </div>
+      <div class="queue-list" id="queue-list"></div>
+      <div class="q-foot"><span>Example data</span><span id="reset-slot"></span></div>
+    </aside>
+    <main class="pane mail" id="mail"></main>
+    <section class="pane triage" id="triage" aria-label="AI triage"></section>
+  </div>
+</div>
+
+<script>
+(function(){
+"use strict";
+
+const CATS = ["Billing","Bug","Account & access","Feature request","How-to","Cancellation risk"];
+const URGS = ["Urgent","High","Normal","Low"];
+const TONES = ["Friendly","Concise","Formal"];
+const TONE_DESC = {Friendly:"warm and personable, plain language", Concise:"short and direct, no pleasantries beyond one line", Formal:"polished and professional"};
+const URG_COLOR = {Urgent:"var(--crit)", High:"var(--warn)", Normal:"var(--ink-3)", Low:"var(--line-2)"};
+const LS_KEY = "triage-desk-v2";
+
+const EXAMPLES = [
+  {
+    id:"LL-4821", from:"Marisol Vega", email:"marisol@northfield-dental.example", company:"Northfield Dental Group", plan:"Growth plan · 24 seats", received:"12 min ago",
+    subject:"Invoices going out twice to every client??",
+    body:"Hi team,\n\nSince about 8am today every invoice we send is going out twice. Our clients are emailing us confused and two of them already paid both copies. This is happening across all 6 of our locations.\n\nWe haven't changed any settings. Can someone look at this right away? I need to know whether to pause invoicing for the day.\n\nMarisol\nOperations Lead, Northfield Dental",
+    ai:{
+      category:{value:"Bug",confidence:0.94,runner_up:"Billing"},
+      urgency:{value:"Urgent",confidence:0.9,runner_up:"High"},
+      summary:"Every invoice has been sent twice since this morning across all six locations, and some clients have paid twice.",
+      evidence:[
+        {quote:"every invoice we send is going out twice",supports:"category",note:"Describes the product misbehaving"},
+        {quote:"We haven't changed any settings",supports:"category",note:"Rules out a configuration mistake"},
+        {quote:"two of them already paid both copies",supports:"urgency",note:"Customers are paying twice right now"},
+        {quote:"across all 6 of our locations",supports:"urgency",note:"Affects the whole account"}
+      ],
+      flags:["Check whether there's an active incident for duplicate sends","Double payments will need refunds handled separately"],
+      draft:"Hi Marisol,\n\nThanks for flagging this so quickly, and I'm sorry for the confusion it's causing your clients. I've escalated it to our engineering team as an urgent issue.\n\nTo be safe, I'd recommend pausing scheduled invoices until we confirm a fix. Here's how: [link to pause instructions].\n\nFor the clients who paid twice, could you send me the invoice numbers? We'll help you sort out the duplicate payments.\n\nI'll send you an update by [time of next update].\n\nLedgerline Support"
+    }
+  },
+  {
+    id:"LL-4819", from:"Theo Lindqvist", email:"theo.l@brightwater-logistics.example", company:"Brightwater Logistics", plan:"Scale plan · 12 seats", received:"47 min ago",
+    subject:"Billed for 12 seats, we only have 8",
+    body:"Hello,\n\nOur October invoice shows 12 seats but we removed 4 users back in August. I've attached a screenshot of our user list showing 8 active users.\n\nCan you correct this and refund the difference for September and October? Our finance close is on Friday so I'd appreciate a quick turnaround.\n\nThanks,\nTheo Lindqvist\nFinance Manager, Brightwater Logistics",
+    ai:{
+      category:{value:"Billing",confidence:0.96,runner_up:null},
+      urgency:{value:"High",confidence:0.78,runner_up:"Normal"},
+      summary:"Invoice charges for 12 seats after 4 users were removed in August; customer wants a refund before their Friday close.",
+      evidence:[
+        {quote:"invoice shows 12 seats but we removed 4 users",supports:"category",note:"Seat count doesn't match the account"},
+        {quote:"refund the difference for September and October",supports:"category",note:"Explicit refund request"},
+        {quote:"Our finance close is on Friday",supports:"urgency",note:"Hard deadline this week"}
+      ],
+      flags:["Confirm the seat removal date in billing history before agreeing to a credit","Credits covering more than one month may need finance approval"],
+      draft:"Hi Theo,\n\nThanks for the details and the screenshot. If those 4 users were removed in August, the October invoice shouldn't show 12 seats.\n\nI'm checking your billing history now to confirm when the seat count changed. Once that's confirmed, we'll apply a credit of [credit amount] and send you a corrected October invoice.\n\nI know your close is on Friday, so you'll hear back from me by [date].\n\nBest,\nLedgerline Support"
+    }
+  },
+  {
+    id:"LL-4816", from:"Priya Raman", email:"priya@kestrelfinch.example", company:"Kestrel & Finch Architects", plan:"Growth plan · 9 seats", received:"2 hr ago",
+    subject:"Exporting all our data",
+    body:"Hi,\n\nIs there a way to export all of our invoices, clients, and payment history in one go? Ideally as CSV.\n\nOur renewal is coming up next month and we're reviewing our tools across the business, so I want to make sure we have everything in a usable format.\n\nThanks,\nPriya",
+    ai:{
+      category:{value:"How-to",confidence:0.52,runner_up:"Cancellation risk"},
+      urgency:{value:"Normal",confidence:0.58,runner_up:"High"},
+      summary:"Asks how to export all data as CSV ahead of next month's renewal while the company reviews its tools.",
+      evidence:[
+        {quote:"export all of our invoices, clients, and payment history",supports:"category",note:"Direct question about a feature"},
+        {quote:"we're reviewing our tools across the business",supports:"category",note:"May be weighing alternatives"},
+        {quote:"Our renewal is coming up next month",supports:"urgency",note:"Renewal gives this a deadline"}
+      ],
+      flags:["Possible churn signal. Consider looping in the account manager","Answer the export question directly before anything else"],
+      draft:"Hi Priya,\n\nYes, you can export everything as CSV. Here's the guide: [link to export guide]. Invoices, clients and payments each download as their own file.\n\nSince your renewal is coming up, I'd be glad to set up a short call with [account manager name] to go over how your team uses Ledgerline and anything you'd like to see improved.\n\nLet me know if the export gives you any trouble.\n\nBest,\nLedgerline Support"
+    }
+  },
+  {
+    id:"LL-4813", from:"Ravi Menon", email:"ravi@coastline-print.example", company:"Coastline Print & Sign", plan:"Starter plan · 3 seats", received:"3 hr ago",
+    subject:"not working again",
+    body:"Hi,\n\nIt's not working again. Same as last time. Can you fix it asap?\n\nThanks\nRavi",
+    ai:{
+      category:{value:"Bug",confidence:0.41,runner_up:"Account & access"},
+      urgency:{value:"Normal",confidence:0.45,runner_up:"High"},
+      summary:"Customer says something has stopped working again but doesn't say what.",
+      needsInfo:true,
+      missing:["Which part of Ledgerline isn't working","What they see, like an error message or a screenshot","When it started, and whether anyone else on their team is affected"],
+      evidence:[
+        {quote:"It's not working again",supports:"category",note:"Sounds like a bug, but no detail"},
+        {quote:"Same as last time",supports:"category",note:"Refers to an issue Claude can't see"},
+        {quote:"Can you fix it asap?",supports:"urgency",note:"Asks for speed but gives no impact"}
+      ],
+      flags:["Check this customer's earlier tickets for what happened last time"],
+      draft:"Hi Ravi,\n\nSorry to hear something's gone wrong again. I want to get this fixed quickly, so could you tell me a bit more?\n\n1. Which part of Ledgerline isn't working (for example, sending invoices, logging in, or payments)?\n2. What do you see when it happens? A screenshot or the exact error message helps a lot.\n3. When did it start, and is anyone else on your team affected?\n\nAs soon as I have that, I'll dig in.\n\nLedgerline Support"
+    }
+  },
+  {
+    id:"LL-4810", from:"Jonas Weber", email:"jonas@weberstudio.example", company:"Weber Studio", plan:"Starter plan · 1 seat", received:"Yesterday",
+    subject:"Small request: dark mode for the invoice editor",
+    body:"Hey Ledgerline folks,\n\nLove the product. One small thing: I do most of my invoicing late at night and the editor is really bright. Any chance of a dark mode?\n\nNo rush at all, just putting it out there.\n\nCheers,\nJonas",
+    ai:{
+      category:{value:"Feature request",confidence:0.97,runner_up:null},
+      urgency:{value:"Low",confidence:0.93,runner_up:null},
+      summary:"Happy customer asking for a dark mode in the invoice editor; explicitly not urgent.",
+      evidence:[
+        {quote:"Any chance of a dark mode?",supports:"category",note:"Asking for something new"},
+        {quote:"No rush at all",supports:"urgency",note:"Customer says it can wait"}
+      ],
+      flags:[],
+      draft:"Hi Jonas,\n\nThanks for the kind words, and for the suggestion. Invoicing late at night in a bright editor is a fair complaint.\n\nDark mode isn't available yet, but I've added your request to our feature tracker so the product team sees it. [Mention if dark mode is on the roadmap, or delete this line]\n\nCheers,\nLedgerline Support"
+    }
+  }
+];
+
+const SAMPLE_EMAIL = {
+  name:"Dana Okafor", company:"Tidewater Co-op", subject:"Nobody can log in after our SSO switch",
+  body:"Hi,\n\nWe moved our SSO from Google to Okta on Monday and now none of our 15 users can log into Ledgerline. Everyone gets \"SAML response invalid\".\n\nPayroll invoices need to go out tomorrow morning. Please help.\n\nDana Okafor\nIT Manager, Tidewater Co-op"
+};
+
+/* ---------- state ---------- */
+const controllers = new Map();
+let sampleFn = null, aiStatus = "checking", aiOffReason = "", lit = null, saveTimer = null;
+
+function freshHuman(){ return {category:null, urgency:null, categoryConfirmed:false, urgencyConfirmed:false}; }
+function fromExample(e){
+  const t = JSON.parse(JSON.stringify(e));
+  t.source = "example"; t.status = "triaged"; t.human = freshHuman(); t.tone = "Friendly";
+  t.draft = t.ai.draft; t.draftOriginal = t.ai.draft;
+  t.draftFor = {category:t.ai.category.value, urgency:t.ai.urgency.value};
+  t.dropped = 0; t.running = null; t.error = null;
+  t.log = [{t:Date.now(), who:"ai", text:`Example suggestion loaded: ${t.ai.category.value} (${pct(t.ai.category.confidence)}), ${t.ai.urgency.value} urgency (${pct(t.ai.urgency.confidence)}). Precomputed, not a live call.`}];
+  return t;
+}
+function fresh(){ return {tickets:EXAMPLES.map(fromExample), selected:EXAMPLES[0].id, composing:false, nextId:4822, armed:null}; }
+function load(){
+  try{
+    const raw = localStorage.getItem(LS_KEY); if(!raw) return null;
+    const s = JSON.parse(raw); if(!s || !Array.isArray(s.tickets) || !s.tickets.length) return null;
+    s.tickets.forEach(t=>{ t.running = null; });
+    s.composing = false; s.armed = null; return s;
+  }catch(e){ return null; }
+}
+function save(){ try{ localStorage.setItem(LS_KEY, JSON.stringify(state)); }catch(e){} }
+function saveSoon(){ clearTimeout(saveTimer); saveTimer = setTimeout(save, 400); }
+let state = load() || fresh();
+
+/* ---------- helpers ---------- */
+const $ = s => document.querySelector(s);
+function h(s){ return String(s == null ? "" : s).replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])); }
+function pct(c){ return Math.round(c*100) + "%"; }
+function level(c){ return c >= 0.8 ? "high" : c >= 0.6 ? "med" : "low"; }
+const LEVEL_WORD = {high:"High", med:"Medium", low:"Low"};
+function cur(){ return state.tickets.find(t=>t.id===state.selected) || state.tickets[0]; }
+function final(t,f){ return t.human[f] || (t.ai ? t.ai[f].value : null); }
+function needsConfirm(t,f){ return !!(t.ai && t.ai[f].confidence < 0.6 && !t.human[f] && !t.human[f+"Confirmed"]); }
+function isEdited(t){ return !!t.draftOriginal && t.draft.trim() !== t.draftOriginal.trim(); }
+function placeholders(text){ return text.match(/\[[^\]\n]{1,80}\]/g) || []; }
+function hasHumanWork(t){ return !!(t.human.category || t.human.urgency || t.human.categoryConfirmed || t.human.urgencyConfirmed || isEdited(t) || t.status==="approved"); }
+function timeStr(ms){ const d = new Date(ms); return d.toLocaleTimeString([], {hour:"2-digit", minute:"2-digit"}); }
+function initials(n){ return (n||"?").split(/\s+/).filter(Boolean).slice(0,2).map(w=>w[0].toUpperCase()).join(""); }
+function pushLog(t, who, text){ t.log.push({t:Date.now(), who, text}); }
+function blockers(t){
+  const b = [];
+  if(!final(t,"category")) b.push("Choose a category");
+  else if(needsConfirm(t,"category")) b.push("Confirm the category");
+  if(!final(t,"urgency")) b.push("Choose an urgency");
+  else if(needsConfirm(t,"urgency")) b.push("Confirm the urgency");
+  if(!t.draft.trim()) b.push("Write a reply");
+  const n = placeholders(t.draft).length;
+  if(n) b.push(`Fill ${n} placeholder${n>1?"s":""}`);
+  return b;
+}
+function quoteRegex(q){
+  const esc = q.trim().replace(/[.*+?^${}()|[\]\\]/g, "\\$&").replace(/\s+/g, "\\s+").replace(/['\u2019\u2018]/g, "['\u2019\u2018]").replace(/["\u201C\u201D]/g, '["\u201C\u201D]');
+  return new RegExp(esc, "i");
+}
+function markBody(body, ev){
+  const ranges = [];
+  (ev||[]).forEach((e,i)=>{ const m = quoteRegex(e.quote).exec(body); if(m) ranges.push({s:m.index, e:m.index+m[0].length, i, k:e.supports}); });
+  ranges.sort((a,b)=>a.s-b.s);
+  let out = "", pos = 0;
+  for(const r of ranges){
+    if(r.s < pos) continue;
+    out += h(body.slice(pos, r.s));
+    out += `<mark class="ev ev-${r.k==="urgency"?"urg":"cat"}" data-ev="${r.i}">${h(body.slice(r.s, r.e))}</mark>`;
+    pos = r.e;
+  }
+  return out + h(body.slice(pos));
+}
+
+/* ---------- Claude ---------- */
+const GUIDE = `Ledgerline is a B2B invoicing and billing app used by small and mid-size businesses.
+
+Categories (pick exactly one):
+- Billing: charges from Ledgerline, seats, refunds, plan changes
+- Bug: something in the product isn't working as it should
+- Account & access: login, SSO, permissions, users
+- Feature request: asking for something the product doesn't do
+- How-to: a question about using an existing feature
+- Cancellation risk: signs the customer may leave or downgrade
+
+Urgency (pick exactly one):
+- Urgent: broken for many users, or money going out wrong right now
+- High: blocks the customer's work, a billing error, or a hard deadline
+- Normal: a question or an issue with a workaround
+- Low: suggestions and nice-to-haves with no time pressure`;
+
+function draftRules(tone){
+  return `Draft rules:
+- Plain text, ${tone==="Concise" ? "40 to 80" : "70 to 140"} words. Start with "Hi <customer first name>," and sign off with "Ledgerline Support" on its own line.
+- Tone: ${TONE_DESC[tone]}.
+- Never promise refunds, amounts, dates, or fixes you can't know. Never invent menu paths, links, people's names or policies.
+- Wherever the reply needs a specific fact you don't have, write a short placeholder in square brackets, like [credit amount] or [link to export guide]. Use square brackets for nothing else.`;
+}
+function emailBlock(t){ return `From: ${t.from}${t.company ? ", " + t.company : ""}\nSubject: ${t.subject}\n\n${t.body.slice(0, 8000)}`; }
+function triagePrompt(t){
+  return `You are helping a support agent triage an incoming customer email.
+
+${GUIDE}
+
+Rules:
+- "confidence" is your honest probability from 0 to 1 that the value is correct. Go below 0.6 whenever the email could reasonably fit another option, and name that option in "runner_up". Use null for "runner_up" when nothing else fits.
+- "evidence": 2 to 4 short quotes copied word for word from the email (12 words or fewer each). Each one supports either "category" or "urgency" and has a note under 10 words.
+- "summary": one sentence, under 25 words.
+- "flags": 0 to 3 short notes on what the agent should verify before replying.
+- "enough_context": false when the email doesn't say enough to know what's wrong or what the customer needs. In that case keep both confidences low, list in "missing" up to 4 short things the agent would need to know, and make "draft" a short reply that asks only for those things, as a numbered list. Otherwise set it to true and "missing" to [].
+- "draft": a reply the agent can edit and send.
+${draftRules(t.tone)}
+
+Reply with only JSON in exactly this shape:
+{"category":{"value":"Billing","confidence":0.8,"runner_up":"How-to"},"urgency":{"value":"High","confidence":0.7,"runner_up":null},"summary":"...","evidence":[{"quote":"...","supports":"category","note":"..."}],"flags":["..."],"enough_context":true,"missing":[],"draft":"..."}
+
+The email:
+"""
+${emailBlock(t)}
+"""`;
+}
+function draftPrompt(t){
+  return `Write a reply to this customer email for a Ledgerline support agent.
+
+${GUIDE}
+
+The agent has decided the category is "${final(t,"category")}" and the urgency is "${final(t,"urgency")}". Write the reply to fit those decisions.${t.ai && t.ai.needsInfo && t.ai.missing.length ? `
+The email doesn't say enough to resolve it yet. The reply should only ask, as a numbered list, for: ${t.ai.missing.join("; ")}.` : ""}
+${draftRules(t.tone)}
+
+Reply with only JSON in this shape: {"draft":"..."}
+
+The email:
+"""
+${emailBlock(t)}
+"""`;
+}
+function pickOne(v, list){
+  if(typeof v !== "string") return null;
+  const m = list.find(o=>o.toLowerCase()===v.trim().toLowerCase());
+  return m || null;
+}
+function normConf(c){ let n = Number(c); if(!isFinite(n)) n = 0.5; if(n > 1 && n <= 100) n = n/100; return Math.min(1, Math.max(0, n)); }
+function normField(o, list){
+  if(!o || typeof o !== "object") throw {code:"invalid_json"};
+  const value = pickOne(o.value, list); if(!value) throw {code:"invalid_json"};
+  let runner = pickOne(o.runner_up, list); if(runner === value) runner = null;
+  return {value, confidence:normConf(o.confidence), runner_up:runner};
+}
+function normalize(raw, body){
+  if(!raw || typeof raw !== "object") throw {code:"invalid_json"};
+  const ai = {category:normField(raw.category, CATS), urgency:normField(raw.urgency, URGS)};
+  ai.summary = typeof raw.summary === "string" ? raw.summary.trim() : "";
+  const evIn = Array.isArray(raw.evidence) ? raw.evidence : [];
+  let dropped = 0;
+  ai.evidence = [];
+  for(const e of evIn.slice(0,6)){
+    if(!e || typeof e.quote !== "string" || !e.quote.trim()) continue;
+    if(!quoteRegex(e.quote).test(body)){ dropped++; continue; }
+    ai.evidence.push({quote:e.quote.trim(), supports:e.supports==="urgency"?"urgency":"category", note:typeof e.note==="string"?e.note.trim():""});
+  }
+  ai.flags = Array.isArray(raw.flags) ? raw.flags.filter(f=>typeof f==="string" && f.trim()).slice(0,3).map(f=>f.trim()) : [];
+  ai.missing = Array.isArray(raw.missing) ? raw.missing.filter(m=>typeof m==="string" && m.trim()).slice(0,4).map(m=>m.trim()) : [];
+  ai.needsInfo = raw.enough_context === false;
+  ai.draft = typeof raw.draft === "string" ? raw.draft.trim() : "";
+  if(!ai.draft) throw {code:"invalid_json"};
+  return {ai, dropped};
+}
+
+const ERR = {
+  rate_limited:"Too many requests right now. Wait a minute, then try again.",
+  session_expired:"Your Claude session expired. Sign in again, then try again.",
+  refused:"Claude declined to work on this email. Edit the text and try again.",
+  invalid_json:"Claude's answer came back in a shape this page couldn't read. Try again.",
+  empty_completion:"Claude returned an empty answer. Try again.",
+  prompt_too_large:"This email is too long. Trim it to the part that matters and add it again.",
+  upstream_error:"Couldn't reach Claude. Check your connection and try again."
+};
+function handleErr(t, e, kind){
+  const code = (e && e.code) || "upstream_error";
+  if(code === "cancelled"){ pushLog(t, "you", kind==="draft" ? "You stopped the rewrite" : "You stopped the triage"); return; }
+  if(["not_granted","sampling_disabled","not_declared","capability_disabled","capability_removed"].includes(code)){
+    aiStatus = "off";
+    aiOffReason = code==="not_granted" ? "You didn't allow this page to use Claude." : "Claude isn't available for this account.";
+    t.error = {msg:aiOffReason + " The example tickets still work, and you can triage this one yourself.", retry:false, kind};
+    return;
+  }
+  t.error = {msg:ERR[code] || ERR.upstream_error, retry:!["refused","prompt_too_large"].includes(code), kind};
+}
+
+async function runTriage(t){
+  if(!sampleFn || t.running) return;
+  const ctl = new AbortController(); controllers.set(t.id, ctl);
+  t.running = "triage"; t.error = null; render();
+  try{
+    const raw = await sampleFn.json(triagePrompt(t), {modelTier:"quick", signal:ctl.signal, cache:false});
+    const {ai, dropped} = normalize(raw, t.body);
+    t.ai = ai; t.dropped = dropped; t.source = "live"; t.liveAt = Date.now(); t.status = "triaged";
+    t.human = freshHuman(); t.draft = ai.draft; t.draftOriginal = ai.draft;
+    t.draftFor = {category:ai.category.value, urgency:ai.urgency.value};
+    pushLog(t, "ai", `Claude suggested ${ai.category.value} (${pct(ai.category.confidence)}) and ${ai.urgency.value} urgency (${pct(ai.urgency.confidence)})`);
+  }catch(e){ handleErr(t, e, "triage"); }
+  finally{ t.running = null; controllers.delete(t.id); save(); render(); }
+}
+async function runDraft(t){
+  if(!sampleFn || t.running) return;
+  const ctl = new AbortController(); controllers.set(t.id, ctl);
+  t.running = "draft"; t.error = null; render();
+  try{
+    const raw = await sampleFn.json(draftPrompt(t), {modelTier:"quick", signal:ctl.signal, cache:false});
+    const d = raw && typeof raw.draft === "string" ? raw.draft.trim() : "";
+    if(!d) throw {code:"invalid_json"};
+    t.draft = d; t.draftOriginal = d;
+    t.draftFor = {category:final(t,"category"), urgency:final(t,"urgency")};
+    pushLog(t, "ai", `Claude rewrote the draft in a ${t.tone.toLowerCase()} tone for ${t.draftFor.category} · ${t.draftFor.urgency}`);
+  }catch(e){ handleErr(t, e, "draft"); }
+  finally{ t.running = null; controllers.delete(t.id); save(); render(); }
+}
+
+/* ---------- render: top + queue ---------- */
+function statusHTML(){
+  const el = $("#status");
+  el.className = "status " + (aiStatus==="ready" ? "is-ready" : aiStatus==="off" ? "is-off" : "");
+  el.title = aiStatus==="off" ? (aiOffReason || "Live AI isn't available in this view.") : "";
+  return `<i></i>${aiStatus==="ready" ? "Claude connected" : aiStatus==="off" ? "Live AI off · examples only" : "Connecting to Claude…"}`;
+}
+function statsHTML(){
+  const approved = state.tickets.filter(t=>t.status==="approved");
+  let tot = 0, kept = 0;
+  for(const t of approved){
+    if(!t.ai) continue;
+    tot += 3;
+    if(final(t,"category")===t.ai.category.value) kept++;
+    if(final(t,"urgency")===t.ai.urgency.value) kept++;
+    if(!isEdited(t)) kept++;
+  }
+  const open = state.tickets.filter(t=>t.status!=="approved").length;
+  const rated = state.tickets.filter(t=>t.rating);
+  const good = rated.filter(t=>t.rating==="Good").length;
+  return `<span><b>${open}</b> open</span><span><b>${approved.length}</b> approved</span>` +
+    (tot ? `<span title="Category, urgency and draft, across approved tickets">AI picks kept as-is <b>${kept}/${tot}</b></span>` : `<span>Approve a ticket to see how often Claude's picks are kept</span>`) +
+    (rated.length ? `<span title="Your ratings of Claude's drafts">Drafts rated good <b>${good}/${rated.length}</b></span>` : "");
+}
+function queueStatus(t){
+  if(t.running==="triage") return `<span class="tag tag-pencil">Triaging…</span>`;
+  if(t.status==="approved") return `<span class="tag tag-ok">Approved</span>`;
+  if(!t.ai && !final(t,"category")) return `<span class="tag tag-muted">New</span>`;
+  if(t.ai && t.ai.needsInfo) return `<span class="tag tag-warn">Needs info</span>`;
+  if(needsConfirm(t,"category") || needsConfirm(t,"urgency")) return `<span class="tag tag-warn">Check AI pick</span>`;
+  return blockers(t).length ? `<span class="tag">In progress</span>` : `<span class="tag tag-ok">Ready</span>`;
+}
+function queueHTML(){
+  return state.tickets.map(t=>{
+    const cat = final(t,"category"), urg = final(t,"urgency");
+    const inked = t.status==="approved" || t.human.category || t.human.categoryConfirmed;
+    const catTag = cat ? `<span class="tag ${inked ? "tag-ink" : "tag-pencil"}">${h(cat)}</span>` : "";
+    const sel = t.id===state.selected && !state.composing;
+    return `<button class="qitem${sel?" is-sel":""}" data-act="select" data-id="${h(t.id)}" style="--sev:${urg ? URG_COLOR[urg] : "var(--line-2)"}" aria-current="${sel?"true":"false"}">
+      <span class="q-top"><span>${h(t.id)}</span><span>${h(t.received)}</span></span>
+      <span class="q-from">${h(t.from)}${t.company ? " · " + h(t.company) : ""}</span>
+      <span class="q-subj">${h(t.subject)}</span>
+      <span class="q-tags">${catTag}${urg ? `<span class="tag">${h(urg)}</span>` : ""}${queueStatus(t)}</span>
+    </button>`;
+  }).join("");
+}
+
+/* ---------- render: mail ---------- */
+function mailHTML(t){
+  const ev = t.ai ? t.ai.evidence : [];
+  return `<p class="eyebrow"><span class="mono">${h(t.id)}</span><span>·</span><span>${h(t.received)}</span>${t.source==="example" ? `<span class="tag">Example ticket</span>` : ""}</p>
+    <h1>${h(t.subject)}</h1>
+    <div class="from">
+      <span class="avatar" aria-hidden="true">${h(initials(t.from))}</span>
+      <div class="from-txt">
+        <span class="from-name">${h(t.from)}${t.company ? ` <span class="fine">· ${h(t.company)}</span>` : ""}</span>
+        <span class="from-meta">${h(t.email || "No email address")}${t.plan ? " · " + h(t.plan) : ""}</span>
+      </div>
+    </div>
+    <div class="body">${markBody(t.body, ev)}</div>
+    ${ev.length ? `<div class="legend"><span>Highlighted lines are what Claude used:</span><span><span class="sw sw-cat"></span>Category</span><span><span class="sw sw-urg"></span>Urgency</span></div>` : ""}
+    ${threadHTML(t)}`;
+}
+function threadHTML(t){
+  let out = `<section class="thread" aria-label="Activity"><h3 class="tl-head">Activity</h3><div id="log">${logHTML(t)}</div>`;
+  if(t.status==="approved"){
+    out += `<article class="reply"><header><span class="avatar avatar-you" aria-hidden="true">You</span><div><b>Reply approved by you</b><span class="fine"> · ${timeStr(t.approvedAt || Date.now())} · not sent yet</span></div></header><div class="reply-body">${h(t.draft)}</div></article>`;
+  }
+  return out + `</section>`;
+}
+function composerHTML(){
+  return `<form id="composer" class="composer" novalidate>
+    <div>
+      <p class="eyebrow">New ticket</p>
+      <h1>Paste a customer email</h1>
+      <p class="sub">Claude suggests a category, an urgency and a reply. Nothing goes out until you approve it.</p>
+    </div>
+    <div class="grid2">
+      <label for="c-name">Customer name<input id="c-name" autocomplete="off" placeholder="e.g. Dana Okafor"></label>
+      <label for="c-company">Company <span>(optional)</span><input id="c-company" autocomplete="off"></label>
+    </div>
+    <label for="c-subj">Subject <span>(optional)</span><input id="c-subj" autocomplete="off"></label>
+    <label for="c-body">Message<textarea id="c-body" placeholder="Paste the email body here"></textarea></label>
+    <p class="form-err" id="c-err" hidden></p>
+    <div class="row">
+      <button type="button" class="btn-ghost" data-act="fill-sample">Use a sample email</button>
+      <span class="spacer"></span>
+      <button type="button" class="btn-ghost" data-act="cancel-compose">Cancel</button>
+      <button type="submit" class="btn" id="c-submit">${aiStatus==="ready" ? "Add and triage" : "Add ticket"}</button>
+    </div>
+  </form>`;
+}
+function composeAsideHTML(){
+  return `<div class="howto">
+    <div><p class="eyebrow">How review works</p><h2 style="font-family:var(--f-display);font-weight:600;font-size:18px;margin:0">You stay in charge</h2></div>
+    <ol class="steps">
+      <li><b>Claude suggests.</b> A category, an urgency, the lines it based them on, and a draft reply. Suggestions show in dashed pencil.</li>
+      <li><b>You check the shaky ones.</b> Anything under 60% confidence needs your confirmation before approval.</li>
+      <li><b>You fill the gaps.</b> Claude leaves facts it can't know as [placeholders] instead of guessing.</li>
+      <li><b>You approve.</b> Approval turns everything to solid ink and logs who decided what.</li>
+    </ol>
+    ${aiStatus!=="ready" ? `<div class="banner banner-info">${aiStatus==="off" ? "Live AI isn't available in this view, so new tickets are triaged by hand." : "Connecting to Claude…"}</div>` : ""}
+  </div>`;
+}
+
+/* ---------- render: triage panel ---------- */
+function headHTML(t){
+  let src = "Manual triage";
+  if(t.source==="example" && t.ai) src = "Example · precomputed";
+  if(t.source==="live" && t.ai) src = "Live · Claude · " + timeStr(t.liveAt);
+  let action = "";
+  if(aiStatus==="ready" && t.status!=="approved" && !t.running && t.ai){
+    const armed = state.armed === "rerun:" + t.id;
+    action = `<button class="btn-ghost btn-sm${armed ? " btn-armed" : ""}" data-act="rerun">${armed ? "Discard your changes and re-run" : (t.source==="example" ? "Run live with Claude" : "Re-run")}</button>`;
+  }
+  return `<div class="tp-head"><div><h2>${t.ai || t.running==="triage" ? "Claude's suggestion" : "Triage"}</h2><div class="src">${h(src)}</div></div>${action}</div>`;
+}
+function errorHTML(t){
+  if(!t.error) return "";
+  return `<div class="banner banner-err" role="alert"><span>${h(t.error.msg)}</span>${t.error.retry && aiStatus==="ready" ? `<button class="btn-ghost btn-sm" data-act="${t.error.kind==="draft" ? "rewrite" : "triage"}">Try again</button>` : ""}</div>`;
+}
+function fieldHTML(t, f){
+  const opts = f==="category" ? CATS : URGS;
+  const ai = t.ai ? t.ai[f] : null;
+  const human = t.human[f];
+  const fin = final(t,f);
+  const approved = t.status==="approved";
+  const changed = !!(human && ai && human !== ai.value);
+  const inked = approved || !!human || t.human[f+"Confirmed"];
+  const needs = needsConfirm(t,f);
+  const name = f==="category" ? "Category" : "Urgency";
+
+  let conf = "";
+  if(ai){
+    const lv = level(ai.confidence);
+    conf = `<span class="conf conf-${lv}${changed ? " is-past" : ""}" title="Claude's own estimate of how likely its pick is right">
+      <span class="bar"><i style="width:${pct(ai.confidence)}"></i></span><span class="mono">${pct(ai.confidence)}</span><span>${changed ? "for " + h(ai.value) : LEVEL_WORD[lv] + " confidence"}</span></span>`;
+  }
+  let by;
+  if(approved) by = `<span class="by"><span class="by-you">Approved</span></span>`;
+  else if(changed) by = `<span class="by"><span class="by-you">Changed by you</span><button class="link" data-act="undo" data-field="${f}">Undo</button></span>`;
+  else if(ai && t.human[f+"Confirmed"]) by = `<span class="by"><span class="by-you">Confirmed by you</span></span>`;
+  else if(ai) by = `<span class="by">Suggested by Claude</span>`;
+  else if(human) by = `<span class="by"><span class="by-you">Set by you</span></span>`;
+  else by = `<span class="by">Not set</span>`;
+
+  const chips = opts.map(o=>{
+    const on = o===fin;
+    const cls = on ? (inked ? " is-ink" : " is-pencil") : "";
+    const dot = f==="urgency" ? `<span class="dot" style="background:${URG_COLOR[o]}"></span>` : "";
+    const aiMark = ai && o===ai.value ? `<span class="ai" title="Claude's pick">AI</span>` : "";
+    return `<button class="chip${cls}" data-act="set" data-field="${f}" data-val="${h(o)}" aria-pressed="${on}"${approved || t.running ? " disabled" : ""}>${dot}${h(o)}${aiMark}</button>`;
+  }).join("");
+
+  let low = "";
+  if(needs && !approved){
+    low = `<div class="lowconf"><p><b>Claude isn't sure about this one.</b> ${ai.runner_up ? `It could also be <b>${h(ai.runner_up)}</b>.` : "Check it against the email."}</p>
+      <div class="row"><button class="btn-ghost btn-sm" data-act="confirm" data-field="${f}">Keep ${h(ai.value)}</button>${ai.runner_up ? `<button class="btn-ghost btn-sm" data-act="set" data-field="${f}" data-val="${h(ai.runner_up)}">Switch to ${h(ai.runner_up)}</button>` : ""}</div></div>`;
+  }
+  return `<div class="field"><div class="field-head"><span class="label">${name}</span>${conf}${by}</div><div class="chips" role="group" aria-label="${name}">${chips}</div>${low}</div>`;
+}
+function evidenceHTML(t){
+  const ev = t.ai.evidence;
+  if(!ev.length && !t.dropped) return "";
+  return `<section class="sec"><h3>Why Claude chose this</h3>
+    ${ev.length ? `<ul class="evlist">${ev.map((e,i)=>`<li class="evitem" data-ev="${i}" tabindex="0"><span class="evtag evtag-${e.supports==="urgency"?"urg":"cat"}">${e.supports==="urgency"?"Urgency":"Category"}</span><q>${h(e.quote)}</q><span class="evnote">${h(e.note)}</span></li>`).join("")}</ul>` : ""}
+    ${t.dropped ? `<p class="fine">${t.dropped} quote${t.dropped>1?"s":""} Claude cited didn't match the email word for word, so ${t.dropped>1?"they were":"it was"} left out.</p>` : ""}
+  </section>`;
+}
+function flagsHTML(t){
+  if(!t.ai.flags.length) return "";
+  return `<section class="sec flags"><h3>Check before replying</h3><ul>${t.ai.flags.map(f=>`<li>${h(f)}</li>`).join("")}</ul></section>`;
+}
+function phHTML(t){
+  const ph = placeholders(t.draft);
+  if(t.status==="approved") return "";
+  if(!ph.length) return t.draft.trim() ? `<span class="ph-ok">No placeholders left to fill.</span>` : "";
+  return `<span>Fill before approving:</span>${ph.map((p,i)=>`<button data-act="ph" data-i="${i}" title="Select it in the draft">${h(p)}</button>`).join("")}`;
+}
+function draftStateText(t){
+  if(t.status==="approved") return "Approved";
+  if(!t.draftOriginal) return t.draft.trim() ? "Written by you" : "";
+  return isEdited(t) ? "Edited by you" : "Written by Claude";
+}
+function draftHTML(t){
+  const approved = t.status==="approved";
+  const busy = t.running==="draft";
+  let stale = "";
+  if(t.ai && !approved && t.draftFor && (final(t,"category")!==t.draftFor.category || final(t,"urgency")!==t.draftFor.urgency)){
+    stale = `<div class="notice"><span>This draft was written for <b>${h(t.draftFor.category)} · ${h(t.draftFor.urgency)}</b>. ${aiStatus==="ready" ? "Rewrite it to match your changes?" : "Check that it still fits."}</span>${aiStatus==="ready" ? `<button class="btn-ghost btn-sm" data-act="rewrite">Rewrite</button>` : ""}</div>`;
+  }
+  let tools = "";
+  if(t.ai && aiStatus==="ready" && !approved){
+    const armed = state.armed === "rewrite:" + t.id;
+    tools = `<div class="row"><div class="tone" role="group" aria-label="Tone">${TONES.map(x=>`<button data-act="tone" data-val="${x}" aria-pressed="${t.tone===x}"${busy?" disabled":""}>${x}</button>`).join("")}</div>
+      <button class="btn-ghost btn-sm${armed ? " btn-armed" : ""}" data-act="rewrite"${busy?" disabled":""}>${armed ? "Replace your edits?" : "Rewrite draft"}</button></div>`;
+  }
+  const cls = approved ? "is-approved" : (!t.draftOriginal || isEdited(t)) ? "is-edited" : "";
+  return `<section class="sec">
+    <div class="sec-head"><h3>${t.ai && t.ai.needsInfo ? "Clarifying question" : "Draft reply"}</h3><span class="fine" id="draft-state">${h(draftStateText(t))}</span></div>
+    ${stale}${tools}
+    <div class="ta-wrap">
+      <textarea id="draft" class="${cls}" aria-label="Draft reply" placeholder="Write the reply here"${approved || busy ? " readonly" : ""}>${h(t.draft)}</textarea>
+      ${busy ? `<div class="busy"><span class="spin" aria-hidden="true"></span><span>Rewriting in a ${t.tone.toLowerCase()} tone…</span><button class="btn-ghost btn-sm" data-act="stop">Stop</button></div>` : ""}
+    </div>
+    <div class="ph" id="ph">${phHTML(t)}</div>
+  </section>`;
+}
+function gateInner(t){
+  if(t.status==="approved"){
+    const rate = t.draftOriginal ? `<div class="rate"><span>How was Claude's draft?</span><span class="rate-opts" role="group" aria-label="Rate Claude's draft">${["Good","Acceptable","Poor"].map(r=>`<button data-act="rate" data-val="${r}" aria-pressed="${t.rating===r}">${r}</button>`).join("")}</span>${t.rating ? `<span class="fine">Saved</span>` : ""}</div>` : "";
+    return `<div class="approved"><strong>Approved</strong><p>Nothing has been sent. Copy the reply into your help desk to send it.</p>
+      ${rate}
+      <div class="row"><button class="btn" data-act="copy">Copy reply</button><button class="btn-ghost" data-act="reopen">Reopen</button></div></div>`;
+  }
+  const b = blockers(t);
+  const list = b.length ? `<ul class="blockers">${b.map(x=>`<li>${h(x)}</li>`).join("")}</ul>` : `<span class="ready-note">Everything's checked.</span>`;
+  return `${list}<button class="btn" data-act="approve"${b.length || t.running ? " disabled" : ""}>Approve reply</button>`;
+}
+function logHTML(t){
+  return `<ol class="timeline">${t.log.map(l=>`<li class="${l.who==="you"?"you":"ai"}"><span class="tl-dot" aria-hidden="true"></span><span class="tl-text"><span class="sr">${l.who==="you"?"You":"Claude"}: </span>${h(l.text)}</span><time>${timeStr(l.t)}</time></li>`).join("")}</ol>`;
+}
+function triageHTML(t){
+  if(t.running==="triage"){
+    return headHTML(t) + `<div class="running" role="status"><span class="spin" aria-hidden="true"></span><div><span class="rt">Reading the email…</span><span class="fine">Choosing a category and urgency, finding the lines that support them, and drafting a reply.</span></div><button class="btn-ghost btn-sm" data-act="stop">Stop</button></div>
+      <div class="skel" aria-hidden="true"><span style="width:40%"></span><span style="width:92%"></span><span style="width:70%"></span><span style="width:30%;margin-top:10px"></span><span style="width:86%"></span><span style="width:95%"></span><span style="width:60%"></span></div>`;
+  }
+  let out = headHTML(t) + errorHTML(t);
+  if(!t.ai && t.status!=="approved"){
+    if(aiStatus==="ready" && !t.human.category && !t.human.urgency && !t.draft.trim()){
+      return out + `<div class="empty"><p>Claude hasn't looked at this ticket yet.</p><button class="btn" data-act="triage">Triage with Claude</button></div>`;
+    }
+    if(aiStatus==="checking") out += `<div class="banner banner-info">Connecting to Claude…</div>`;
+    else if(aiStatus==="off" && !t.error) out += `<div class="banner banner-info">Live AI isn't available in this view, so you're triaging this ticket yourself.</div>`;
+  }
+  if(t.ai && t.ai.summary) out += `<p class="summary">${h(t.ai.summary)}</p>`;
+  if(t.ai && t.ai.needsInfo && t.status!=="approved"){
+    out += `<div class="needinfo" role="note"><p><b>Not enough to go on.</b> Claude drafted a question instead of an answer, and its picks below are rough guesses.${t.ai.missing && t.ai.missing.length ? " It would need to know:" : ""}</p>${t.ai.missing && t.ai.missing.length ? `<ul>${t.ai.missing.map(m=>`<li>${h(m)}</li>`).join("")}</ul>` : ""}</div>`;
+  }
+  out += fieldHTML(t,"category") + fieldHTML(t,"urgency");
+  if(t.ai) out += evidenceHTML(t) + flagsHTML(t);
+  out += draftHTML(t);
+  out += `<div class="gate" id="gate">${gateInner(t)}</div>`;
+  if(t.ai) out += `<p class="fine">Confidence is Claude's own estimate of how likely its pick is right, not measured accuracy. Below 60% you're asked to confirm; above it, your approval still decides.</p>`;
+  return out;
+}
+
+function render(){
+  $("#status").innerHTML = statusHTML();
+  $("#stats").innerHTML = statsHTML();
+  $("#q-count").textContent = state.tickets.length;
+  $("#queue-list").innerHTML = queueHTML();
+  const armed = state.armed === "reset";
+  $("#reset-slot").innerHTML = `<button class="link" data-act="reset">${armed ? "Reset all tickets? Click again" : "Reset demo"}</button>`;
+  if(state.composing){
+    if(!$("#composer")) $("#mail").innerHTML = composerHTML();
+    else $("#c-submit").textContent = aiStatus==="ready" ? "Add and triage" : "Add ticket";
+    $("#triage").innerHTML = composeAsideHTML();
+  } else {
+    const t = cur();
+    $("#mail").innerHTML = mailHTML(t);
+    $("#triage").innerHTML = triageHTML(t);
+  }
+  lit = null;
+}
+function updateDraftBits(t){
+  const ph = $("#ph"); if(ph) ph.innerHTML = phHTML(t);
+  const gate = $("#gate"); if(gate) gate.innerHTML = gateInner(t);
+  const st = $("#draft-state"); if(st) st.textContent = draftStateText(t);
+  const ta = $("#draft"); if(ta) ta.className = (!t.draftOriginal || isEdited(t)) ? "is-edited" : "";
+  $("#queue-list").innerHTML = queueHTML();
+}
+
+/* ---------- events ---------- */
+const ARMED_ACTS = ["rerun","rewrite","reset"];
+document.addEventListener("click", e=>{
+  const b = e.target.closest("[data-act]");
+  if(!b){ if(state.armed){ state.armed = null; render(); } return; }
+  const act = b.dataset.act;
+  if(state.armed && !ARMED_ACTS.includes(act)) state.armed = null;
+  const t = cur();
+
+  switch(act){
+    case "select":
+      state.selected = b.dataset.id; state.composing = false; break;
+    case "compose":
+      state.composing = true; render(); setTimeout(()=>{ const n = $("#c-name"); if(n) n.focus(); }, 0); return;
+    case "cancel-compose":
+      state.composing = false; break;
+    case "fill-sample":
+      $("#c-name").value = SAMPLE_EMAIL.name; $("#c-company").value = SAMPLE_EMAIL.company;
+      $("#c-subj").value = SAMPLE_EMAIL.subject; $("#c-body").value = SAMPLE_EMAIL.body; return;
+    case "triage":
+      t.error = null; runTriage(t); return;
+    case "rerun":
+      if(hasHumanWork(t) && state.armed !== "rerun:" + t.id){ state.armed = "rerun:" + t.id; break; }
+      state.armed = null; t.error = null; runTriage(t); return;
+    case "stop": {
+      const c = controllers.get(t.id); if(c) c.abort(); return;
+    }
+    case "set": {
+      if(t.status==="approved") return;
+      const f = b.dataset.field, v = b.dataset.val, before = final(t,f);
+      if(t.ai && v === t.ai[f].value){
+        const wasNeeded = needsConfirm(t,f) || t.human[f];
+        t.human[f] = null; t.human[f+"Confirmed"] = true;
+        if(wasNeeded) pushLog(t, "you", before !== v ? `You set ${f} back to ${v}` : `You confirmed ${f}: ${v}`);
+      } else if(v !== before){
+        t.human[f] = v; t.human[f+"Confirmed"] = true;
+        pushLog(t, "you", before ? `You changed ${f} from ${before} to ${v}` : `You set ${f} to ${v}`);
+      }
+      break;
+    }
+    case "confirm": {
+      const f = b.dataset.field; t.human[f+"Confirmed"] = true;
+      pushLog(t, "you", `You confirmed ${f}: ${t.ai[f].value}`); break;
+    }
+    case "undo": {
+      const f = b.dataset.field, before = t.human[f];
+      t.human[f] = null; t.human[f+"Confirmed"] = false;
+      pushLog(t, "you", `You reverted ${f} from ${before} to Claude's pick, ${t.ai[f].value}`); break;
+    }
+    case "tone":
+      t.tone = b.dataset.val; break;
+    case "rewrite":
+      if(isEdited(t) && state.armed !== "rewrite:" + t.id){ state.armed = "rewrite:" + t.id; break; }
+      state.armed = null; t.error = null; runDraft(t); return;
+    case "ph": {
+      const ta = $("#draft"); const want = placeholders(t.draft)[Number(b.dataset.i)];
+      if(!ta || !want) return;
+      let idx = -1, from = 0;
+      for(let k = 0; k <= Number(b.dataset.i); k++){ idx = t.draft.indexOf(placeholders(t.draft)[k], from); from = idx + 1; }
+      if(idx < 0) idx = t.draft.indexOf(want);
+      ta.focus(); ta.setSelectionRange(idx, idx + want.length); return;
+    }
+    case "approve":
+      if(blockers(t).length) return;
+      t.status = "approved"; t.approvedAt = Date.now();
+      pushLog(t, "you", `You approved: ${final(t,"category")} · ${final(t,"urgency")}${isEdited(t) ? " · edited reply" : t.draftOriginal ? " · Claude's reply unchanged" : ""}`);
+      break;
+    case "reopen":
+      t.status = "triaged"; t.approvedAt = null; pushLog(t, "you", "You reopened the ticket"); break;
+    case "rate":
+      if(t.rating === b.dataset.val) return;
+      t.rating = b.dataset.val; pushLog(t, "you", `You rated Claude's draft: ${t.rating}`); break;
+    case "copy": {
+      const done = ()=>{ b.textContent = "Copied"; setTimeout(()=>{ b.textContent = "Copy reply"; }, 1600); };
+      const fallback = ()=>{ const ta = $("#draft"); if(ta){ ta.focus(); ta.select(); } b.textContent = "Selected. Press Ctrl+C or ⌘C"; };
+      try{ navigator.clipboard.writeText(t.draft).then(done, fallback); }catch(err){ fallback(); }
+      return;
+    }
+    case "reset":
+      if(state.armed !== "reset"){ state.armed = "reset"; break; }
+      controllers.forEach(c=>c.abort());
+      state = fresh(); break;
+    default: return;
+  }
+  save(); render();
+});
+
+document.addEventListener("submit", e=>{
+  if(e.target.id !== "composer") return;
+  e.preventDefault();
+  const name = $("#c-name").value.trim(), company = $("#c-company").value.trim();
+  const body = $("#c-body").value.trim(); let subject = $("#c-subj").value.trim();
+  const err = $("#c-err");
+  if(body.length < 20){ err.textContent = "Paste the email body first. It needs at least a sentence or two for Claude to work with."; err.hidden = false; $("#c-body").focus(); return; }
+  if(!subject) subject = body.split("\n").find(l=>l.trim()).slice(0, 70);
+  const t = {
+    id:"LL-" + (state.nextId++), from:name || "Unknown sender", email:"", company, plan:"", received:"Just now",
+    subject, body, ai:null, source:"pasted", status:"new", human:freshHuman(), tone:"Friendly",
+    draft:"", draftOriginal:"", draftFor:null, dropped:0, running:null, error:null,
+    log:[{t:Date.now(), who:"you", text:"You added this ticket"}]
+  };
+  state.tickets.unshift(t); state.selected = t.id; state.composing = false;
+  save(); render();
+  if(aiStatus === "ready") runTriage(t);
+});
+
+document.addEventListener("input", e=>{
+  if(e.target.id !== "draft") return;
+  const t = cur(); t.draft = e.target.value; updateDraftBits(t); saveSoon();
+});
+document.addEventListener("change", e=>{
+  if(e.target.id !== "draft") return;
+  const t = cur();
+  if(t.draftOriginal && isEdited(t)){
+    const last = t.log[t.log.length-1];
+    if(!last || last.text !== "You edited the draft") pushLog(t, "you", "You edited the draft");
+  } else if(!t.draftOriginal && t.draft.trim()){
+    const last = t.log[t.log.length-1];
+    if(!last || last.text !== "You wrote the reply") pushLog(t, "you", "You wrote the reply");
+  }
+  const lg = $("#log"); if(lg) lg.innerHTML = logHTML(t);
+  save();
+});
+
+function setLit(i){
+  if(i === lit) return; lit = i;
+  document.querySelectorAll("[data-ev]").forEach(n=>n.classList.toggle("is-lit", n.dataset.ev === i));
+}
+document.addEventListener("mouseover", e=>{ const el = e.target.closest("[data-ev]"); setLit(el ? el.dataset.ev : null); });
+document.addEventListener("focusin", e=>{ const el = e.target.closest("[data-ev]"); setLit(el ? el.dataset.ev : null); });
+
+/* ---------- boot ---------- */
+render();
+(async ()=>{
+  try{
+    if(window.claude && typeof window.claude.use === "function") sampleFn = await window.claude.use("sample");
+  }catch(e){ sampleFn = null; }
+  aiStatus = sampleFn ? "ready" : "off";
+  if(!sampleFn) aiOffReason = "Live AI isn't available in this view.";
+  render();
+})();
+})();
+</script>
+</body>
+</html>
