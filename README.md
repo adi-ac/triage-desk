@@ -16,8 +16,17 @@ Paste in a customer email and Claude suggests a category, an urgency level and a
 
 ## Running it
 
-It's a single self-contained `index.html` with no build step. Open it in a browser.
+The app is being rebuilt in Next.js (App Router, TypeScript). With [pnpm](https://pnpm.io) installed:
 
-Live AI triage runs when the page is published as a Claude artifact, where it calls Claude through the artifact's `sample` capability. Opened anywhere else, it runs in demo mode: the five example tickets come with precomputed suggestions, and new tickets can be triaged by hand.
+```bash
+pnpm install
+pnpm dev
+```
+
+Then open http://localhost:3000.
+
+### The original version
+
+The first version was a single self-contained HTML page, kept at [`reference/v1.html`](reference/v1.html) and tagged `v1-artifact`. Open it in a browser; there's no build step. Live AI triage runs when the page is published as a Claude artifact, where it calls Claude through the artifact's `sample` capability. Opened anywhere else, it runs in demo mode: the five example tickets come with precomputed suggestions, and new tickets can be triaged by hand.
 
 The example tickets use a fictional company, Ledgerline, and invented customers.
