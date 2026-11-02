@@ -1,6 +1,7 @@
 /*
- * Colour primitives. Don't use these in components; use the roles in
- * theme.css, which switch between light and dark.
+ * Colour primitives, chosen in the look prototype (see docs/brief.md).
+ * Don't use these in components; use the roles in theme.css, which switch
+ * between light and dark.
  *
  * Every ramp shares one lightness table, so the same step looks equally
  * bright across hues. Steps 200–800 are 0.08 apart in L; the ends are closer
@@ -8,41 +9,43 @@
  *
  * Each ramp keeps a single hue. The colour ramps share one chroma target per
  * step, so the same step looks equally colourful across hues, capped at 95% of
- * each hue's sRGB ceiling so nothing clips. Teal has the least room, so it sits
- * at its cap for most steps.
+ * each hue's sRGB ceiling so nothing clips. Petrol has the least room, so it
+ * sits at its cap for most of the middle steps.
  */
 
 :root {
-  /* Cool neutral with a slight teal bias. 0, 25, 975 and 990 are extra
-     surface steps the colour ramps don't need. */
+  /* Neutral grey, no tint. 0, 25, 975 and 990 are extra surface steps the
+     colour ramps don't need; 275 exists only for dark-mode ink-3, which falls
+     just short of APCA 60 at 300. */
   --grey-0: oklch(1 0 0);
-  --grey-25: oklch(0.985 0.004 200);
-  --grey-50: oklch(0.97 0.004 200);
-  --grey-100: oklch(0.92 0.006 200);
-  --grey-200: oklch(0.85 0.009 200);
-  --grey-300: oklch(0.77 0.011 200);
-  --grey-400: oklch(0.69 0.013 200);
-  --grey-500: oklch(0.61 0.014 200);
-  --grey-600: oklch(0.53 0.014 200);
-  --grey-700: oklch(0.45 0.013 200);
-  --grey-800: oklch(0.37 0.011 200);
-  --grey-900: oklch(0.29 0.009 200);
-  --grey-950: oklch(0.235 0.007 200);
-  --grey-975: oklch(0.2 0.006 200);
-  --grey-990: oklch(0.17 0.005 200);
+  --grey-25: oklch(0.985 0 0);
+  --grey-50: oklch(0.97 0 0);
+  --grey-100: oklch(0.92 0 0);
+  --grey-200: oklch(0.85 0 0);
+  --grey-275: oklch(0.78 0 0);
+  --grey-300: oklch(0.77 0 0);
+  --grey-400: oklch(0.69 0 0);
+  --grey-500: oklch(0.61 0 0);
+  --grey-600: oklch(0.53 0 0);
+  --grey-700: oklch(0.45 0 0);
+  --grey-800: oklch(0.37 0 0);
+  --grey-900: oklch(0.29 0 0);
+  --grey-950: oklch(0.235 0 0);
+  --grey-975: oklch(0.2 0 0);
+  --grey-990: oklch(0.17 0 0);
 
   /* Accent */
-  --teal-50: oklch(0.97 0.012 192);
-  --teal-100: oklch(0.92 0.035 192);
-  --teal-200: oklch(0.85 0.07 192);
-  --teal-300: oklch(0.77 0.1 192);
-  --teal-400: oklch(0.69 0.113 192);
-  --teal-500: oklch(0.61 0.1 192);
-  --teal-600: oklch(0.53 0.087 192);
-  --teal-700: oklch(0.45 0.073 192);
-  --teal-800: oklch(0.37 0.06 192);
-  --teal-900: oklch(0.29 0.04 192);
-  --teal-950: oklch(0.235 0.028 192);
+  --petrol-50: oklch(0.97 0.012 215);
+  --petrol-100: oklch(0.92 0.035 215);
+  --petrol-200: oklch(0.85 0.07 215);
+  --petrol-300: oklch(0.77 0.1 215);
+  --petrol-400: oklch(0.69 0.116 215);
+  --petrol-500: oklch(0.61 0.102 215);
+  --petrol-600: oklch(0.53 0.089 215);
+  --petrol-700: oklch(0.45 0.076 215);
+  --petrol-800: oklch(0.37 0.062 215);
+  --petrol-900: oklch(0.29 0.04 215);
+  --petrol-950: oklch(0.235 0.028 215);
 
   /* Warning */
   --amber-50: oklch(0.97 0.012 65);

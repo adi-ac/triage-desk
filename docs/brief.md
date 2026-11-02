@@ -40,6 +40,15 @@ What it can't claim is real-world use, so it gets tested with support agents and
 **What it's not leading with**
 - The system underneath (trust signals as tokens and typed components, so "AI suggested vs. person decided" holds on every screen by construction). It rewards someone in minute ten, but nobody opens a repo in a sixty-second skim.
 
+**Look** (decided 2026-11-02 in a throwaway tuning page at `/prototype/look`, now deleted)
+- Accent: Petrol, hue 215. Light mode uses `petrol-700` for the accent and `petrol-100` for its soft fill; dark mode uses `petrol-300` and `petrol-900`.
+- Greys: neutral, with no tint (chroma 0).
+- Fonts: Schibsted Grotesk for headings, Geist for body text, Geist Mono for IDs, times and figures.
+- Palette method unchanged: one lightness table for every ramp, one chroma target per step, capped at 95% of each hue's sRGB ceiling. Status colours stay amber 65, red 27 and green 150.
+- Contrast: all 41 checked pairs pass WCAG AA and APCA in both themes. Neutral greys left dark-mode `ink-3` on `surface-2` at Lc 59.9, so dark `ink-3` moved to a new `grey-275` (L 0.78, Lc 61.7).
+- Replaced: the v1 look of teal 192 with greys tinted toward teal, set in Bricolage Grotesque, IBM Plex Sans and IBM Plex Mono. The other accents on the panel (Pine, Blue, Indigo, Violet, Plum) and the cool and warm greys were also not chosen. Reasons weren't recorded during the session.
+- Known trade-off: a violet accent and warm greys each failed one dark-mode pair on the panel; neither was picked, so neither needed fixing.
+
 ## Chain of must-be-trues
 
 1. **← testing now.** A design lead opens the link and, within 60 seconds and with no instructions, sees the model be unsure and the interface stop it: Approve blocked, the reason beside it, the runner-up offered.
@@ -97,4 +106,6 @@ Proposed shape for the test (not yet agreed):
 - **Real, messy input.** The example emails are invented (a fictional company, Ledgerline). Real support email has forwarded chains, signatures, several asks at once, and quoted replies that may break word-for-word evidence matching. Not discussed.
 - **Which vague email reliably gets an unsure result** in minute two, so a skeptical reviewer sees the system catch a case I didn't choose for them.
 - **Whether the unsure examples are actually unsure.** Before building the triage panel, run LL-5040 and the vague email (`vagueEmail` in `fixtures/tickets.ts`) against the live model several times and confirm they come back unsure every time.
+- **Pencil and evidence colours.** The look prototype reused `accent-soft` and `warning-soft` for evidence highlights and drew pencil with a dashed `line-strong` border. Neither has its own token yet.
+- **Focus ring colour.** `theme.css` says the accent is for focus rings; the prototype used `ink`, following the polish rule that focus rings stay neutral. Pick one.
 - **Long emails.** v1 cut emails off at 8,000 characters before sending them to the model, which loses the last section of LL-5033. Raise the limit, and when an email is still cut off, show the agent a note saying so.

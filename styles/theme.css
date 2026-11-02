@@ -26,11 +26,11 @@
   --ink-2: var(--grey-700);
   --ink-3: var(--grey-600);
 
-  --accent: var(--teal-700);
-  --accent-hover: var(--teal-800);
+  --accent: var(--petrol-700);
+  --accent-hover: var(--petrol-800);
   --accent-ink: var(--grey-0);
-  --accent-soft: var(--teal-100);
-  --accent-text: var(--teal-700);
+  --accent-soft: var(--petrol-100);
+  --accent-text: var(--petrol-700);
 
   --warning: var(--amber-700);
   --warning-soft: var(--amber-100);
@@ -52,13 +52,13 @@
 
     --ink: var(--grey-50);
     --ink-2: var(--grey-200);
-    --ink-3: var(--grey-300);
+    --ink-3: var(--grey-275);
 
-    --accent: var(--teal-300);
-    --accent-hover: var(--teal-200);
+    --accent: var(--petrol-300);
+    --accent-hover: var(--petrol-200);
     --accent-ink: var(--grey-990);
-    --accent-soft: var(--teal-900);
-    --accent-text: var(--teal-200);
+    --accent-soft: var(--petrol-900);
+    --accent-text: var(--petrol-200);
 
     --warning: var(--amber-200);
     --warning-soft: var(--amber-900);
@@ -80,13 +80,13 @@
 
   --ink: var(--grey-50);
   --ink-2: var(--grey-200);
-  --ink-3: var(--grey-300);
+  --ink-3: var(--grey-275);
 
-  --accent: var(--teal-300);
-  --accent-hover: var(--teal-200);
+  --accent: var(--petrol-300);
+  --accent-hover: var(--petrol-200);
   --accent-ink: var(--grey-990);
-  --accent-soft: var(--teal-900);
-  --accent-text: var(--teal-200);
+  --accent-soft: var(--petrol-900);
+  --accent-text: var(--petrol-200);
 
   --warning: var(--amber-200);
   --warning-soft: var(--amber-900);
