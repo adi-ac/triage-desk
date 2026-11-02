@@ -1,0 +1,97 @@
+/*
+ * Colour roles. Components use these, never the primitives in tokens.css.
+ * Dark mode follows the system unless <html data-theme> says otherwise.
+ *
+ * Checked pairs (WCAG 2 and APCA, both themes):
+ * - ink, ink-2, ink-3 on bg, surface, surface-2 and every *-soft fill:
+ *   at least 4.5:1 and Lc 60, so all three work at small sizes.
+ * - accent-text, warning, critical, success on bg, surface, surface-2 and
+ *   their own *-soft fill: at least 4.5:1 and Lc 60.
+ * - accent-ink on accent and accent-hover: at least 4.5:1 and Lc 60.
+ * - line-strong and accent on bg, surface, surface-2: at least 3:1, for
+ *   control borders and focus rings.
+ * line is decorative (dividers) and has no contrast requirement.
+ */
+
+:root {
+  color-scheme: light;
+
+  --bg: var(--grey-50);
+  --surface: var(--grey-0);
+  --surface-2: var(--grey-25);
+  --line: var(--grey-100);
+  --line-strong: var(--grey-500);
+
+  --ink: var(--grey-900);
+  --ink-2: var(--grey-700);
+  --ink-3: var(--grey-600);
+
+  --accent: var(--teal-700);
+  --accent-hover: var(--teal-800);
+  --accent-ink: var(--grey-0);
+  --accent-soft: var(--teal-100);
+  --accent-text: var(--teal-700);
+
+  --warning: var(--amber-700);
+  --warning-soft: var(--amber-100);
+  --critical: var(--red-700);
+  --critical-soft: var(--red-100);
+  --success: var(--green-700);
+  --success-soft: var(--green-100);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    color-scheme: dark;
+
+    --bg: var(--grey-990);
+    --surface: var(--grey-975);
+    --surface-2: var(--grey-950);
+    --line: var(--grey-900);
+    --line-strong: var(--grey-500);
+
+    --ink: var(--grey-50);
+    --ink-2: var(--grey-200);
+    --ink-3: var(--grey-300);
+
+    --accent: var(--teal-300);
+    --accent-hover: var(--teal-200);
+    --accent-ink: var(--grey-990);
+    --accent-soft: var(--teal-900);
+    --accent-text: var(--teal-200);
+
+    --warning: var(--amber-200);
+    --warning-soft: var(--amber-900);
+    --critical: var(--red-200);
+    --critical-soft: var(--red-900);
+    --success: var(--green-200);
+    --success-soft: var(--green-900);
+  }
+}
+
+:root[data-theme="dark"] {
+  color-scheme: dark;
+
+  --bg: var(--grey-990);
+  --surface: var(--grey-975);
+  --surface-2: var(--grey-950);
+  --line: var(--grey-900);
+  --line-strong: var(--grey-500);
+
+  --ink: var(--grey-50);
+  --ink-2: var(--grey-200);
+  --ink-3: var(--grey-300);
+
+  --accent: var(--teal-300);
+  --accent-hover: var(--teal-200);
+  --accent-ink: var(--grey-990);
+  --accent-soft: var(--teal-900);
+  --accent-text: var(--teal-200);
+
+  --warning: var(--amber-200);
+  --warning-soft: var(--amber-900);
+  --critical: var(--red-200);
+  --critical-soft: var(--red-900);
+  --success: var(--green-200);
+  --success-soft: var(--green-900);
+}

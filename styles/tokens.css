@@ -1,0 +1,85 @@
+/*
+ * Colour primitives. Don't use these in components; use the roles in
+ * theme.css, which switch between light and dark.
+ *
+ * Every ramp shares one lightness table, so the same step looks equally
+ * bright across hues. Steps 200–800 are 0.08 apart in L; the ends are closer
+ * together because surfaces and soft fills need finer steps there.
+ *
+ * Each ramp keeps a single hue. The colour ramps share one chroma target per
+ * step, so the same step looks equally colourful across hues, capped at 95% of
+ * each hue's sRGB ceiling so nothing clips. Teal has the least room, so it sits
+ * at its cap for most steps.
+ */
+
+:root {
+  /* Cool neutral with a slight teal bias. 0, 25, 975 and 990 are extra
+     surface steps the colour ramps don't need. */
+  --grey-0: oklch(1 0 0);
+  --grey-25: oklch(0.985 0.004 200);
+  --grey-50: oklch(0.97 0.004 200);
+  --grey-100: oklch(0.92 0.006 200);
+  --grey-200: oklch(0.85 0.009 200);
+  --grey-300: oklch(0.77 0.011 200);
+  --grey-400: oklch(0.69 0.013 200);
+  --grey-500: oklch(0.61 0.014 200);
+  --grey-600: oklch(0.53 0.014 200);
+  --grey-700: oklch(0.45 0.013 200);
+  --grey-800: oklch(0.37 0.011 200);
+  --grey-900: oklch(0.29 0.009 200);
+  --grey-950: oklch(0.235 0.007 200);
+  --grey-975: oklch(0.2 0.006 200);
+  --grey-990: oklch(0.17 0.005 200);
+
+  /* Accent */
+  --teal-50: oklch(0.97 0.012 192);
+  --teal-100: oklch(0.92 0.035 192);
+  --teal-200: oklch(0.85 0.07 192);
+  --teal-300: oklch(0.77 0.1 192);
+  --teal-400: oklch(0.69 0.113 192);
+  --teal-500: oklch(0.61 0.1 192);
+  --teal-600: oklch(0.53 0.087 192);
+  --teal-700: oklch(0.45 0.073 192);
+  --teal-800: oklch(0.37 0.06 192);
+  --teal-900: oklch(0.29 0.04 192);
+  --teal-950: oklch(0.235 0.028 192);
+
+  /* Warning */
+  --amber-50: oklch(0.97 0.012 65);
+  --amber-100: oklch(0.92 0.035 65);
+  --amber-200: oklch(0.85 0.07 65);
+  --amber-300: oklch(0.77 0.1 65);
+  --amber-400: oklch(0.69 0.12 65);
+  --amber-500: oklch(0.61 0.13 65);
+  --amber-600: oklch(0.53 0.113 65);
+  --amber-700: oklch(0.45 0.096 65);
+  --amber-800: oklch(0.37 0.079 65);
+  --amber-900: oklch(0.29 0.04 65);
+  --amber-950: oklch(0.235 0.028 65);
+
+  /* Critical */
+  --red-50: oklch(0.97 0.012 27);
+  --red-100: oklch(0.92 0.035 27);
+  --red-200: oklch(0.85 0.07 27);
+  --red-300: oklch(0.77 0.1 27);
+  --red-400: oklch(0.69 0.12 27);
+  --red-500: oklch(0.61 0.13 27);
+  --red-600: oklch(0.53 0.125 27);
+  --red-700: oklch(0.45 0.115 27);
+  --red-800: oklch(0.37 0.085 27);
+  --red-900: oklch(0.29 0.04 27);
+  --red-950: oklch(0.235 0.028 27);
+
+  /* Success */
+  --green-50: oklch(0.97 0.012 150);
+  --green-100: oklch(0.92 0.035 150);
+  --green-200: oklch(0.85 0.07 150);
+  --green-300: oklch(0.77 0.1 150);
+  --green-400: oklch(0.69 0.12 150);
+  --green-500: oklch(0.61 0.13 150);
+  --green-600: oklch(0.53 0.125 150);
+  --green-700: oklch(0.45 0.115 150);
+  --green-800: oklch(0.37 0.085 150);
+  --green-900: oklch(0.29 0.04 150);
+  --green-950: oklch(0.235 0.028 150);
+}
