@@ -46,7 +46,10 @@ What it can't claim is real-world use, so it gets tested with support agents and
 - Fonts: Schibsted Grotesk for headings, Geist for body text, Geist Mono for IDs, times and figures.
 - Palette method unchanged: one lightness table for every ramp, one chroma target per step, capped at 95% of each hue's sRGB ceiling. Status colours stay amber 65, red 27 and green 150.
 - Contrast: all 41 checked pairs pass WCAG AA and APCA in both themes. Neutral greys left dark-mode `ink-3` on `surface-2` at Lc 59.9, so dark `ink-3` moved to a new `grey-275` (L 0.78, Lc 61.7).
-- Replaced: the v1 look of teal 192 with greys tinted toward teal, set in Bricolage Grotesque, IBM Plex Sans and IBM Plex Mono. The other accents on the panel (Pine, Blue, Indigo, Violet, Plum) and the cool and warm greys were also not chosen. Reasons weren't recorded during the session.
+- Replaced: the v1 look of teal 192 with greys tinted toward teal, set in Bricolage Grotesque, IBM Plex Sans and IBM Plex Mono. The other accents on the panel (Pine, Blue, Indigo, Violet, Plum) and the cool and warm greys were also not chosen. My reasons, recorded 2026-11-03:
+  - Accent: "I wanted a distinct hue other than blue, indigo, and violet which have become overused in products as of late. Teal and plum felt a bit too close to success and error state colors, respectively."
+  - Greys: "I wanted a more neutral look for the grays compared to the tinted variants."
+  - Fonts: "The v1 set of Bricolage Grotesque, IBM Plex Sans and IBM Plex Mono typefaces have gotten used a lot more in the recent years and I wanted to use a set that was more opinionated and non-generic yet distinct enough. That's why I went with Schibsted Grotesk, Geist and Geist Mono."
 - Known trade-off: a violet accent and warm greys each failed one dark-mode pair on the panel; neither was picked, so neither needed fixing.
 
 **Surfaces** (decided 2026-11-03 in a throwaway tuning page at `/prototype/surfaces`, now deleted, referencing Clerk's dashboard)
@@ -56,7 +59,7 @@ What it can't claim is real-world use, so it gets tested with support agents and
 - Buttons are raised. Secondary buttons have an edge and the pane shadow. The primary button has a gradient (the accent with 12% white at the top), a lighter top edge, a darker accent ring and the pane shadow. Text on the gradient's lightest point is 5.46:1 / Lc 82 in light and 10.4:1 / Lc 69 in dark.
 - Disabled buttons are flat at every depth and sunk to `bg`, so the blocked Approve doesn't look pressable.
 - Dark mode has no shadows. Levels step lighter (`surface` for panes, `grey-950` for popovers and dialogs) and carry white hairline rings. The panel's hairline switch was off, which also dropped the dark rings; they were kept because the rule for dark mode was lighter surfaces and borders.
-- Not chosen: decisions a person made sitting raised while AI suggestions stay flat. Both stay flat; a decision has a solid `line-strong` border and a suggestion a dashed one. Reasons weren't recorded.
+- Not chosen: decisions a person made sitting raised while AI suggestions stay flat. Both stay flat; a decision has a solid `line-strong` border and a suggestion a dashed one. My reason, recorded 2026-11-03: "The raised variants seemed to blend in with the rest of the buttons."
 
 ## Chain of must-be-trues
 
