@@ -1,5 +1,5 @@
 /*
- * Colour primitives, chosen in the look prototype (see docs/brief.md).
+ * Color primitives, chosen in the look prototype (see docs/brief.md).
  * Don't use these in components; use the roles in theme.css, which switch
  * between light and dark.
  *
@@ -7,15 +7,15 @@
  * bright across hues. Steps 200–800 are 0.08 apart in L; the ends are closer
  * together because surfaces and soft fills need finer steps there.
  *
- * Each ramp keeps a single hue. The colour ramps share one chroma target per
- * step, so the same step looks equally colourful across hues, capped at 95% of
+ * Each ramp keeps a single hue. The color ramps share one chroma target per
+ * step, so the same step looks equally colorful across hues, capped at 95% of
  * each hue's sRGB ceiling so nothing clips. Petrol has the least room, so it
  * sits at its cap for most of the middle steps.
  */
 
 :root {
-  /* Neutral grey, no tint. 0, 25, 975 and 990 are extra surface steps the
-     colour ramps don't need; 275 exists only for dark-mode ink-3, which falls
+  /* Neutral gray, no tint. 0, 25, 975 and 990 are extra surface steps the
+     color ramps don't need; 275 exists only for dark-mode ink-3, which falls
      just short of APCA 60 at 300. */
   --grey-0: oklch(1 0 0);
   --grey-25: oklch(0.985 0 0);

@@ -1,5 +1,5 @@
 /*
- * Colour roles. Components use these, never the primitives in tokens.css.
+ * Color roles. Components use these, never the primitives in tokens.css.
  * Dark mode follows the system unless <html data-theme> says otherwise.
  *
  * Checked pairs (WCAG 2 and APCA, both themes):
@@ -13,7 +13,7 @@
  * line is decorative (dividers) and has no contrast requirement.
  *
  * Surfaces, from the surfaces prototype (see docs/brief.md):
- * - page is the window behind everything. tray is the grey band that holds a
+ * - page is the window behind everything. tray is the gray band that holds a
  *   pane's header and wraps its card; the card itself is surface.
  * - surface-raised is for popovers, menus and dialogs. Dark mode lifts it a
  *   step, because it has no shadows to do that.

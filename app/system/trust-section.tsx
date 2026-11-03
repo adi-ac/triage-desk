@@ -69,7 +69,7 @@ export function TrustSection({ theme }: { theme: string }) {
       <section className={styles.card}>
         <h3 className={`text-heading ${styles.cardTitle}`}>Pencil and ink</h3>
         <p className={`text-body ${styles.muted} ${styles.cardIntro}`}>
-          Anything the model proposes is pencil: dashed and grey. Anything a person sets or approves
+          Anything the model proposes is pencil: dashed and gray. Anything a person sets or approves
           is ink: solid and petrol. Both are flat, because neither is a button.
         </p>
         <div className={styles.pencilInk}>
@@ -120,9 +120,9 @@ export function TrustSection({ theme }: { theme: string }) {
         <h3 className={`text-heading ${styles.cardTitle}`}>Evidence</h3>
         <p className={`text-body ${styles.muted} ${styles.cardIntro}`}>
           Quotes the model used, marked in the email with a fill and a dashed underline, since the
-          model made the mark. Category evidence is the model&apos;s grey; urgency evidence is red,
+          model made the mark. Category evidence is the model&apos;s gray; urgency evidence is red,
           like severity. In the triage panel, the evidence list beside the email names which is
-          which, so colour isn&apos;t the only cue. These marks are an illustration, not a
+          which, so color isn&apos;t the only cue. These marks are an illustration, not a
           recorded model output.
         </p>
         <div className={styles.legend}>
@@ -161,7 +161,7 @@ export function TrustSection({ theme }: { theme: string }) {
       <section className={styles.card}>
         <h3 className={`text-heading ${styles.cardTitle}`}>Severity</h3>
         <p className={`text-body ${styles.muted} ${styles.cardIntro}`}>
-          Only urgent is solid. The bars repeat the level without colour.
+          Only urgent is solid. The bars repeat the level without color.
         </p>
         <div className={styles.severities}>
           {(["urgent", "high", "normal", "low"] as const).map((level, i) => (

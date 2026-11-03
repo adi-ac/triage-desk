@@ -26,7 +26,7 @@ What it can't claim is real-world use, so it gets tested with support agents and
 
 **First screen**
 - The link opens straight onto a ticket where the model is unsure. Approve is blocked with the reason beside it, the runner-up is offered, and the evidence is highlighted in the email. There are zero steps to the idea and one click to override.
-- The example tickets are real outputs recorded from the model and labelled as recorded. An unlabelled canned example would undo the honesty claim the piece rests on.
+- The example tickets are real outputs recorded from the model and labeled as recorded. An unlabeled canned example would undo the honesty claim the piece rests on.
 
 **Minute two**
 - Visitors can paste their own email, which calls a live model through my backend. There's a per-visitor limit and a daily spend cap. When the cap is hit, the page says so and falls back to the recorded examples.
@@ -42,20 +42,20 @@ What it can't claim is real-world use, so it gets tested with support agents and
 
 **Look** (decided 2026-11-02 in a throwaway tuning page at `/prototype/look`, now deleted)
 - Accent: Petrol, hue 215. Light mode uses `petrol-700` for the accent and `petrol-100` for its soft fill; dark mode uses `petrol-300` and `petrol-900`.
-- Greys: neutral, with no tint (chroma 0).
+- Grays: neutral, with no tint (chroma 0).
 - Fonts: Schibsted Grotesk for headings, Geist for body text, Geist Mono for IDs, times and figures.
-- Palette method unchanged: one lightness table for every ramp, one chroma target per step, capped at 95% of each hue's sRGB ceiling. Status colours stay amber 65, red 27 and green 150.
-- Contrast: all 41 checked pairs pass WCAG AA and APCA in both themes. Neutral greys left dark-mode `ink-3` on `surface-2` at Lc 59.9, so dark `ink-3` moved to a new `grey-275` (L 0.78, Lc 61.7).
-- Replaced: the v1 look of teal 192 with greys tinted toward teal, set in Bricolage Grotesque, IBM Plex Sans and IBM Plex Mono. The other accents on the panel (Pine, Blue, Indigo, Violet, Plum) and the cool and warm greys were also not chosen. My reasons, recorded 2026-11-03:
+- Palette method unchanged: one lightness table for every ramp, one chroma target per step, capped at 95% of each hue's sRGB ceiling. Status colors stay amber 65, red 27 and green 150.
+- Contrast: all 41 checked pairs pass WCAG AA and APCA in both themes. Neutral grays left dark-mode `ink-3` on `surface-2` at Lc 59.9, so dark `ink-3` moved to a new `grey-275` (L 0.78, Lc 61.7).
+- Replaced: the v1 look of teal 192 with grays tinted toward teal, set in Bricolage Grotesque, IBM Plex Sans and IBM Plex Mono. The other accents on the panel (Pine, Blue, Indigo, Violet, Plum) and the cool and warm grays were also not chosen. My reasons, recorded 2026-11-03:
   - Accent: "I wanted a distinct hue other than blue, indigo, and violet which have become overused in products as of late. Teal and plum felt a bit too close to success and error state colors, respectively."
-  - Greys: "I wanted a more neutral look for the grays compared to the tinted variants."
+  - Grays: "I wanted a more neutral look for the grays compared to the tinted variants."
   - Fonts: "The v1 set of Bricolage Grotesque, IBM Plex Sans and IBM Plex Mono typefaces have gotten used a lot more in the recent years and I wanted to use a set that was more opinionated and non-generic yet distinct enough. That's why I went with Schibsted Grotesk, Geist and Geist Mono."
-- Known trade-off: a violet accent and warm greys each failed one dark-mode pair on the panel; neither was picked, so neither needed fixing.
+- Known trade-off: a violet accent and warm grays each failed one dark-mode pair on the panel; neither was picked, so neither needed fixing.
 
 **Surfaces** (decided 2026-11-03 in a throwaway tuning page at `/prototype/surfaces`, now deleted, referencing Clerk's dashboard)
 - Three elevation levels, no more: panes, popovers and menus, dialogs. Shadows and button fills are in `styles/elevation.css`; the new surface roles (`page`, `tray`, `surface-raised`, `scrim`) are in `theme.css`.
-- Tray and card: a grey band holds each pane's header and wraps a white card.
-- Light-mode page, changed 2026-11-03 from white (`grey-0`) to `grey-25`, so white surfaces stand out from it. My reason: "white surfaces blended into the white page." The tray stays `grey-50`, a step darker than the page, so it still reads against both the page and the white cards. Every text role passes on the new page and tray (lowest: `ink-3` on the tray at 4.82:1 / Lc 70). The pane shadows read the same on grey. Dark mode is unchanged.
+- Tray and card: a gray band holds each pane's header and wraps a white card.
+- Light-mode page, changed 2026-11-03 from white (`grey-0`) to `grey-25`, so white surfaces stand out from it. My reason: "white surfaces blended into the white page." The tray stays `grey-50`, a step darker than the page, so it still reads against both the page and the white cards. Every text role passes on the new page and tray (lowest: `ink-3` on the tray at 4.82:1 / Lc 70). The pane shadows read the same on gray. Dark mode is unchanged.
   - Also tried: page `grey-50` with the tray at 30% `grey-100`. Its cards sat twice as far from the page, but `ink-3` on that tray was down to 4.61:1. I chose `grey-25` and `grey-50` after comparing both on `/system`.
 - Shadows: a tight layer under the edge plus a wide soft one, at 0.7× the prototype's starting softness and 0.9× its strength. No hairline ring in light mode.
 - Buttons are raised. Secondary buttons have an edge and the pane shadow. The primary button has a gradient (the accent with 12% white at the top), a lighter top edge, a darker accent ring and the pane shadow. Text on the gradient's lightest point is 5.46:1 / Lc 82 in light and 10.4:1 / Lc 69 in dark.
@@ -65,13 +65,13 @@ What it can't claim is real-world use, so it gets tested with support agents and
 
 **Trust signals** (decided 2026-11-03; tokens in `styles/trust.css`, shown with live contrast checks at `/system`)
 - Every token points at an existing role, so light and dark come from `theme.css` and nothing new needs its own dark value.
-- One colour family per meaning: grey and dashed for the model (suggestions and the evidence it quotes), petrol and solid for a person (decisions, the same accent as Approve), amber for uncertainty, red for urgency.
+- One color family per meaning: gray and dashed for the model (suggestions and the evidence it quotes), petrol and solid for a person (decisions, the same accent as Approve), amber for uncertainty, red for urgency.
 - Pencil, a suggestion not yet acted on: dashed `line-strong` border, `bg` fill, `ink` text.
 - Ink, a person's decision: solid `accent` border, `accent-soft` fill, `accent-text` text.
 - Both are flat at every level. Raised means pressable, and a decision is a record, not a button.
-- Evidence: a fill plus a dashed underline, because the model made the mark. Category uses `line` with an `ink-3` underline (`line-strong` was 2.98:1 on the fill); urgency uses `critical-soft` with a `critical` underline. The evidence list names which is which, so colour isn't the only cue.
+- Evidence: a fill plus a dashed underline, because the model made the mark. Category uses `line` with an `ink-3` underline (`line-strong` was 2.98:1 on the fill); urgency uses `critical-soft` with a `critical` underline. The evidence list names which is which, so color isn't the only cue.
 - Confidence: high is quiet on purpose (an `ink-3` meter, `ink-2` text), so attention goes to the cases where the model shouldn't be trusted. Medium turns the meter `warning`; low adds `warning` text on a `warning-soft` fill. High confidence is never green, so it doesn't invite trust.
-- Severity: urgent is the only solid fill (`surface` text on `critical`); high is `critical` on `critical-soft`; normal and low have no fill (`ink-2`, `ink-3`). Bars repeat the level without colour, and every level carries its word.
+- Severity: urgent is the only solid fill (`surface` text on `critical`); high is `critical` on `critical-soft`; normal and low have no fill (`ink-2`, `ink-3`). Bars repeat the level without color, and every level carries its word.
 - Contrast: all 21 trust pairs pass in both themes (text 4.5:1 and Lc 60, non-text 3:1). The tightest is the pencil border on its own fill in light mode, at 3.48:1.
 
 **Focus ring** (decided 2026-11-03): the accent, 2px with a 2px offset, set globally on `:focus-visible` via a `--focus-ring` role. It is at least 6.59:1 on `surface` and `bg` in both themes.
@@ -105,7 +105,7 @@ Proposed shape for the test (not yet agreed):
 
 **Build at 100%: link 1.**
 - The first screen: the unsure ticket, blocked Approve with its reason, the runner-up, evidence highlighted in the email.
-- Recorded examples, labelled as recorded.
+- Recorded examples, labeled as recorded.
 - Then run the cold-open test, and fix the first screen until it passes.
 
 **Half-build on purpose.**

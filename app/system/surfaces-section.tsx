@@ -15,7 +15,7 @@ export function SurfacesSection({ theme }: { theme: string }) {
       <section className={styles.card}>
         <h3 className={`text-heading ${styles.cardTitle}`}>Tray and card</h3>
         <p className={`text-body ${styles.muted} ${styles.cardIntro}`}>
-          A grey tray holds the pane&apos;s header and wraps a white card. The card&apos;s radius is
+          A gray tray holds the pane&apos;s header and wraps a white card. The card&apos;s radius is
           the tray&apos;s minus the gap (14 − 4 = 10), so the corners stay concentric.
         </p>
         <div className={styles.pageDemo}>

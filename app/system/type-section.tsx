@@ -257,10 +257,10 @@ function FallbackCheck() {
   }, []);
 
   useEffect(() => {
-    let cancelled = false;
+    let canceled = false;
     document.fonts.ready.then(() => {
       const host = probe.current;
-      if (cancelled || !host) return;
+      if (canceled || !host) return;
       const root = getComputedStyle(document.documentElement);
       const measure = (role: Role, onlyFallback: boolean) => {
         const el = document.createElement("p");
@@ -284,7 +284,7 @@ function FallbackCheck() {
       );
     });
     return () => {
-      cancelled = true;
+      canceled = true;
     };
   }, []);
 

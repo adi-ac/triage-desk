@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { Swatch } from "./contrast-table";
 import styles from "./system.module.css";
 
-const colourSteps = ["50", "100", "200", "300", "400", "500", "600", "700", "800", "900", "950"];
+const colorSteps = ["50", "100", "200", "300", "400", "500", "600", "700", "800", "900", "950"];
 
 const ramps: { name: string; note: string; steps: string[] }[] = [
   {
@@ -12,10 +12,10 @@ const ramps: { name: string; note: string; steps: string[] }[] = [
     note: "Neutral, no tint",
     steps: ["0", "25", "50", "100", "200", "275", "300", "400", "500", "600", "700", "800", "900", "950", "975", "990"],
   },
-  { name: "petrol", note: "Accent, hue 215", steps: colourSteps },
-  { name: "amber", note: "Warning, hue 65", steps: colourSteps },
-  { name: "red", note: "Critical, hue 27", steps: colourSteps },
-  { name: "green", note: "Success, hue 150", steps: colourSteps },
+  { name: "petrol", note: "Accent, hue 215", steps: colorSteps },
+  { name: "amber", note: "Warning, hue 65", steps: colorSteps },
+  { name: "red", note: "Critical, hue 27", steps: colorSteps },
+  { name: "green", note: "Success, hue 150", steps: colorSteps },
 ];
 
 const roleGroups: { name: string; roles: string[] }[] = [
@@ -34,7 +34,7 @@ const roleGroups: { name: string; roles: string[] }[] = [
   },
 ];
 
-export function ColourSection({ theme }: { theme: string }) {
+export function ColorSection({ theme }: { theme: string }) {
   const [values, setValues] = useState<Record<string, string>>({});
 
   useEffect(() => {

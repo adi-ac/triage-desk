@@ -1,5 +1,5 @@
 /**
- * Live contrast checks for /system. Each colour is resolved from the page's
+ * Live contrast checks for /system. Each color is resolved from the page's
  * own CSS (so oklch, color-mix and theme switches all apply), painted onto a
  * 1×1 canvas over its background, and read back as sRGB.
  */
@@ -33,7 +33,7 @@ function paint(colors: string[]): RGB {
   return [r, g, b];
 }
 
-/** The computed colour of a custom property, e.g. "--ink". */
+/** The computed color of a custom property, e.g. "--ink". */
 function computed(token: string, host: HTMLElement) {
   host.style.color = `var(${token})`;
   return getComputedStyle(host).color;

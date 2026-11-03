@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useSyncExternalStore } from "react";
-import { ColourSection } from "./colour-section";
+import { ColorSection } from "./color-section";
 import { SurfacesSection } from "./surfaces-section";
 import { TrustSection } from "./trust-section";
 import { TypeSection } from "./type-section";
@@ -19,7 +19,7 @@ function subscribe(onChange: () => void) {
 
 const sections = [
   { id: "type", title: "Type", files: "styles/type.css" },
-  { id: "colour", title: "Colour", files: "styles/tokens.css, styles/theme.css" },
+  { id: "color", title: "Color", files: "styles/tokens.css, styles/theme.css" },
   { id: "surfaces", title: "Surfaces", files: "styles/elevation.css" },
   { id: "trust", title: "Trust signals", files: "styles/trust.css" },
 ] as const;
@@ -86,7 +86,7 @@ export function SystemPage() {
             <code className={`text-mono-small ${styles.muted} ${styles.spec}`}>{s.files}</code>
           </div>
           {s.id === "type" && <TypeSection />}
-          {s.id === "colour" && <ColourSection theme={resolved} />}
+          {s.id === "color" && <ColorSection theme={resolved} />}
           {s.id === "surfaces" && <SurfacesSection theme={resolved} />}
           {s.id === "trust" && <TrustSection theme={resolved} />}
         </section>

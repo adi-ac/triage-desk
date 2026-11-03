@@ -4,15 +4,15 @@
  * and the contrast pairs checked there still hold. /system shows them and
  * re-checks each pair live in both themes.
  *
- * One colour family per meaning, so they never blur together:
- *   grey, dashed   the model: suggestions and the evidence it quotes
+ * One color family per meaning, so they never blur together:
+ *   gray, dashed   the model: suggestions and the evidence it quotes
  *   petrol, solid  a person: decisions (the same accent as Approve)
  *   amber          uncertainty: medium and low confidence
  *   red            urgency: urgent and high severity, urgency evidence
  *
  * Suggestions and decisions are flat at every level: no shadow, no gradient.
  * Raised means pressable (see elevation.css), and a decision is a record,
- * not a button. Colour is never the only cue: suggestions are dashed and
+ * not a button. Color is never the only cue: suggestions are dashed and
  * decisions solid, and confidence and severity always carry a word.
  */
 
@@ -30,7 +30,7 @@
   --decided-text: var(--accent-text);
 
   /* Evidence highlights in the email: a fill plus a dashed underline, since
-     the model marked them. Category is the model's grey; urgency is red, like
+     the model marked them. Category is the model's gray; urgency is red, like
      severity. Text on both stays ink. */
   --evidence-category: var(--line);
   --evidence-category-line: var(--ink-3); /* line-strong is 2.98:1 on the fill */
