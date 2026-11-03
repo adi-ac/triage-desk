@@ -45,7 +45,7 @@ What it can't claim is real-world use, so it gets tested with support agents and
 - Grays: neutral, with no tint (chroma 0).
 - Fonts: Schibsted Grotesk for headings, Geist for body text, Geist Mono for IDs, times and figures.
 - Palette method unchanged: one lightness table for every ramp, one chroma target per step, capped at 95% of each hue's sRGB ceiling. Status colors stay amber 65, red 27 and green 150.
-- Contrast: all 41 checked pairs pass WCAG AA and APCA in both themes. Neutral grays left dark-mode `ink-3` on `surface-2` at Lc 59.9, so dark `ink-3` moved to a new `grey-275` (L 0.78, Lc 61.7).
+- Contrast: all 41 checked pairs pass WCAG AA and APCA in both themes. Neutral grays left dark-mode `ink-3` on `surface-2` at Lc 59.9, so dark `ink-3` moved to a new `gray-275` (L 0.78, Lc 61.7).
 - Replaced: the v1 look of teal 192 with grays tinted toward teal, set in Bricolage Grotesque, IBM Plex Sans and IBM Plex Mono. The other accents on the panel (Pine, Blue, Indigo, Violet, Plum) and the cool and warm grays were also not chosen. My reasons, recorded 2026-11-03:
   - Accent: "I wanted a distinct hue other than blue, indigo, and violet which have become overused in products as of late. Teal and plum felt a bit too close to success and error state colors, respectively."
   - Grays: "I wanted a more neutral look for the grays compared to the tinted variants."
@@ -55,12 +55,12 @@ What it can't claim is real-world use, so it gets tested with support agents and
 **Surfaces** (decided 2026-11-03 in a throwaway tuning page at `/prototype/surfaces`, now deleted, referencing Clerk's dashboard)
 - Three elevation levels, no more: panes, popovers and menus, dialogs. Shadows and button fills are in `styles/elevation.css`; the new surface roles (`page`, `tray`, `surface-raised`, `scrim`) are in `theme.css`.
 - Tray and card: a gray band holds each pane's header and wraps a white card.
-- Light-mode page, changed 2026-11-03 from white (`grey-0`) to `grey-25`, so white surfaces stand out from it. My reason: "white surfaces blended into the white page." The tray stays `grey-50`, a step darker than the page, so it still reads against both the page and the white cards. Every text role passes on the new page and tray (lowest: `ink-3` on the tray at 4.82:1 / Lc 70). The pane shadows read the same on gray. Dark mode is unchanged.
-  - Also tried: page `grey-50` with the tray at 30% `grey-100`. Its cards sat twice as far from the page, but `ink-3` on that tray was down to 4.61:1. I chose `grey-25` and `grey-50` after comparing both on `/system`.
+- Light-mode page, changed 2026-11-03 from white (`gray-0`) to `gray-25`, so white surfaces stand out from it. My reason: "white surfaces blended into the white page." The tray stays `gray-50`, a step darker than the page, so it still reads against both the page and the white cards. Every text role passes on the new page and tray (lowest: `ink-3` on the tray at 4.82:1 / Lc 70). The pane shadows read the same on gray. Dark mode is unchanged.
+  - Also tried: page `gray-50` with the tray at 30% `gray-100`. Its cards sat twice as far from the page, but `ink-3` on that tray was down to 4.61:1. I chose `gray-25` and `gray-50` after comparing both on `/system`.
 - Shadows: a tight layer under the edge plus a wide soft one, at 0.7× the prototype's starting softness and 0.9× its strength. No hairline ring in light mode.
 - Buttons are raised. Secondary buttons have an edge and the pane shadow. The primary button has a gradient (the accent with 12% white at the top), a lighter top edge, a darker accent ring and the pane shadow. Text on the gradient's lightest point is 5.46:1 / Lc 82 in light and 10.4:1 / Lc 69 in dark.
 - Disabled buttons are flat at every depth and sunk to `bg`, so the blocked Approve doesn't look pressable.
-- Dark mode has no shadows. Levels step lighter (`surface` for panes, `grey-950` for popovers and dialogs) and carry white hairline rings. The panel's hairline switch was off, which also dropped the dark rings; they were kept because the rule for dark mode was lighter surfaces and borders.
+- Dark mode has no shadows. Levels step lighter (`surface` for panes, `gray-950` for popovers and dialogs) and carry white hairline rings. The panel's hairline switch was off, which also dropped the dark rings; they were kept because the rule for dark mode was lighter surfaces and borders.
 - Not chosen: decisions a person made sitting raised while AI suggestions stay flat. Both stay flat; a decision has a solid accent border and a suggestion a dashed `line-strong` one (see Trust signals). My reason, recorded 2026-11-03: "The raised variants seemed to blend in with the rest of the buttons."
 
 **Trust signals** (decided 2026-11-03; tokens in `styles/trust.css`, shown with live contrast checks at `/system`)

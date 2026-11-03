@@ -17,22 +17,22 @@
   /* Neutral gray, no tint. 0, 25, 975 and 990 are extra surface steps the
      color ramps don't need; 275 exists only for dark-mode ink-3, which falls
      just short of APCA 60 at 300. */
-  --grey-0: oklch(1 0 0);
-  --grey-25: oklch(0.985 0 0);
-  --grey-50: oklch(0.97 0 0);
-  --grey-100: oklch(0.92 0 0);
-  --grey-200: oklch(0.85 0 0);
-  --grey-275: oklch(0.78 0 0);
-  --grey-300: oklch(0.77 0 0);
-  --grey-400: oklch(0.69 0 0);
-  --grey-500: oklch(0.61 0 0);
-  --grey-600: oklch(0.53 0 0);
-  --grey-700: oklch(0.45 0 0);
-  --grey-800: oklch(0.37 0 0);
-  --grey-900: oklch(0.29 0 0);
-  --grey-950: oklch(0.235 0 0);
-  --grey-975: oklch(0.2 0 0);
-  --grey-990: oklch(0.17 0 0);
+  --gray-0: oklch(1 0 0);
+  --gray-25: oklch(0.985 0 0);
+  --gray-50: oklch(0.97 0 0);
+  --gray-100: oklch(0.92 0 0);
+  --gray-200: oklch(0.85 0 0);
+  --gray-275: oklch(0.78 0 0);
+  --gray-300: oklch(0.77 0 0);
+  --gray-400: oklch(0.69 0 0);
+  --gray-500: oklch(0.61 0 0);
+  --gray-600: oklch(0.53 0 0);
+  --gray-700: oklch(0.45 0 0);
+  --gray-800: oklch(0.37 0 0);
+  --gray-900: oklch(0.29 0 0);
+  --gray-950: oklch(0.235 0 0);
+  --gray-975: oklch(0.2 0 0);
+  --gray-990: oklch(0.17 0 0);
 
   /* Accent */
   --petrol-50: oklch(0.97 0.012 215);

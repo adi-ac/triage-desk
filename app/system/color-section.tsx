@@ -8,7 +8,7 @@ const colorSteps = ["50", "100", "200", "300", "400", "500", "600", "700", "800"
 
 const ramps: { name: string; note: string; steps: string[] }[] = [
   {
-    name: "grey",
+    name: "gray",
     note: "Neutral, no tint",
     steps: ["0", "25", "50", "100", "200", "275", "300", "400", "500", "600", "700", "800", "900", "950", "975", "990"],
   },
