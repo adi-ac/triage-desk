@@ -43,6 +43,9 @@
   --accent-ink: var(--grey-0);
   --accent-soft: var(--petrol-100);
   --accent-text: var(--petrol-700);
+  /* Focus rings use the accent in both themes: it passes 3:1 on every
+     surface, and accent already means "this is where you act". */
+  --focus-ring: var(--accent);
 
   --warning: var(--amber-700);
   --warning-soft: var(--amber-100);

@@ -2,7 +2,7 @@
 
 import { useEffect, useRef, useState } from "react";
 import { firstScreenTicketId, tickets } from "@/fixtures/tickets";
-import styles from "./type.module.css";
+import styles from "./system.module.css";
 
 const ticket = tickets.find((t) => t.id === firstScreenTicketId)!;
 const firstParagraph = ticket.body.split("\n\n")[1];
@@ -105,49 +105,11 @@ const familyVar = {
   mono: "--font-geist-mono",
 } as const;
 
-type Theme = "system" | "light" | "dark";
-
-export function TypeSpecimen() {
-  const [theme, setTheme] = useState<Theme>("system");
-
-  useEffect(() => {
-    const root = document.documentElement;
-    if (theme === "system") delete root.dataset.theme;
-    else root.dataset.theme = theme;
-    return () => {
-      delete root.dataset.theme;
-    };
-  }, [theme]);
-
+export function TypeSection() {
   return (
-    <main className={styles.page}>
-      <header className={styles.header}>
-        <div>
-          <p className="text-overline">Prototype</p>
-          <h1 className="text-title">Type scale</h1>
-          <p className={`text-small ${styles.muted}`}>
-            Schibsted Grotesk for headings, Geist for text, Geist Mono for IDs, times and figures.
-            Body is 14px. Tokens live in <code className="text-mono">styles/type.css</code>.
-          </p>
-        </div>
-        <div className={styles.segmented} role="radiogroup" aria-label="Theme">
-          {(["system", "light", "dark"] as const).map((t) => (
-            <button
-              key={t}
-              type="button"
-              role="radio"
-              aria-checked={theme === t}
-              className={`text-body-strong ${styles.segment}`}
-              onClick={() => setTheme(t)}
-            >
-              {t[0].toUpperCase() + t.slice(1)}
-            </button>
-          ))}
-        </div>
-      </header>
-
+    <>
       <section className={styles.card}>
-        <h2 className={`text-heading ${styles.cardTitle}`}>Scale</h2>
+        <h3 className={`text-heading ${styles.cardTitle}`}>Scale</h3>
         <ul className={styles.scale}>
           {roles.map((r) => (
             <li key={r.name} className={styles.row}>
@@ -163,20 +125,20 @@ export function TypeSpecimen() {
       </section>
 
       <section className={styles.card}>
-        <h2 className={`text-heading ${styles.cardTitle}`}>In context</h2>
+        <h3 className={`text-heading ${styles.cardTitle}`}>In context</h3>
         <TicketHeader />
       </section>
 
       <section className={styles.card}>
-        <h2 className={`text-heading ${styles.cardTitle}`}>Figures</h2>
+        <h3 className={`text-heading ${styles.cardTitle}`}>Figures</h3>
         <Figures />
       </section>
 
       <section className={styles.card}>
-        <h2 className={`text-heading ${styles.cardTitle}`}>Loading without layout shift</h2>
+        <h3 className={`text-heading ${styles.cardTitle}`}>Loading without layout shift</h3>
         <FallbackCheck />
       </section>
-    </main>
+    </>
   );
 }
 
@@ -187,7 +149,7 @@ function TicketHeader() {
         <span className={`text-mono ${styles.muted}`}>{ticket.id}</span>
         <span className={`text-mono-small ${styles.muted}`}>2 Nov 2026 · 16:48 UTC</span>
       </div>
-      <h3 className="text-title">{ticket.subject}</h3>
+      <h4 className="text-title">{ticket.subject}</h4>
       <p className={`text-small ${styles.muted}`}>
         {ticket.from.name} · {ticket.account?.company} · {ticket.account?.plan}
       </p>

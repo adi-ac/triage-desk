@@ -1,0 +1,60 @@
+/*
+ * Trust signals: the semantic layer the brief's one idea rests on. Every
+ * token here points at a role in theme.css, so light and dark come for free
+ * and the contrast pairs checked there still hold. /system shows them and
+ * re-checks each pair live in both themes.
+ *
+ * One colour family per meaning, so they never blur together:
+ *   grey, dashed   the model: suggestions and the evidence it quotes
+ *   petrol, solid  a person: decisions (the same accent as Approve)
+ *   amber          uncertainty: medium and low confidence
+ *   red            urgency: urgent and high severity, urgency evidence
+ *
+ * Suggestions and decisions are flat at every level: no shadow, no gradient.
+ * Raised means pressable (see elevation.css), and a decision is a record,
+ * not a button. Colour is never the only cue: suggestions are dashed and
+ * decisions solid, and confidence and severity always carry a word.
+ */
+
+:root {
+  /* Pencil: the model's suggestion, not yet acted on. Text stays ink. */
+  --suggested-border: var(--line-strong);
+  --suggested-border-style: dashed;
+  --suggested-fill: var(--bg);
+  --suggested-text: var(--ink);
+
+  /* Ink: a person's decision. */
+  --decided-border: var(--accent);
+  --decided-border-style: solid;
+  --decided-fill: var(--accent-soft);
+  --decided-text: var(--accent-text);
+
+  /* Evidence highlights in the email: a fill plus a dashed underline, since
+     the model marked them. Category is the model's grey; urgency is red, like
+     severity. Text on both stays ink. */
+  --evidence-category: var(--line);
+  --evidence-category-line: var(--ink-3); /* line-strong is 2.98:1 on the fill */
+  --evidence-urgency: var(--critical-soft);
+  --evidence-urgency-line: var(--critical);
+
+  /* Confidence: high is quiet on purpose, so attention goes to the cases
+     where the model shouldn't be trusted. Low gets a fill as well. */
+  --confidence-track: var(--line);
+  --confidence-high: var(--ink-3);
+  --confidence-high-text: var(--ink-2);
+  --confidence-medium: var(--warning);
+  --confidence-medium-text: var(--ink-2);
+  --confidence-low: var(--warning);
+  --confidence-low-text: var(--warning);
+  --confidence-low-fill: var(--warning-soft);
+
+  /* Severity: only urgent is solid. Normal and low have no fill. */
+  --severity-urgent-text: var(--surface);
+  --severity-urgent-fill: var(--critical);
+  --severity-high-text: var(--critical);
+  --severity-high-fill: var(--critical-soft);
+  --severity-normal-text: var(--ink-2);
+  --severity-normal-fill: transparent;
+  --severity-low-text: var(--ink-3);
+  --severity-low-fill: transparent;
+}

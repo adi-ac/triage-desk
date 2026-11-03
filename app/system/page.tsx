@@ -1,10 +1,10 @@
 import type { Metadata } from "next";
-import { TypeSpecimen } from "./type-specimen";
+import { SystemPage } from "./system-page";
 
 export const metadata: Metadata = {
-  title: "Type scale · Triage Desk",
+  title: "Design system · Triage Desk",
 };
 
 export default function Page() {
-  return <TypeSpecimen />;
+  return <SystemPage />;
 }

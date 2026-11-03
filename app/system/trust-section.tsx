@@ -1,0 +1,205 @@
+import type { ReactNode } from "react";
+import { firstScreenTicketId, tickets } from "@/fixtures/tickets";
+import type { Pair } from "./contrast";
+import { ContrastTable } from "./contrast-table";
+import styles from "./system.module.css";
+
+const ticket = tickets.find((t) => t.id === firstScreenTicketId)!;
+
+const pairs: Pair[] = [
+  { label: "Suggestion text on its fill", fg: "--suggested-text", bg: "--suggested-fill", kind: "text" },
+  { label: "Suggestion border on surface", fg: "--suggested-border", bg: "--surface", kind: "non-text" },
+  { label: "Suggestion border on its fill", fg: "--suggested-border", bg: "--suggested-fill", kind: "non-text" },
+  { label: "Decision text on its fill", fg: "--decided-text", bg: "--decided-fill", kind: "text" },
+  { label: "Decision border on surface", fg: "--decided-border", bg: "--surface", kind: "non-text" },
+  { label: "Text on category evidence", fg: "--ink", bg: "--evidence-category", kind: "text" },
+  { label: "Text on urgency evidence", fg: "--ink", bg: "--evidence-urgency", kind: "text" },
+  { label: "Category evidence underline", fg: "--evidence-category-line", bg: "--evidence-category", kind: "non-text" },
+  { label: "Urgency evidence underline", fg: "--evidence-urgency-line", bg: "--evidence-urgency", kind: "non-text" },
+  { label: "High confidence text", fg: "--confidence-high-text", bg: "--surface", kind: "text" },
+  { label: "High confidence meter", fg: "--confidence-high", bg: "--confidence-track", kind: "non-text" },
+  { label: "Medium confidence text", fg: "--confidence-medium-text", bg: "--surface", kind: "text" },
+  { label: "Medium confidence meter", fg: "--confidence-medium", bg: "--confidence-track", kind: "non-text" },
+  { label: "Low confidence text on its fill", fg: "--confidence-low-text", bg: "--confidence-low-fill", kind: "text" },
+  { label: "Low confidence meter", fg: "--confidence-low", bg: "--confidence-track", kind: "non-text" },
+  { label: "Urgent", fg: "--severity-urgent-text", bg: "--severity-urgent-fill", kind: "text" },
+  { label: "High severity", fg: "--severity-high-text", bg: "--severity-high-fill", kind: "text" },
+  { label: "Normal severity", fg: "--severity-normal-text", bg: "--surface", kind: "text" },
+  { label: "Low severity", fg: "--severity-low-text", bg: "--surface", kind: "text" },
+  { label: "Focus ring on surface", fg: "--focus-ring", bg: "--surface", kind: "non-text" },
+  { label: "Focus ring on bg", fg: "--focus-ring", bg: "--bg", kind: "non-text" },
+];
+
+/** Quotes from LL-5040 marked the way the triage panel will mark them. */
+const marks: { quote: string; supports: "category" | "urgency" }[] = [
+  { quote: "how to export everything we have in Ledgerline", supports: "category" },
+  { quote: "whether the API can pull the same history", supports: "category" },
+  { quote: "Our renewal is on 15 December", supports: "urgency" },
+];
+
+function markUp(text: string) {
+  const parts: ReactNode[] = [];
+  let rest = text;
+  let key = 0;
+  while (rest) {
+    const next = marks
+      .map((m) => ({ ...m, at: rest.indexOf(m.quote) }))
+      .filter((m) => m.at >= 0)
+      .sort((a, b) => a.at - b.at)[0];
+    if (!next) {
+      parts.push(rest);
+      break;
+    }
+    parts.push(rest.slice(0, next.at));
+    parts.push(
+      <mark key={key++} className={styles.evidence} data-supports={next.supports}>
+        {next.quote}
+      </mark>,
+    );
+    rest = rest.slice(next.at + next.quote.length);
+  }
+  return parts;
+}
+
+export function TrustSection({ theme }: { theme: string }) {
+  const paragraphs = ticket.body.split("\n\n").slice(1, 4);
+
+  return (
+    <>
+      <section className={styles.card}>
+        <h3 className={`text-heading ${styles.cardTitle}`}>Pencil and ink</h3>
+        <p className={`text-body ${styles.muted} ${styles.cardIntro}`}>
+          Anything the model proposes is pencil: dashed and grey. Anything a person sets or approves
+          is ink: solid and petrol. Both are flat, because neither is a button.
+        </p>
+        <div className={styles.pencilInk}>
+          <div className={styles.field}>
+            <p className={`text-overline ${styles.muted}`}>Pencil · suggested</p>
+            <div className={styles.fieldRow}>
+              <span className="text-small">Category</span>
+              <span className={`text-body-strong ${styles.chip} ${styles.suggested}`}>How-to</span>
+            </div>
+            <div className={styles.fieldRow}>
+              <span className="text-small">Urgency</span>
+              <span className={`text-body-strong ${styles.chip} ${styles.suggested}`}>Normal</span>
+            </div>
+            <p className={`text-small ${styles.muted}`}>Suggested by the model, not yet reviewed</p>
+          </div>
+          <div className={styles.field}>
+            <p className={`text-overline ${styles.muted}`}>Ink · decided</p>
+            <div className={styles.fieldRow}>
+              <span className="text-small">Category</span>
+              <span className={`text-body-strong ${styles.chip} ${styles.decided}`}>How-to</span>
+            </div>
+            <div className={styles.fieldRow}>
+              <span className="text-small">Urgency</span>
+              <span className={`text-body-strong ${styles.chip} ${styles.decided}`}>High</span>
+            </div>
+            <p className={`text-small ${styles.muted}`}>
+              Set by you at <span className="text-mono-small">16:52</span>
+            </p>
+          </div>
+        </div>
+        <div className={styles.pencilInk}>
+          <div className={`text-reading ${styles.draft} ${styles.suggested}`}>
+            <p className={`text-overline ${styles.muted}`}>Draft reply · suggested</p>
+            <p>
+              Hi Aisha, thanks for checking before your renewal. Here&apos;s what you can export…
+            </p>
+          </div>
+          <div className={`text-reading ${styles.draft} ${styles.decided}`}>
+            <p className="text-overline">Reply · approved and sent</p>
+            <p>
+              Hi Aisha, thanks for checking before your renewal. Here&apos;s what you can export…
+            </p>
+          </div>
+        </div>
+      </section>
+
+      <section className={styles.card}>
+        <h3 className={`text-heading ${styles.cardTitle}`}>Evidence</h3>
+        <p className={`text-body ${styles.muted} ${styles.cardIntro}`}>
+          Quotes the model used, marked in the email with a fill and a dashed underline, since the
+          model made the mark. Category evidence is the model&apos;s grey; urgency evidence is red,
+          like severity. In the triage panel, the evidence list beside the email names which is
+          which, so colour isn&apos;t the only cue. These marks are an illustration, not a
+          recorded model output.
+        </p>
+        <div className={styles.legend}>
+          <span className="text-small">
+            <mark className={styles.evidence} data-supports="category">
+              Category
+            </mark>
+          </span>
+          <span className="text-small">
+            <mark className={styles.evidence} data-supports="urgency">
+              Urgency
+            </mark>
+          </span>
+        </div>
+        <div className="text-reading">
+          {paragraphs.map((p, i) => (
+            <p key={i} className={styles.paragraph}>
+              {markUp(p)}
+            </p>
+          ))}
+        </div>
+      </section>
+
+      <section className={styles.card}>
+        <h3 className={`text-heading ${styles.cardTitle}`}>Confidence</h3>
+        <p className={`text-body ${styles.muted} ${styles.cardIntro}`}>
+          High is quiet on purpose. Medium turns the meter amber; low adds a fill and blocks Approve.
+        </p>
+        <div className={styles.stack}>
+          <Confidence level="high" value={0.92} />
+          <Confidence level="medium" value={0.71} />
+          <Confidence level="low" value={0.48} />
+        </div>
+      </section>
+
+      <section className={styles.card}>
+        <h3 className={`text-heading ${styles.cardTitle}`}>Severity</h3>
+        <p className={`text-body ${styles.muted} ${styles.cardIntro}`}>
+          Only urgent is solid. The bars repeat the level without colour.
+        </p>
+        <div className={styles.severities}>
+          {(["urgent", "high", "normal", "low"] as const).map((level, i) => (
+            <span key={level} className={`text-body-strong ${styles.severity}`} data-level={level}>
+              <Bars filled={4 - i} total={4} />
+              {level[0].toUpperCase() + level.slice(1)}
+            </span>
+          ))}
+        </div>
+      </section>
+
+      <section className={styles.card}>
+        <h3 className={`text-heading ${styles.cardTitle}`}>Contrast</h3>
+        <ContrastTable pairs={pairs} theme={theme} />
+      </section>
+    </>
+  );
+}
+
+function Confidence({ level, value }: { level: "high" | "medium" | "low"; value: number }) {
+  return (
+    <div className={`text-small ${styles.confidence}`} data-level={level}>
+      <span className={styles.meter} aria-hidden>
+        <span style={{ inlineSize: `${value * 100}%` }} />
+      </span>
+      <span className="text-mono">{Math.round(value * 100)}%</span>
+      <span>{level[0].toUpperCase() + level.slice(1)} confidence</span>
+      {level === "low" && <span className={styles.muted}>· confirm before approving</span>}
+    </div>
+  );
+}
+
+function Bars({ filled, total }: { filled: number; total: number }) {
+  return (
+    <span className={styles.bars} aria-hidden>
+      {Array.from({ length: total }, (_, i) => (
+        <span key={i} data-on={i < filled} style={{ blockSize: `${4 + i * 2}px` }} />
+      ))}
+    </span>
+  );
+}

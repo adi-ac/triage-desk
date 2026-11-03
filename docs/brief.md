@@ -59,7 +59,20 @@ What it can't claim is real-world use, so it gets tested with support agents and
 - Buttons are raised. Secondary buttons have an edge and the pane shadow. The primary button has a gradient (the accent with 12% white at the top), a lighter top edge, a darker accent ring and the pane shadow. Text on the gradient's lightest point is 5.46:1 / Lc 82 in light and 10.4:1 / Lc 69 in dark.
 - Disabled buttons are flat at every depth and sunk to `bg`, so the blocked Approve doesn't look pressable.
 - Dark mode has no shadows. Levels step lighter (`surface` for panes, `grey-950` for popovers and dialogs) and carry white hairline rings. The panel's hairline switch was off, which also dropped the dark rings; they were kept because the rule for dark mode was lighter surfaces and borders.
-- Not chosen: decisions a person made sitting raised while AI suggestions stay flat. Both stay flat; a decision has a solid `line-strong` border and a suggestion a dashed one. My reason, recorded 2026-11-03: "The raised variants seemed to blend in with the rest of the buttons."
+- Not chosen: decisions a person made sitting raised while AI suggestions stay flat. Both stay flat; a decision has a solid accent border and a suggestion a dashed `line-strong` one (see Trust signals). My reason, recorded 2026-11-03: "The raised variants seemed to blend in with the rest of the buttons."
+
+**Trust signals** (decided 2026-11-03; tokens in `styles/trust.css`, shown with live contrast checks at `/system`)
+- Every token points at an existing role, so light and dark come from `theme.css` and nothing new needs its own dark value.
+- One colour family per meaning: grey and dashed for the model (suggestions and the evidence it quotes), petrol and solid for a person (decisions, the same accent as Approve), amber for uncertainty, red for urgency.
+- Pencil, a suggestion not yet acted on: dashed `line-strong` border, `bg` fill, `ink` text.
+- Ink, a person's decision: solid `accent` border, `accent-soft` fill, `accent-text` text.
+- Both are flat at every level. Raised means pressable, and a decision is a record, not a button.
+- Evidence: a fill plus a dashed underline, because the model made the mark. Category uses `line` with an `ink-3` underline (`line-strong` was 2.98:1 on the fill); urgency uses `critical-soft` with a `critical` underline. The evidence list names which is which, so colour isn't the only cue.
+- Confidence: high is quiet on purpose (an `ink-3` meter, `ink-2` text), so attention goes to the cases where the model shouldn't be trusted. Medium turns the meter `warning`; low adds `warning` text on a `warning-soft` fill. High confidence is never green, so it doesn't invite trust.
+- Severity: urgent is the only solid fill (`surface` text on `critical`); high is `critical` on `critical-soft`; normal and low have no fill (`ink-2`, `ink-3`). Bars repeat the level without colour, and every level carries its word.
+- Contrast: all 21 trust pairs pass in both themes (text 4.5:1 and Lc 60, non-text 3:1). The tightest is the pencil border on its own fill in light mode, at 3.48:1.
+
+**Focus ring** (decided 2026-11-03): the accent, 2px with a 2px offset, set globally on `:focus-visible` via a `--focus-ring` role. It is at least 6.59:1 on `surface` and `bg` in both themes.
 
 ## Chain of must-be-trues
 
@@ -118,6 +131,4 @@ Proposed shape for the test (not yet agreed):
 - **Real, messy input.** The example emails are invented (a fictional company, Ledgerline). Real support email has forwarded chains, signatures, several asks at once, and quoted replies that may break word-for-word evidence matching. Not discussed.
 - **Which vague email reliably gets an unsure result** in minute two, so a skeptical reviewer sees the system catch a case I didn't choose for them.
 - **Whether the unsure examples are actually unsure.** Before building the triage panel, run LL-5040 and the vague email (`vagueEmail` in `fixtures/tickets.ts`) against the live model several times and confirm they come back unsure every time.
-- **Pencil and evidence colours.** The look prototype reused `accent-soft` and `warning-soft` for evidence highlights and drew pencil with a dashed `line-strong` border. Neither has its own token yet.
-- **Focus ring colour.** `theme.css` says the accent is for focus rings; the prototype used `ink`, following the polish rule that focus rings stay neutral. Pick one.
 - **Long emails.** v1 cut emails off at 8,000 characters before sending them to the model, which loses the last section of LL-5033. Raise the limit, and when an email is still cut off, show the agent a note saying so.
