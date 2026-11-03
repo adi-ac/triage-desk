@@ -11,16 +11,28 @@
  * - line-strong and accent on bg, surface, surface-2: at least 3:1, for
  *   control borders and focus rings.
  * line is decorative (dividers) and has no contrast requirement.
+ *
+ * Surfaces, from the surfaces prototype (see docs/brief.md):
+ * - page is the window behind everything. tray is the grey band that holds a
+ *   pane's header and wraps its card; the card itself is surface.
+ * - surface-raised is for popovers, menus and dialogs. Dark mode lifts it a
+ *   step, because it has no shadows to do that.
+ * - Every new fill is bg, surface or surface-2, or (dark tray) sits between
+ *   bg and surface, so the pairs above still cover it.
  */
 
 :root {
   color-scheme: light;
 
   --bg: var(--grey-50);
+  --page: var(--grey-0);
+  --tray: var(--grey-50);
   --surface: var(--grey-0);
+  --surface-raised: var(--grey-0);
   --surface-2: var(--grey-25);
   --line: var(--grey-100);
   --line-strong: var(--grey-500);
+  --scrim: rgb(0 0 0 / 0.18);
 
   --ink: var(--grey-900);
   --ink-2: var(--grey-700);
@@ -45,10 +57,14 @@
     color-scheme: dark;
 
     --bg: var(--grey-990);
+    --page: var(--grey-990);
+    --tray: color-mix(in oklch, var(--grey-990), var(--grey-975));
     --surface: var(--grey-975);
+    --surface-raised: var(--grey-950);
     --surface-2: var(--grey-950);
     --line: var(--grey-900);
     --line-strong: var(--grey-500);
+    --scrim: rgb(0 0 0 / 0.5);
 
     --ink: var(--grey-50);
     --ink-2: var(--grey-200);
@@ -73,10 +89,14 @@
   color-scheme: dark;
 
   --bg: var(--grey-990);
+  --page: var(--grey-990);
+  --tray: color-mix(in oklch, var(--grey-990), var(--grey-975));
   --surface: var(--grey-975);
+  --surface-raised: var(--grey-950);
   --surface-2: var(--grey-950);
   --line: var(--grey-900);
   --line-strong: var(--grey-500);
+  --scrim: rgb(0 0 0 / 0.5);
 
   --ink: var(--grey-50);
   --ink-2: var(--grey-200);

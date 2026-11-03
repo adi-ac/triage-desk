@@ -12,7 +12,7 @@
 
 body {
   margin: 0;
-  background: var(--bg);
+  background: var(--page);
   color: var(--ink);
   font-family: var(--font-body);
   font-synthesis: none;

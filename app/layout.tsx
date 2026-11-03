@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono, Schibsted_Grotesk } from "next/font/google";
 import "@/styles/tokens.css";
 import "@/styles/theme.css";
+import "@/styles/elevation.css";
 import "./globals.css";
 
 const heading = Schibsted_Grotesk({ subsets: ["latin"], variable: "--font-schibsted" });

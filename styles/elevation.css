@@ -1,0 +1,90 @@
+/*
+ * Elevation, chosen in the surfaces prototype (see docs/brief.md). Surface
+ * colours live in theme.css; this file holds the shadows and button fills
+ * that sit on them.
+ *
+ * Three levels and no more:
+ *   pane     cards, raised buttons
+ *   popover  popovers and menus
+ *   dialog   dialogs
+ *
+ * Light mode: soft shadows, no hairline ring. Dark mode: no shadows (they
+ * can't be seen); each level is a lighter surface with a white hairline ring.
+ *
+ * Disabled buttons are flat at every level: no gradient, no shadow, sunk to
+ * bg, so a blocked button doesn't look pressable.
+ */
+
+:root {
+  --hairline: 1px;
+
+  --button-primary-bg: linear-gradient(
+    to bottom,
+    color-mix(in oklch, var(--accent) 88%, white),
+    var(--accent)
+  );
+  --button-primary-bg-hover: linear-gradient(
+    to bottom,
+    color-mix(in oklch, var(--accent-hover) 88%, white),
+    var(--accent-hover)
+  );
+  --button-disabled-bg: var(--bg);
+  --shadow-button-disabled: 0 0 0 1px var(--line);
+
+  --shadow-pane:
+    0 1px 1.4px rgb(0 0 0 / 0.045),
+    0 4px 8.4px -2.8px rgb(0 0 0 / 0.063);
+  --shadow-popover:
+    0 2px 2.8px -0.7px rgb(0 0 0 / 0.054),
+    0 10px 19.6px -5.6px rgb(0 0 0 / 0.108);
+  --shadow-dialog:
+    0 4px 5.6px -1.4px rgb(0 0 0 / 0.072),
+    0 24px 39.2px -8.4px rgb(0 0 0 / 0.18);
+
+  /* A button keeps its edge: it's the control's boundary, not a depth cue. */
+  --button-bg: var(--surface);
+  --shadow-button:
+    0 0 0 var(--hairline) rgb(0 0 0 / 0.12),
+    var(--shadow-pane);
+  --shadow-button-primary:
+    inset 0 1px 0 rgb(255 255 255 / 0.22),
+    0 0 0 var(--hairline) color-mix(in oklch, var(--accent) 75%, black),
+    var(--shadow-pane);
+}
+
+@media (min-resolution: 2dppx) {
+  :root {
+    --hairline: 0.5px;
+  }
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --shadow-pane: 0 0 0 var(--hairline) rgb(255 255 255 / 0.07);
+    --shadow-popover: 0 0 0 var(--hairline) rgb(255 255 255 / 0.1);
+    --shadow-dialog: 0 0 0 var(--hairline) rgb(255 255 255 / 0.13);
+
+    /* Translucent, so a button reads lighter than whatever surface it's on. */
+    --button-bg: color-mix(in oklch, var(--ink) 8%, transparent);
+    --shadow-button:
+      inset 0 1px 0 rgb(255 255 255 / 0.06),
+      0 0 0 var(--hairline) rgb(255 255 255 / 0.12);
+    --shadow-button-primary:
+      inset 0 1px 0 rgb(255 255 255 / 0.4),
+      0 0 0 var(--hairline) color-mix(in oklch, var(--accent) 75%, black);
+  }
+}
+
+:root[data-theme="dark"] {
+  --shadow-pane: 0 0 0 var(--hairline) rgb(255 255 255 / 0.07);
+  --shadow-popover: 0 0 0 var(--hairline) rgb(255 255 255 / 0.1);
+  --shadow-dialog: 0 0 0 var(--hairline) rgb(255 255 255 / 0.13);
+
+  --button-bg: color-mix(in oklch, var(--ink) 8%, transparent);
+  --shadow-button:
+    inset 0 1px 0 rgb(255 255 255 / 0.06),
+    0 0 0 var(--hairline) rgb(255 255 255 / 0.12);
+  --shadow-button-primary:
+    inset 0 1px 0 rgb(255 255 255 / 0.4),
+    0 0 0 var(--hairline) color-mix(in oklch, var(--accent) 75%, black);
+}

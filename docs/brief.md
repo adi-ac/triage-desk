@@ -49,6 +49,15 @@ What it can't claim is real-world use, so it gets tested with support agents and
 - Replaced: the v1 look of teal 192 with greys tinted toward teal, set in Bricolage Grotesque, IBM Plex Sans and IBM Plex Mono. The other accents on the panel (Pine, Blue, Indigo, Violet, Plum) and the cool and warm greys were also not chosen. Reasons weren't recorded during the session.
 - Known trade-off: a violet accent and warm greys each failed one dark-mode pair on the panel; neither was picked, so neither needed fixing.
 
+**Surfaces** (decided 2026-11-03 in a throwaway tuning page at `/prototype/surfaces`, now deleted, referencing Clerk's dashboard)
+- Three elevation levels, no more: panes, popovers and menus, dialogs. Shadows and button fills are in `styles/elevation.css`; the new surface roles (`page`, `tray`, `surface-raised`, `scrim`) are in `theme.css`.
+- Tray and card: a grey band holds each pane's header and wraps a white card. The page behind it is white in light mode.
+- Shadows: a tight layer under the edge plus a wide soft one, at 0.7× the prototype's starting softness and 0.9× its strength. No hairline ring in light mode.
+- Buttons are raised. Secondary buttons have an edge and the pane shadow. The primary button has a gradient (the accent with 12% white at the top), a lighter top edge, a darker accent ring and the pane shadow. Text on the gradient's lightest point is 5.46:1 / Lc 82 in light and 10.4:1 / Lc 69 in dark.
+- Disabled buttons are flat at every depth and sunk to `bg`, so the blocked Approve doesn't look pressable.
+- Dark mode has no shadows. Levels step lighter (`surface` for panes, `grey-950` for popovers and dialogs) and carry white hairline rings. The panel's hairline switch was off, which also dropped the dark rings; they were kept because the rule for dark mode was lighter surfaces and borders.
+- Not chosen: decisions a person made sitting raised while AI suggestions stay flat. Both stay flat; a decision has a solid `line-strong` border and a suggestion a dashed one. Reasons weren't recorded.
+
 ## Chain of must-be-trues
 
 1. **← testing now.** A design lead opens the link and, within 60 seconds and with no instructions, sees the model be unsure and the interface stop it: Approve blocked, the reason beside it, the runner-up offered.
