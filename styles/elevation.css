@@ -32,35 +32,37 @@
   --button-disabled-bg: var(--bg);
   --shadow-button-disabled: 0 0 0 1px var(--line);
 
-  /* Each level is a faint black hairline ring, then its soft shadow. The
-     ring only just separates a white surface from the gray page; it mirrors
-     dark mode's white rings and steps up with the level. */
-  --shadow-pane-soft:
-    0 1px 1.4px rgb(0 0 0 / 0.045),
-    0 4px 8.4px -2.8px rgb(0 0 0 / 0.063);
+  /* Each level is a faint black hairline ring, then a very faint soft
+     shadow. The ring only just separates a white surface from the gray
+     page; it mirrors dark mode's white rings and steps up with the level.
+     The shadows are kept barely there on purpose (see docs/brief.md). */
   --shadow-pane:
     0 0 0 var(--hairline) rgb(0 0 0 / 0.06),
-    var(--shadow-pane-soft);
+    0 1px 1.4px #00000003,
+    0 4px 8.4px -2.8px #00000005;
   --shadow-popover:
     0 0 0 var(--hairline) rgb(0 0 0 / 0.08),
-    0 2px 2.8px -0.7px rgb(0 0 0 / 0.054),
-    0 10px 19.6px -5.6px rgb(0 0 0 / 0.108);
+    0 2px 2.8px -0.7px #00000004,
+    0 10px 19.6px -5.6px #00000008;
   --shadow-dialog:
     0 0 0 var(--hairline) rgb(0 0 0 / 0.1),
-    0 4px 5.6px -1.4px rgb(0 0 0 / 0.072),
-    0 24px 39.2px -8.4px rgb(0 0 0 / 0.18);
+    0 4px 5.6px -1.4px #00000005,
+    0 24px 39.2px -8.4px #0000000e;
 
   /* A button keeps its edge: it's the control's boundary, not a depth cue.
-     Buttons take the pane's soft layers but not its ring, since they have
-     their own. */
+     Its soft shadow is stronger than the pane's, so it still reads as
+     pressable. */
+  --shadow-button-soft:
+    0 1px 1.4px rgb(0 0 0 / 0.045),
+    0 4px 8.4px -2.8px rgb(0 0 0 / 0.063);
   --button-bg: var(--surface);
   --shadow-button:
     0 0 0 var(--hairline) rgb(0 0 0 / 0.12),
-    var(--shadow-pane-soft);
+    var(--shadow-button-soft);
   --shadow-button-primary:
     inset 0 1px 0 rgb(255 255 255 / 0.22),
     0 0 0 var(--hairline) color-mix(in oklch, var(--accent) 75%, black),
-    var(--shadow-pane-soft);
+    var(--shadow-button-soft);
 }
 
 @media (min-resolution: 2dppx) {

@@ -35,7 +35,7 @@ export function SurfacesSection({ theme }: { theme: string }) {
         <h3 className={`text-heading ${styles.cardTitle}`}>Three levels</h3>
         <p className={`text-body ${styles.muted} ${styles.cardIntro}`}>
           From <code className="text-mono">styles/elevation.css</code>. Light mode uses a faint
-          black hairline ring and a soft shadow; dark mode has no shadows and steps each level
+          black hairline ring and a very faint shadow; dark mode has no shadows and steps each level
           lighter with a white hairline ring.
         </p>
         <div className={styles.levels}>
