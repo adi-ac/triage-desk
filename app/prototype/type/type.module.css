@@ -1,0 +1,278 @@
+.page {
+  max-inline-size: 960px;
+  margin-inline: auto;
+  padding: 32px 16px 64px;
+  display: grid;
+  gap: 24px;
+}
+
+.header {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 16px;
+}
+
+.header p,
+.header h1 {
+  margin: 0;
+}
+
+.header h1 {
+  margin-block: 2px 4px;
+}
+
+.muted {
+  color: var(--ink-3);
+}
+
+.segmented {
+  display: inline-flex;
+  padding: 2px;
+  gap: 2px;
+  border-radius: 8px;
+  background: var(--tray);
+  box-shadow: inset 0 0 0 var(--hairline) var(--line);
+}
+
+.segment {
+  appearance: none;
+  border: 0;
+  border-radius: 6px;
+  padding: 4px 10px;
+  background: transparent;
+  color: var(--ink-2);
+  cursor: pointer;
+  user-select: none;
+}
+
+.segment[aria-checked="true"] {
+  background: var(--button-bg);
+  box-shadow: var(--shadow-button);
+  color: var(--ink);
+}
+
+.segment:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 1px;
+}
+
+.card {
+  background: var(--surface);
+  border-radius: 12px;
+  box-shadow: var(--shadow-pane);
+  padding: 20px;
+  min-inline-size: 0;
+}
+
+.cardTitle {
+  margin: 0 0 16px;
+}
+
+.scale {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.row {
+  display: grid;
+  grid-template-columns: 220px minmax(0, 1fr);
+  gap: 24px;
+  padding-block: 14px;
+  border-block-start: var(--hairline) solid var(--line);
+  align-items: baseline;
+}
+
+.row:first-child {
+  border-block-start: 0;
+  padding-block-start: 0;
+}
+
+.meta {
+  display: grid;
+  gap: 2px;
+}
+
+.sample {
+  margin: 0;
+  min-inline-size: 0;
+}
+
+@media (max-width: 640px) {
+  .row {
+    grid-template-columns: minmax(0, 1fr);
+    gap: 8px;
+  }
+}
+
+/* In context */
+
+.ticket {
+  display: grid;
+  gap: 6px;
+}
+
+.ticket h3,
+.ticket p {
+  margin: 0;
+}
+
+.ticketTop {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.suggestion {
+  margin-block: 10px 6px;
+  padding: 12px 14px;
+  border-radius: 8px;
+  background: var(--surface-2);
+  border: 1px dashed var(--line-strong);
+  display: grid;
+  gap: 6px;
+}
+
+.candidates {
+  display: grid;
+  grid-template-columns: max-content max-content;
+  column-gap: 16px;
+  align-items: baseline;
+}
+
+.ticket .paragraph {
+  margin: 0 0 0.75em;
+  white-space: pre-line;
+}
+
+/* Figures */
+
+.figures {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 20px;
+}
+
+.figureCol {
+  display: grid;
+  gap: 6px;
+  align-content: start;
+}
+
+.figureCol p {
+  margin: 0;
+}
+
+.proportional {
+  font-variant-numeric: proportional-nums;
+}
+
+.box {
+  outline: 1px solid var(--accent-soft);
+  outline-offset: 1px;
+  border-radius: 2px;
+}
+
+.column {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  text-align: end;
+  inline-size: 6ch;
+}
+
+.figureNote {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+/* Fallback check */
+
+.fallback {
+  display: grid;
+  gap: 14px;
+}
+
+.fallback > p {
+  margin: 0;
+  max-inline-size: 75ch;
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.table {
+  border-collapse: collapse;
+  inline-size: 100%;
+  white-space: nowrap;
+}
+
+.table th,
+.table td {
+  text-align: end;
+  padding: 6px 10px;
+  border-block-end: var(--hairline) solid var(--line);
+}
+
+.table th:first-child {
+  text-align: start;
+  padding-inline-start: 0;
+}
+
+.table thead th {
+  font-weight: 500;
+  color: var(--ink-3);
+}
+
+.diff {
+  color: var(--critical);
+}
+
+.toggle {
+  display: inline-flex;
+  gap: 8px;
+  align-items: center;
+  inline-size: fit-content;
+  cursor: pointer;
+}
+
+.overlay {
+  position: relative;
+  padding: 16px;
+  border-radius: 8px;
+  box-shadow: inset 0 0 0 var(--hairline) var(--line);
+}
+
+.overlayFallback {
+  --font-heading: "Schibsted Grotesk Fallback";
+  --font-body: "Geist Fallback";
+  --font-mono: "Geist Mono Fallback";
+  position: absolute;
+  inset: 16px;
+  color: var(--critical);
+  opacity: 0;
+  pointer-events: none;
+}
+
+.overlayFallback .suggestion {
+  background: transparent;
+  border-color: transparent;
+}
+
+.overlay[data-show="true"] .overlayFallback {
+  opacity: 0.6;
+}
+
+.probe {
+  position: absolute;
+  inset-inline-start: -10000px;
+  inline-size: 560px;
+  visibility: hidden;
+}
+
+.spec {
+  white-space: normal;
+}

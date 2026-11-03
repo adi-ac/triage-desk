@@ -1,0 +1,168 @@
+/*
+ * Type scale for a dense support tool. Components use the role classes below
+ * or their tokens, never a one-off font-size.
+ *
+ * Families: Schibsted Grotesk for headings, Geist for everything else, Geist
+ * Mono for IDs, timestamps and figures. The --font-schibsted, --font-geist and
+ * --font-geist-mono variables come from next/font in app/layout.tsx; each one
+ * already lists a metric-matched fallback, so text keeps its size and line
+ * breaks while the web font loads.
+ *
+ * Five sizes: 20, 16, 14, 13, 12. Body is 14. Nothing goes below 12, and 12
+ * is only for uppercase overlines and small mono.
+ *
+ * Line heights are unitless, so they follow the size. Headings are tight,
+ * reading text is loose, UI text sits between.
+ *
+ * Figures are tabular everywhere (set on body in globals.css), so counts,
+ * percentages and dates don't jitter or misalign. Geist Mono's zero is
+ * already slashed, so IDs never confuse 0 with O; slashed-zero is set anyway
+ * so that holds if the mono family ever changes.
+ */
+
+:root {
+  --font-heading: var(--font-schibsted), system-ui, sans-serif;
+  --font-body: var(--font-geist), system-ui, sans-serif;
+  --font-mono: var(--font-geist-mono), ui-monospace, monospace;
+
+  /* Ticket subject, page title */
+  --text-title-size: 20px;
+  --text-title-leading: 1.25;
+  --text-title-weight: 600;
+  --text-title-tracking: -0.012em;
+
+  /* Pane titles */
+  --text-heading-size: 16px;
+  --text-heading-leading: 1.3;
+  --text-heading-weight: 600;
+  --text-heading-tracking: -0.006em;
+
+  /* Section heads inside a pane */
+  --text-subheading-size: 14px;
+  --text-subheading-leading: 1.4;
+  --text-subheading-weight: 600;
+  --text-subheading-tracking: 0;
+
+  /* Default UI text: buttons, menus, list rows, the triage panel */
+  --text-body-size: 14px;
+  --text-body-leading: 1.5;
+  --text-body-weight: 400;
+  --text-body-weight-strong: 500;
+
+  /* The customer's email: same size as body, looser, about 71 characters a
+     line. Not 65ch: ch is the width of "0", which is wide in Geist (65ch
+     holds about 95 characters of prose) and narrower in the fallback, so the
+     column would change width when the font swaps in. em doesn't. */
+  --text-reading-size: 14px;
+  --text-reading-leading: 1.6;
+  --text-reading-measure: 32em;
+
+  /* Metadata, help text, captions */
+  --text-small-size: 13px;
+  --text-small-leading: 1.45;
+
+  /* Uppercase labels above a group ("Suggested", "Evidence") */
+  --text-overline-size: 12px;
+  --text-overline-leading: 1.4;
+  --text-overline-weight: 500;
+  --text-overline-tracking: 0.05em;
+
+  /* IDs, timestamps, confidence and other figures */
+  --text-mono-size: 13px;
+  --text-mono-leading: 1.45;
+  --text-mono-small-size: 12px;
+  --text-mono-small-leading: 1.4;
+
+  /* Text inputs and textareas: 16px on phones, or iOS Safari zooms the page
+     when one is focused. Body size from tablet width up. */
+  --text-input-size: 16px;
+}
+
+@media (min-width: 768px) {
+  :root {
+    --text-input-size: var(--text-body-size);
+  }
+}
+
+.text-title,
+.text-heading,
+.text-subheading {
+  font-family: var(--font-heading);
+  text-wrap: balance;
+}
+
+.text-title {
+  font-size: var(--text-title-size);
+  line-height: var(--text-title-leading);
+  font-weight: var(--text-title-weight);
+  letter-spacing: var(--text-title-tracking);
+}
+
+.text-heading {
+  font-size: var(--text-heading-size);
+  line-height: var(--text-heading-leading);
+  font-weight: var(--text-heading-weight);
+  letter-spacing: var(--text-heading-tracking);
+}
+
+.text-subheading {
+  font-size: var(--text-subheading-size);
+  line-height: var(--text-subheading-leading);
+  font-weight: var(--text-subheading-weight);
+  letter-spacing: var(--text-subheading-tracking);
+}
+
+.text-body,
+.text-body-strong {
+  font-family: var(--font-body);
+  font-size: var(--text-body-size);
+  line-height: var(--text-body-leading);
+  font-weight: var(--text-body-weight);
+}
+
+.text-body-strong {
+  font-weight: var(--text-body-weight-strong);
+}
+
+.text-reading {
+  font-family: var(--font-body);
+  font-size: var(--text-reading-size);
+  line-height: var(--text-reading-leading);
+  font-weight: var(--text-body-weight);
+  max-inline-size: var(--text-reading-measure);
+  overflow-wrap: break-word;
+}
+
+.text-small {
+  font-family: var(--font-body);
+  font-size: var(--text-small-size);
+  line-height: var(--text-small-leading);
+  font-weight: var(--text-body-weight);
+}
+
+.text-overline {
+  font-family: var(--font-body);
+  font-size: var(--text-overline-size);
+  line-height: var(--text-overline-leading);
+  font-weight: var(--text-overline-weight);
+  letter-spacing: var(--text-overline-tracking);
+  text-transform: uppercase;
+}
+
+.text-mono,
+.text-mono-small {
+  font-family: var(--font-mono);
+  font-weight: var(--text-body-weight);
+  font-variant-numeric: tabular-nums slashed-zero;
+  white-space: nowrap;
+}
+
+.text-mono {
+  font-size: var(--text-mono-size);
+  line-height: var(--text-mono-leading);
+}
+
+.text-mono-small {
+  font-size: var(--text-mono-small-size);
+  line-height: var(--text-mono-small-leading);
+}
