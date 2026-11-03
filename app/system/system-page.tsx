@@ -87,7 +87,7 @@ export function SystemPage() {
           </div>
           {s.id === "type" && <TypeSection />}
           {s.id === "colour" && <ColourSection theme={resolved} />}
-          {s.id === "surfaces" && <SurfacesSection />}
+          {s.id === "surfaces" && <SurfacesSection theme={resolved} />}
           {s.id === "trust" && <TrustSection theme={resolved} />}
         </section>
       ))}

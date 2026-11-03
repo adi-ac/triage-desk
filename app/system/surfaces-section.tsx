@@ -1,6 +1,15 @@
+import type { Pair } from "./contrast";
+import { ContrastTable } from "./contrast-table";
 import styles from "./system.module.css";
 
-export function SurfacesSection() {
+const textRoles = ["--ink", "--ink-2", "--ink-3", "--accent-text", "--warning", "--critical", "--success"];
+
+/** Pane headers sit on the tray, and loose text can sit on the page. */
+const pairs: Pair[] = ["--page", "--tray"].flatMap((bg) =>
+  textRoles.map((fg) => ({ label: `${fg.slice(2)} on ${bg.slice(2)}`, fg, bg, kind: "text" as const })),
+);
+
+export function SurfacesSection({ theme }: { theme: string }) {
   return (
     <>
       <section className={styles.card}>
@@ -47,6 +56,11 @@ export function SurfacesSection() {
             <span className={`text-small ${styles.muted}`}>Dialogs</span>
           </div>
         </div>
+      </section>
+
+      <section className={styles.card}>
+        <h3 className={`text-heading ${styles.cardTitle}`}>Text on page and tray</h3>
+        <ContrastTable pairs={pairs} theme={theme} />
       </section>
 
       <section className={styles.card}>
