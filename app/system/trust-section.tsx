@@ -149,7 +149,7 @@ export function TrustSection({ theme }: { theme: string }) {
       <section className={styles.card}>
         <h3 className={`text-heading ${styles.cardTitle}`}>Confidence</h3>
         <p className={`text-body ${styles.muted} ${styles.cardIntro}`}>
-          High is quiet on purpose. Medium turns the meter amber; low adds a fill and blocks Approve.
+          High is petrol, like Approve: fine to go ahead. Medium turns the meter amber; low adds a fill and blocks Approve.
         </p>
         <div className={styles.stack}>
           <Confidence level="high" value={0.92} />

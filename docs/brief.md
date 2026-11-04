@@ -68,12 +68,15 @@ What it can't claim is real-world use, so it gets tested with support agents and
 
 **Trust signals** (decided 2026-11-03; tokens in `styles/trust.css`, shown with live contrast checks at `/system`)
 - Every token points at an existing role, so light and dark come from `theme.css` and nothing new needs its own dark value.
-- One color family per meaning: gray and dashed for the model (suggestions and the evidence it quotes), petrol and solid for a person (decisions, the same accent as Approve), amber for uncertainty, red for urgency.
+- One color family per meaning: gray and dashed for the model (suggestions and the evidence it quotes), petrol and solid for a person (decisions, the same accent as Approve), amber for uncertainty, red for urgency. Petrol also marks high confidence (see Confidence below).
 - Pencil, a suggestion not yet acted on: dashed `line-strong` border, `bg` fill, `ink` text.
 - Ink, a person's decision: solid `accent` border, `accent-soft` fill, `accent-text` text.
 - Both are flat at every level. Raised means pressable, and a decision is a record, not a button.
 - Evidence: a fill plus a dashed underline, because the model made the mark. Category uses `line` with an `ink-3` underline (`line-strong` was 2.98:1 on the fill); urgency uses `critical-soft` with a `critical` underline. The evidence list names which is which, so color isn't the only cue.
-- Confidence: high is quiet on purpose (an `ink-3` meter, `ink-2` text), so attention goes to the cases where the model shouldn't be trusted. Medium turns the meter `warning`; low adds `warning` text on a `warning-soft` fill. High confidence is never green, so it doesn't invite trust.
+- Confidence: high is petrol (an `accent` meter, `accent-text` text). Medium turns the meter `warning`; low adds `warning` text on a `warning-soft` fill. High confidence is never green.
+  - Changed 2026-11-04 from a quiet gray high (an `ink-3` meter, `ink-2` text), which was meant to send attention to the cases where the model shouldn't be trusted. Medium and low are unchanged. My reason: "It's the brand color, so screens feel calm and on-brand rather than grey. Most tickets will be high confidence, so this sets the overall feel. It gives a clear three-color scale (Petrol, amber, amber with fill) without green's 'this is correct' message. There's a coherent story: Petrol means 'fine to go ahead' and amber means 'check this', and Approve is Petrol too."
+  - Trade-off: high confidence now shares its color with a person's decisions and with Approve, so petrol no longer means only "a person did this". A high-confidence meter and a decision are told apart by shape and words, not color: the meter is a bar with its "High confidence" label, and a decision is a solid-bordered chip on an `accent-soft` fill.
+  - Contrast, re-checked in both themes: high-confidence text is at least 6.59:1 / Lc 79 in light (on `bg` and the tray) and 10.76:1 / Lc 76 in dark (on `surface-2` and `surface-raised`); the meter is 5.65:1 on its track in light and 7.08:1 in dark. All pass (text 4.5:1 and Lc 60, meter 3:1).
 - Severity: urgent is the only solid fill (`surface` text on `critical`); high is `critical` on `critical-soft`; normal and low have no fill (`ink-2`, `ink-3`). Bars repeat the level without color, and every level carries its word.
 - Contrast: all 21 trust pairs pass in both themes (text 4.5:1 and Lc 60, non-text 3:1). The tightest is the pencil border on its own fill in light mode, at 3.48:1.
 

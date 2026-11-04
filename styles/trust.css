@@ -7,6 +7,7 @@
  * One color family per meaning, so they never blur together:
  *   gray, dashed   the model: suggestions and the evidence it quotes
  *   petrol, solid  a person: decisions (the same accent as Approve)
+ *   petrol         high confidence: fine to go ahead (shares the accent)
  *   amber          uncertainty: medium and low confidence
  *   red            urgency: urgent and high severity, urgency evidence
  *
@@ -37,11 +38,11 @@
   --evidence-urgency: var(--critical-soft);
   --evidence-urgency-line: var(--critical);
 
-  /* Confidence: high is quiet on purpose, so attention goes to the cases
-     where the model shouldn't be trusted. Low gets a fill as well. */
+  /* Confidence: high is petrol, "fine to go ahead", like Approve; medium
+     and low are amber, "check this". Low gets a fill as well. */
   --confidence-track: var(--line);
-  --confidence-high: var(--ink-3);
-  --confidence-high-text: var(--ink-2);
+  --confidence-high: var(--accent);
+  --confidence-high-text: var(--accent-text);
   --confidence-medium: var(--warning);
   --confidence-medium-text: var(--ink-2);
   --confidence-low: var(--warning);
