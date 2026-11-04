@@ -1,15 +1,18 @@
-import type { Evidence, EvidenceSupports } from "./suggestion";
+import type { EmailEvidence, Evidence, EvidenceSupports } from "./suggestion";
 
 /** The email's paragraphs. A quote can't cross one, so matching is per paragraph. */
 export const paragraphsOf = (body: string) => body.split("\n\n");
 
+const fromEmail = (e: Evidence): e is EmailEvidence => e.supports !== "draft";
+
 /**
- * The quotes that appear in the email word for word, in the model's order.
- * Anything else is dropped: never show evidence the email doesn't contain.
+ * The email quotes that appear in the email word for word, in the model's
+ * order. Anything else is dropped: never show evidence the email doesn't
+ * contain. Article evidence (what the draft relies on) is left out.
  */
-export function matchEvidence(body: string, evidence: readonly Evidence[]): Evidence[] {
+export function matchEvidence(body: string, evidence: readonly Evidence[]): EmailEvidence[] {
   const paragraphs = paragraphsOf(body);
-  return evidence.filter((e) => e.quote.trim() !== "" && paragraphs.some((p) => p.includes(e.quote)));
+  return evidence.filter(fromEmail).filter((e) => e.quote.trim() !== "" && paragraphs.some((p) => p.includes(e.quote)));
 }
 
 /** A quote and every field it supports; one quote can back both the category and the urgency. */
@@ -21,7 +24,7 @@ export type Segment = { text: string; supports?: EvidenceSupports[] };
  * fields is one segment listing them all, so it's marked once. Only pass
  * matched evidence.
  */
-export function segmentParagraph(paragraph: string, evidence: readonly Evidence[]): Segment[] {
+export function segmentParagraph(paragraph: string, evidence: readonly EmailEvidence[]): Segment[] {
   const byQuote = new Map<string, EvidenceSupports[]>();
   for (const e of evidence) {
     if (e.quote === "") continue;

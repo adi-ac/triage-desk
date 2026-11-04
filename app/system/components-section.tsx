@@ -25,6 +25,7 @@ import {
 import { suggestionFor } from "@/fixtures/suggestions";
 import { autoSendTicketId, firstScreenTicketId, tickets, type Ticket } from "@/fixtures/tickets";
 import { approveBlockers, approveField } from "@/lib/approve";
+import { matchEvidence } from "@/lib/evidence";
 import { categories, urgencies, type Category, type Urgency } from "@/lib/suggestion";
 import type { Pair } from "./contrast";
 import { ContrastTable } from "./contrast-table";
@@ -64,7 +65,7 @@ function FieldReviewDemo() {
         options={categories}
         value={null}
         onValueChange={() => {}}
-        evidence={suggestion.evidence.filter((e) => e.supports === "category")}
+        evidence={matchEvidence(firstScreen.body, suggestion.evidence).filter((e) => e.supports === "category")}
         onEvidenceActive={() => {}}
       />
       <p className={`text-overline ${styles.muted}`}>Sent by a team rule</p>

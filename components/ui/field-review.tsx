@@ -2,7 +2,7 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import { toPercent } from "@/lib/confidence";
-import type { Evidence, SuggestedField } from "@/lib/suggestion";
+import type { EmailEvidence, SuggestedField } from "@/lib/suggestion";
 import { Button } from "./button";
 import { Chip } from "./chip";
 import { ConfidenceMeter } from "./confidence-meter";
@@ -37,7 +37,7 @@ export type FieldReviewProps<T extends string> = {
    */
   explainEstimate?: boolean;
   /** This field's evidence, already matched to the email (matchEvidence), shown beneath it. */
-  evidence?: readonly Evidence[];
+  evidence?: readonly EmailEvidence[];
   /** A quote is hovered or focused (null when it isn't), so the screen can mark it in the email. */
   onEvidenceActive?: (quote: string | null) => void;
 };

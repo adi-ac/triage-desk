@@ -147,6 +147,11 @@ What it can't claim is real-world use, so it gets tested with support agents and
     - Normal: a real need with no pressing deadline.
     - Low: curiosity or a nice-to-have.
 
+**Drafts grounded in the help center** (decided 2026-11-04)
+- Drafts are grounded in the help center, not guessed. `fixtures/help-center.ts` holds six short fictional Ledgerline articles (data export, the API, invoices and billing, plan changes, cancelling, passwords and access), and the recording prompt includes them. A draft may state only facts found in the email or these articles; anything else is a placeholder. Each article a draft relies on is recorded as evidence with the article's title and the sentence it relies on (`ArticleEvidence`), separate from the email quotes that back the category and urgency.
+- Placeholders are never used inside a question to the customer; the question is asked in plain words. Prompted by a vague-email draft that asked "which invoice is it (the invoice number, [invoice number], or the date is fine)?".
+- The dev-only Next.js warning that `app/tickets/layout.tsx` and `app/system/page.tsx` were "dropped" from instant-navigation validation comes from the Anthropic SDK, not from either file. `@anthropic-ai/sdk` depends on `@opentelemetry/api`, an optional peer of Next.js, so installing the SDK made pnpm resolve Next with OpenTelemetry, and that build's dev validator reports those segments as unrendered. The same code without the SDK shows no warning. The pages render and behave the same either way.
+
 **Focus ring** (decided 2026-11-03): the accent, 2px with a 2px offset, set globally on `:focus-visible` via a `--focus-ring` role. It is at least 6.59:1 on `surface` and `bg` in both themes.
 - The one documented exception to the Petrol rule (Petrol is only for decisions, high confidence, the selected queue item and Approve), confirmed 2026-11-04. My reason: keyboard focus must always be clearly visible, and it only appears while tabbing, so it never competes with Approve.
 

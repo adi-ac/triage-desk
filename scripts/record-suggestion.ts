@@ -11,6 +11,7 @@
 
 import Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
+import { helpArticles, helpArticleTitles } from "../fixtures/help-center.ts";
 import { tickets, vagueEmail } from "../fixtures/tickets.ts";
 import { toPercent, unsureReason } from "../lib/confidence.ts";
 import { matchEvidence } from "../lib/evidence.ts";
@@ -21,6 +22,8 @@ const MODEL = "claude-sonnet-5-5";
 const PRICE = { input: 2, output: 10 };
 
 // --- What we ask for -------------------------------------------------------
+
+const HELP_CENTER = helpArticles.map((a) => `<article title="${a.title}">\n${a.body}\n</article>`).join("\n\n");
 
 const SYSTEM = `You triage support email for Ledgerline, a B2B invoicing product. For each email, suggest a category and an urgency, quote the evidence for them, and draft a reply a support agent will review before sending.
 
@@ -39,11 +42,17 @@ Urgencies:
 
 Confidence: give your honest probability (0 to 1) that each pick is right, and the same for the runner-up, the next most likely option. Treat them as parts of one distribution over all options, so a pick and its runner-up add up to at most 1. When the email is ambiguous, say so with your numbers rather than picking confidently.
 
-Evidence: quote the exact words from the email, character for character, that support each pick. Mark each quote as supporting the category or the urgency. Only quote words that appear in the email.
+Evidence from the email: quote the exact words from the email, character for character, that support each pick. Mark each quote as supporting the category or the urgency, with article set to null. Only quote words that appear in the email.
 
-Draft: a short, friendly reply to the customer from "Ledgerline Support". Use a placeholder in square brackets only for a fact you can't know, such as a date, an amount, a name, an account detail or a link, for example [invoice number]. Never invent facts about Ledgerline.
+Draft: a short, friendly reply to the customer from "Ledgerline Support". It may state only facts found in the customer's email or in the help-center articles below. Anything else Ledgerline-specific that the reply needs, such as a date, an amount, a name or an account detail, is a placeholder in square brackets, for example [renewal price]. Never invent facts about Ledgerline. Each time the draft relies on an article, add an evidence item that supports "draft", gives the article's exact title, and quotes the sentence it relies on, character for character.
 
-Agent note: the draft is only ever words to the customer. Never put advice or instructions for the support agent in it, not even in brackets. If the agent should know or do something (check an account, loop in a colleague, watch for a risk), say it in agentNote, in one or two sentences addressed to the agent. If there's nothing to add, set agentNote to null.`;
+Questions to the customer: when the draft asks the customer for something, ask in plain words. Never put a placeholder inside a question; a placeholder is a gap for the support agent to fill, not something to ask the customer.
+
+Agent note: the draft is only ever words to the customer. Never put advice or instructions for the support agent in it, not even in brackets. If the agent should know or do something (check an account, loop in a colleague, watch for a risk), say it in agentNote, in one or two sentences addressed to the agent. If there's nothing to add, set agentNote to null.
+
+Help-center articles:
+
+${HELP_CENTER}`;
 
 const fieldSchema = (options: readonly string[]) => ({
   type: "object",
@@ -76,9 +85,10 @@ const OUTPUT_SCHEMA = {
         type: "object",
         properties: {
           quote: { type: "string" },
-          supports: { type: "string", enum: ["category", "urgency"] },
+          supports: { type: "string", enum: ["category", "urgency", "draft"] },
+          article: { anyOf: [{ type: "string", enum: helpArticleTitles }, { type: "null" }] },
         },
-        required: ["quote", "supports"],
+        required: ["quote", "supports", "article"],
         additionalProperties: false,
       },
     },
@@ -100,7 +110,14 @@ const field = <T extends readonly [string, ...string[]]>(options: T) =>
 const Output = z.object({
   category: field(categories),
   urgency: field(urgencies),
-  evidence: z.array(z.object({ quote: z.string(), supports: z.enum(["category", "urgency"]) })),
+  evidence: z.array(
+    z.union([
+      z
+        .object({ quote: z.string(), supports: z.enum(["category", "urgency"]), article: z.null() })
+        .transform(({ quote, supports }) => ({ quote, supports })),
+      z.object({ quote: z.string(), supports: z.literal("draft"), article: z.enum(helpArticleTitles) }),
+    ]),
+  ),
   draft: z.string(),
   agentNote: z.string().nullable(),
 });
@@ -182,8 +199,16 @@ async function record(email: ReturnType<typeof emailFor>, run: number) {
     stop: response.stop_reason,
     category: describe(suggestion.category),
     urgency: describe(suggestion.urgency),
-    evidence: `${matchEvidence(email.body, suggestion.evidence).length} of ${suggestion.evidence.length} quotes match word for word`,
+    emailEvidence: `${matchEvidence(email.body, suggestion.evidence).length} of ${suggestion.evidence.filter((e) => e.supports !== "draft").length} email quotes match word for word`,
+    articleEvidence: suggestion.evidence.flatMap((e) =>
+      e.supports === "draft"
+        ? [`${e.article}: ${helpArticles.find((a) => a.title === e.article)?.body.includes(e.quote) ? "matches" : "DOES NOT MATCH"} word for word`]
+        : [],
+    ),
     placeholders: [...new Set(suggestion.draft.match(/\[[^\]\n]+\]/g) ?? [])],
+    placeholdersInQuestions: suggestion.draft
+      .split(/(?<=[.?!])\s+/)
+      .filter((sentence) => sentence.trim().endsWith("?") && /\[[^\]\n]+\]/.test(sentence)),
     tokens: { input: response.usage.input_tokens, output: response.usage.output_tokens },
     cost,
     suggestion,

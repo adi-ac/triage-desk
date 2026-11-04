@@ -25,11 +25,27 @@ export type SuggestedField<T extends string = string> = {
   runnerUp?: { value: T; confidence: number };
 };
 
-export type Evidence = {
+/** A quote from the customer's email that backs the category or urgency pick. */
+export type EmailEvidence = {
   /** Word for word from the email. Screens drop any quote that doesn't match. */
   quote: string;
   supports: EvidenceSupports;
+  article?: never;
 };
+
+/**
+ * A sentence from a help-center article (fixtures/help-center.ts) that the
+ * draft relies on. Drafts are grounded in the help center, not guessed.
+ */
+export type ArticleEvidence = {
+  /** Word for word from the article. */
+  quote: string;
+  supports: "draft";
+  /** The article's title. */
+  article: string;
+};
+
+export type Evidence = EmailEvidence | ArticleEvidence;
 
 /** A reply a team rule sent without review. Not model output: the rule acted on it. */
 export type RuleSend = {
