@@ -34,28 +34,39 @@ export function leastSure(s: Suggestion, d: FieldDecisions): number {
 
 const newestFirst = (a: Ticket, b: Ticket) => b.receivedAt.localeCompare(a.receivedAt);
 
+export type Queue = { needsReview: Ticket[]; untriaged: Ticket[]; sent: Ticket[] };
+
 /**
- * The queue: triaged tickets by stakes first (high, then normal), least sure
- * first within each; then tickets with no model output, newest first.
+ * The queue, in three groups. Needs review: triaged and not yet sent, high
+ * stakes before normal, least sure first within each. Not triaged yet: no
+ * model output, newest first. Sent: sent by a person or a rule, most
+ * recently sent first.
  */
 export function orderQueue(
   tickets: readonly Ticket[],
   suggestionFor: (id: string) => Suggestion | undefined,
   decisionsFor: (id: string) => FieldDecisions,
-): { triaged: Ticket[]; untriaged: Ticket[] } {
-  const triaged = tickets.filter((t) => suggestionFor(t.id));
+  sentAtFor: (id: string) => string | null,
+): Queue {
   const untriaged = tickets.filter((t) => !suggestionFor(t.id)).sort(newestFirst);
+  const sent = tickets
+    .filter((t) => suggestionFor(t.id) && sentAtFor(t.id))
+    .sort((a, b) => sentAtFor(b.id)!.localeCompare(sentAtFor(a.id)!));
+  const needsReview = tickets.filter((t) => suggestionFor(t.id) && !sentAtFor(t.id));
   const key = (t: Ticket) => {
     const s = suggestionFor(t.id)!;
     const d = decisionsFor(t.id);
     return { high: isHighStakes(s, d), sure: leastSure(s, d) };
   };
-  triaged.sort((a, b) => {
+  needsReview.sort((a, b) => {
     const ka = key(a);
     const kb = key(b);
     if (ka.high !== kb.high) return ka.high ? -1 : 1;
     if (ka.sure !== kb.sure) return ka.sure - kb.sure;
     return newestFirst(a, b);
   });
-  return { triaged, untriaged };
+  return { needsReview, untriaged, sent };
 }
+
+/** The queue top to bottom, for "Next ticket". */
+export const flatQueue = (q: Queue) => [...q.needsReview, ...q.untriaged, ...q.sent];

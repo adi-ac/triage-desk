@@ -15,15 +15,15 @@ import styles from "./inbox.module.css";
  * email and triage panes.
  */
 export function InboxShell({ children }: { children: ReactNode }) {
+  const { id } = useParams<{ id: string }>();
   return (
-    <InboxProvider>
-      <Shell>{children}</Shell>
+    <InboxProvider currentId={id}>
+      <Shell id={id}>{children}</Shell>
     </InboxProvider>
   );
 }
 
-function Shell({ children }: { children: ReactNode }) {
-  const { id } = useParams<{ id: string }>();
+function Shell({ id, children }: { id: string; children: ReactNode }) {
   const router = useRouter();
   const [queueOpen, setQueueOpen] = useState(false);
   const sheetList = useRef<HTMLDivElement>(null);

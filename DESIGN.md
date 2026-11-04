@@ -11,7 +11,7 @@ These hold on every screen. If a design seems to need an exception, ask; don't m
 1. **Anything Claude produced renders as a suggestion until a person acts on it.** Suggestions are pencil: dashed `--suggested-border`, gray. Use `Chip state="suggested"`, `Tag tone="ai"`, `TimelineRow actor="ai"`, `DraftEditor state="suggested"`. It becomes decided, edited or approved only when a person sets, edits or approves it. Why: if model output looks like a decision, nobody can tell what was checked.
 2. **A confidence value always shows as `ConfidenceMeter`: a bar, a percentage and a level word. Never as a chip or a tag**, and never as a bare number. The one exception is history: once a field is kept or switched, FieldReview replaces its meter with a quiet note, "Claude suggested How-to · 48%". Why: high confidence shares Petrol with decisions, so shape and words are what keep them apart; and confidence belongs to suggestions, so a meter beside a value must never show confidence in a different value.
 3. **A decided chip always says how it was decided: who set it, or "Approved as suggested".** `Chip state="decided"` requires either `decidedBy` (`"you"` or the person's name) or `asSuggested`. Why: same as rule 2. A solid petrol chip with no name could be the model.
-4. **Petrol is only for decisions, high confidence, the selected queue item and Approve.** Decisions means anything a person set: `Chip state="decided"`, `Tag tone="human"`, `TimelineRow actor="human"`. The focus ring (`--focus-ring`, the accent) is the one documented exception: keyboard focus must always be clearly visible, and it only appears while tabbing, so it never competes with Approve. Nothing else uses an `--accent*`, `--decided-*` or `--confidence-high*` token: no petrol links, info banners, headings or icons. A reply a team rule sent has no Petrol at all, since no person acted: FieldReview `readOnly`, DraftEditor `state="sent-by-rule"`, ApproveBar `sentBy="rule"`. Why: Petrol means "a person did this" or "fine to go ahead". A third meaning breaks both.
+4. **Petrol is only for decisions, high confidence, the selected queue item and Approve.** Decisions means anything a person set: `Chip state="decided"`, `Tag tone="human"`, `TimelineRow actor="human"`. The focus ring (`--focus-ring`, the accent) is the one documented exception: keyboard focus must always be clearly visible, and it only appears while tabbing, so it never competes with Approve. Nothing else uses an `--accent*`, `--decided-*` or `--confidence-high*` token: no petrol links, info banners, headings or icons. A reply a team rule sent has no decision styling, since no person acted: no ink chips, no "Set by you" (FieldReview `readOnly`, DraftEditor `state="sent-by-rule"`, ApproveBar `sentBy="rule"`). Its high-confidence meters stay Petrol like any other: the meter describes the model's confidence, not a decision. There are no per-ticket-type exceptions to this rule. Why: Petrol means "a person did this" or "fine to go ahead". A third meaning breaks both.
 5. **Approve stays disabled while any blocker is open, and the blockers are listed next to it.** Exactly three things block, and nothing else:
    - an unsure field that no one has kept or switched: under 60%, or within 15 points of its runner-up;
    - any unfilled `[placeholder]` in the draft;
@@ -121,7 +121,15 @@ With a queue (the inbox, where a person works through tickets). The inbox is `/t
 | 768–1199px | `minmax(0, 1fr) 360px`: email, triage. The queue moves behind a secondary "Queue" Button in the header row, which opens it in a `Sheet` with the open ticket highlighted and scrolled into view; picking a ticket or Escape closes it. |
 | Below 768px | One column: email, then triage. The "Queue" Button stays in the header; the Sheet is full width. |
 
-**Queue order** comes from `orderQueue()` in `@/lib/queue`; never sort it yourself. Triaged tickets first: high stakes before normal, then the least sure first. High stakes means the category is Billing or Cancellation risk, or the urgency is Urgent, counting the runner-up as well as the top pick; once a person decides a field, only their value counts. Below them, in a group headed "Not triaged yet" (`text-overline`), tickets with no model output, newest first, each with a neutral "Not triaged" Tag. Why: when Claude is unsure, assume the higher stakes, so a likely cancellation can't sink just because the top guess was How-to.
+**Queue order** comes from `orderQueue()` in `@/lib/queue`; never sort it yourself. Three groups, top to bottom, each headed in `text-overline`:
+
+1. **Needs review**: triaged and not yet sent. High stakes before normal, then the least sure first. High stakes means the category is Billing or Cancellation risk, or the urgency is Urgent, counting the runner-up as well as the top pick; once a person decides a field, only their value counts. Why: when Claude is unsure, assume the higher stakes, so a likely cancellation can't sink just because the top guess was How-to.
+2. **Not triaged yet**: no model output, newest first, each with a neutral "Not triaged" Tag.
+3. **Sent**: sent by a person or a rule, most recently sent first, each keeping its "Sent" or "Sent by rule" Tag.
+
+The order is computed when a ticket opens and held while it's open: the queue re-sorts only when a different ticket opens, or on reload. Tags still update live. Why: a row must never move out from under the person working on it.
+
+The browser tab reads "<ticket ID> · Triage Desk", set on the client because the page can't read the ID on the server: the ticket panes render a React `<title>`, and no layout or page above them sets a metadata title (Next would overwrite it on navigation).
 
 **Triage pane, top to bottom:** Category, then Urgency (each a FieldReview with its own evidence beneath it; hovering or focusing a quote marks it in the email), then the draft, then the activity `Timeline` (collapsed, "Activity · 3"). Approve is in the footer.
 
@@ -189,7 +197,7 @@ Reviewing one suggested field: category or urgency. Use it for every field a per
 - While suggested: the dashed chip, the ConfidenceMeter, and three small secondary Buttons: "Keep", "Switch to <runner-up>" and "Other…", which opens the full list. The override is one click, and none of these competes with Approve.
 - Once kept or switched: the solid chip ("Set by you") and a quiet "Change" link that reopens the controls. The meter gives way to a quiet note, "Claude suggested How-to · 48%" (rule 2).
 - `approved`: locks the field. An untouched field shows "Approved as suggested" (rule 7).
-- `readOnly`: a reply a team rule sent. The chip stays pencil and the meter stays; no controls, no Petrol.
+- `readOnly`: a reply a team rule sent. The chip stays pencil and the meter stays (Petrol if it's high confidence); no controls, no decision styling.
 - `evidence`: this field's quotes, from `matchEvidence()` filtered by `supports`, listed beneath it. Pass `onEvidenceActive` and keep the quote in screen state for EmailBody's `activeQuote`; the quotes then respond to hover and keyboard focus.
 
 It's controlled: keep `value` (null until someone keeps or switches) on the screen, because the Approve blockers need it. Give it an `id` and pass that in ApproveBar's `targets`, so the summary can jump to it. `options` is `categories` or `urgencies` from `@/lib/suggestion`. Its heading is an h3, so put it in a Pane. After each choice, add a timeline row: "kept the category as How-to" or "set the category to Billing".
@@ -331,7 +339,7 @@ The reply draft. `state` is required; the label shows it in words ("Draft reply 
 - `suggested`: the model's draft, untouched. Pencil: dashed border (rule 1). The first change a person types shows it as `edited` and calls `onStateChange("edited")`. Give each new draft its own `key`, so it starts suggested again.
 - `edited`: a person changed it, or wrote it from scratch. Solid control border.
 - `approved`: approved or sent by a person. Read-only, in the decided style (rule 4).
-- `sent-by-rule`: sent by a team rule without review. Read-only and still pencil; no Petrol.
+- `sent-by-rule`: sent by a team rule without review. Read-only and still pencil; no decision styling.
 
 `blocker` takes the draft's blocker message from `approveBlockers()` and shows it under the draft (rule 5). Unfilled `[placeholders]` are always highlighted in the text: a `--warning-soft` fill with a dashed `--warning` underline.
 

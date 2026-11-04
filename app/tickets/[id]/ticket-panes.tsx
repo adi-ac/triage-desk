@@ -16,10 +16,10 @@ import {
 import { ruleSendFor, suggestionFor } from "@/fixtures/suggestions";
 import { tickets } from "@/fixtures/tickets";
 import { approveBlockers, approveField } from "@/lib/approve";
+import { flatQueue } from "@/lib/queue";
 import { matchEvidence } from "@/lib/evidence";
 import { categories, urgencies, type Category, type Suggestion, type Urgency } from "@/lib/suggestion";
 import { personRow, useInbox } from "../inbox-state";
-import { useQueue } from "../queue-list";
 import styles from "./ticket.module.css";
 
 const targets = { category: "field-category", urgency: "field-urgency", draft: "draft-reply" };
@@ -33,6 +33,9 @@ export function TicketPanes() {
 
   return (
     <>
+      {/* The page can't read the ID on the server (it would block instant
+          navigation), so the tab title comes from here; React puts it in <head>. */}
+      <title>{`${ticketId} · Triage Desk`}</title>
       <Pane title="Email" meta={<span className="text-mono-small">{ticket.id}</span>}>
         <article className={styles.email}>
           <h3 className={`text-title ${styles.subject}`}>{ticket.subject || "(No subject)"}</h3>
@@ -86,8 +89,7 @@ const modelRowText = (s: Suggestion) =>
 /** A ticket waiting for a person: review the fields and the draft, then Approve. */
 function Triage({ ticketId, body, suggestion, onEvidenceActive }: TriageProps) {
   const router = useRouter();
-  const { stateFor, update } = useInbox();
-  const { triaged, untriaged } = useQueue();
+  const { stateFor, update, queue } = useInbox();
   const state = stateFor(ticketId);
   const sent = state.sentAt !== null;
 
@@ -131,10 +133,10 @@ function Triage({ ticketId, body, suggestion, onEvidenceActive }: TriageProps) {
     });
   };
 
-  const queue = [...triaged, ...untriaged];
   const next = () => {
-    const i = queue.findIndex((t) => t.id === ticketId);
-    router.push(`/tickets/${queue[(i + 1) % queue.length].id}`);
+    const order = flatQueue(queue);
+    const i = order.findIndex((t) => t.id === ticketId);
+    router.push(`/tickets/${order[(i + 1) % order.length].id}`);
   };
 
   const stale = [
@@ -228,15 +230,15 @@ function Triage({ ticketId, body, suggestion, onEvidenceActive }: TriageProps) {
   );
 }
 
-/** A reply a team rule sent without review: a read-only record, no Petrol. */
+/** A reply a team rule sent without review: a read-only record with no decision styling. */
 function RuleSentTriage({ ticketId, body, suggestion, onEvidenceActive }: TriageProps) {
   const router = useRouter();
-  const { triaged, untriaged } = useQueue();
+  const { queue } = useInbox();
   const send = ruleSendFor(ticketId)!;
-  const queue = [...triaged, ...untriaged];
   const next = () => {
-    const i = queue.findIndex((t) => t.id === ticketId);
-    router.push(`/tickets/${queue[(i + 1) % queue.length].id}`);
+    const order = flatQueue(queue);
+    const i = order.findIndex((t) => t.id === ticketId);
+    router.push(`/tickets/${order[(i + 1) % order.length].id}`);
   };
 
   return (

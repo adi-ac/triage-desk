@@ -11,8 +11,9 @@ const heading = Schibsted_Grotesk({ subsets: ["latin"], variable: "--font-schibs
 const body = Geist({ subsets: ["latin"], variable: "--font-geist" });
 const mono = Geist_Mono({ subsets: ["latin"], variable: "--font-geist-mono" });
 
+// No title here: each route sets its own. The inbox's comes from the open
+// ticket, on the client (app/tickets/[id]/ticket-panes.tsx).
 export const metadata: Metadata = {
-  title: "Triage Desk",
   description: "AI support-ticket triage with human-in-the-loop review",
 };
 

@@ -26,8 +26,8 @@ export type FieldReviewProps<T extends string> = {
   /** Who decides, for the decided chip. */
   decidedBy?: string;
   /**
-   * Sent by a team rule: nobody decided, so the chip stays pencil, the
-   * meter stays, and there are no controls.
+   * Sent by a team rule: nobody decided, so the chip stays pencil (no
+   * decision styling), the meter stays, and there are no controls.
    */
   readOnly?: boolean;
   /** This field's evidence, already matched to the email (matchEvidence), shown beneath it. */
