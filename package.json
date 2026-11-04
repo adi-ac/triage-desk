@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "record": "node --env-file=.env.local --experimental-strip-types --no-warnings scripts/record-suggestion.ts"
   },
   "dependencies": {
     "next": "16.4.3",
@@ -14,12 +15,14 @@
     "react-dom": "19.3.0"
   },
   "devDependencies": {
+    "@anthropic-ai/sdk": "^1.4.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.4.3",
-    "typescript": "^5"
+    "typescript": "^5",
+    "zod": "^4.6.7"
   },
   "packageManager": "pnpm@12.16.1"
 }
