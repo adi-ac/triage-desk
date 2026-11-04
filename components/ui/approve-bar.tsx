@@ -26,7 +26,9 @@ export type ApproveBarProps = {
 const labelFor = (target: string) => target[0].toUpperCase() + target.slice(1);
 
 function jump(id: string | undefined) {
-  const el = id ? document.getElementById(id) : null;
+  // Next keeps recently visited pages mounted but hidden, so an ID can exist
+  // more than once; jump to the copy that's actually on screen.
+  const el = id ? [...document.querySelectorAll<HTMLElement>(`[id="${CSS.escape(id)}"]`)].find((e) => e.getClientRects().length > 0) : null;
   if (!el) return;
   el.scrollIntoView({ block: "center", behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth" });
   el.focus({ preventScroll: true });

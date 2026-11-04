@@ -154,7 +154,7 @@ What it can't claim is real-world use, so it gets tested with support agents and
 
 **Recording all 40** (4 November 2026, `claude-sonnet-5-5`, one run each)
 - LL-5040 and the vague email are saved as recorded examples in `fixtures/recorded-suggestions.json`, replacing the hand-written LL-5040. Drafts now use a greeting line, short paragraphs and a sign-off on their own lines.
-- The other 39 tickets were recorded once but not yet saved into the fixtures, pending two decisions:
+- (Superseded the same day: all 40 were re-recorded from one prompt version and merged; see "Stakes, the queue top and the full recording".) The other 39 tickets were recorded once but not yet saved into the fixtures, pending two decisions:
   - LL-5040 would no longer top the queue; it would be fifth. Three of the four tickets above it aren't requests (an out-of-office auto-reply, a three-word body with no subject, a reply from a customer's client); the category list has no "nothing to triage" option, so Claude forces a low-confidence pick, and the stakes rule (runner-up counts) plus "least sure first" floats them up. The fourth, LL-5017, is plausibly right to be there.
   - Two email quotes (LL-5002, LL-5009) quote the subject line, which the prompt shows Claude but evidence matching doesn't check, so screens would drop them.
 - 26 of 40 came back unsure (14 on category, 18 on urgency). No article quote failed to match, no placeholder sat inside a question, and no draft carried advice to the agent. One first attempt cited the draft without an article and was rejected and re-run. LL-5039's recording meets its rule (How-to 96%).
@@ -165,6 +165,12 @@ What it can't claim is real-world use, so it gets tested with support agents and
 - Queue groups, top to bottom: Needs review, then "Probably no action", then Not triaged yet, then Sent. Closed tickets join Sent as "Closed". This replaces the three-group order.
 - Evidence can quote the subject line. EmailBody marks quotes in the subject the same way as in the body. (The earlier all-40 run quoted subject lines twice, and screens dropped them.)
 - Every recording carries its prompt version (a hash of the prompt and schema) and model, so a set recorded from different prompts can't pass unnoticed.
+
+**Stakes, the queue top and the full recording** (decided 2026-11-04)
+- A runner-up counts toward stakes only if it's within the 15-point margin, the same test as the unsure rule. My reason: a far-behind runner-up isn't doubt. Counting every runner-up made LL-5038 (Bug 70%, Cancellation risk 10%) and LL-5020 (urgency runner-up Urgent at 25%) high stakes and floated them above LL-5040.
+- LL-5027 (an urgent request to remove a former employee's admin access) ranking above LL-5040 is correct and stays. The first screen still opens on LL-5040, because `/` redirects to `/tickets/LL-5040`; the queue order doesn't decide what the link opens.
+- The recording script rejects placeholders that are instructions to the agent (such as "[Confirm whether a PO field exists…]"), not just advice in the draft's text. LL-5014 was re-run on the same prompt version until it passed.
+- All 40 tickets and the vague email are now recorded output, all from one prompt version (`p-48be27bc`, `claude-sonnet-5-5`, 4 November 2026), and merged into the fixtures. Nothing is hand-written any more, including LL-5039, whose recording meets its rule (How-to 96%). Two tickets came back as "Not a request": LL-5002 (an auto-reply) and LL-5003 (a client's reply sent to Ledgerline by mistake).
 
 **Focus ring** (decided 2026-11-03): the accent, 2px with a 2px offset, set globally on `:focus-visible` via a `--focus-ring` role. It is at least 6.59:1 on `surface` and `bg` in both themes.
 - The one documented exception to the Petrol rule (Petrol is only for decisions, high confidence, the selected queue item and Approve), confirmed 2026-11-04. My reason: keyboard focus must always be clearly visible, and it only appears while tabbing, so it never competes with Approve.

@@ -1,12 +1,800 @@
 [
   {
-    "ticketId": "LL-5040",
-    "kind": "triage",
+    "ticketId": "LL-5001",
     "source": "recorded",
-    "suggestedAt": "2026-11-04T22:45:44.344Z",
+    "suggestedAt": "2026-11-04T23:03:52.903Z",
     "model": "claude-sonnet-5-5",
+    "promptVersion": "p-48be27bc",
+    "agentNote": "Daniel wants to finish the migration this weekend, so please confirm with engineering quickly whether a bulk endpoint or temporary limit increase exists. The help article gives the 120/min per-key limit, but the customer says the docs don't state numbers, so the API reference may need a check.",
+    "kind": "triage",
+    "category": {
+      "value": "How-to",
+      "confidence": 0.5,
+      "runnerUp": {
+        "value": "Feature request",
+        "confidence": 0.3
+      }
+    },
+    "urgency": {
+      "value": "High",
+      "confidence": 0.5,
+      "runnerUp": {
+        "value": "Urgent",
+        "confidence": 0.3
+      }
+    },
+    "evidence": [
+      {
+        "quote": "What's the limit for POST /v1/invoices, and is there a bulk endpoint or a way to raise the limit temporarily for a migration?",
+        "supports": "category"
+      },
+      {
+        "quote": "After roughly 100 requests we start getting 429 Too Many Requests, and the rest fail.",
+        "supports": "category"
+      },
+      {
+        "quote": "We were hoping to finish this weekend.",
+        "supports": "urgency"
+      },
+      {
+        "quote": "We're migrating about 3,000 invoices from our old system through the API.",
+        "supports": "urgency"
+      },
+      {
+        "quote": "Requests are limited to 120 per minute per key.",
+        "supports": "draft",
+        "article": "Using the Ledgerline API"
+      }
+    ],
+    "draft": "Hi Daniel,\n\nThanks for the details. API requests are limited to 120 per minute per key, which is most likely what is behind the 429 errors you're seeing. Pacing your migration to stay under that rate should let the requests go through.\n\nI'm checking whether there is a bulk endpoint or a way to temporarily raise the limit for a migration like yours. I'll follow up with [answer on bulk endpoint and temporary limit increase] as soon as I have it.\n\nBest,\nLedgerline Support"
+  },
+  {
+    "ticketId": "LL-5002",
+    "source": "recorded",
+    "suggestedAt": "2026-11-04T23:03:44.251Z",
+    "model": "claude-sonnet-5-5",
+    "promptVersion": "p-48be27bc",
+    "kind": "not-a-request",
+    "reason": "auto-reply",
+    "explanation": "This is an out-of-office automatic reply to a ticket-resolved notice, so it needs nothing from support.",
+    "evidence": [
+      {
+        "quote": "Automatic reply: [LL-4952] Your request has been resolved",
+        "supports": "category"
+      },
+      {
+        "quote": "I am out of the office until Monday 9 November with limited access to email.",
+        "supports": "category"
+      }
+    ],
+    "triageAnyway": {
+      "ticketId": "LL-5002",
+      "source": "recorded",
+      "suggestedAt": "2026-11-04T23:03:55.555Z",
+      "model": "claude-sonnet-5-5",
+      "promptVersion": "p-48be27bc",
+      "agentNote": "This is an out-of-office auto-reply with no ask, so the category is a low-confidence best fit that I was asked to give. You can probably close it without sending the draft.}}**Note:** the JSON above has a stray extra brace; use the single-line object below instead.{",
+      "kind": "triage",
+      "category": {
+        "value": "How-to",
+        "confidence": 0.25,
+        "runnerUp": {
+          "value": "Billing",
+          "confidence": 0.2
+        }
+      },
+      "urgency": {
+        "value": "Low",
+        "confidence": 0.85,
+        "runnerUp": {
+          "value": "Normal",
+          "confidence": 0.1
+        }
+      },
+      "evidence": [
+        {
+          "quote": "Automatic reply: [LL-4952] Your request has been resolved",
+          "supports": "category"
+        },
+        {
+          "quote": "For urgent invoicing matters, please contact accounts@ellisrowe.example or call 01632 960 214.",
+          "supports": "category"
+        },
+        {
+          "quote": "I am out of the office until Monday 9 November with limited access to email.",
+          "supports": "urgency"
+        }
+      ],
+      "draft": "Hi Graham,\n\nThanks for your message. It looks like it was an automatic reply to our note that request LL-4952 has been resolved, so there's nothing more we need from you.\n\nIf anything still needs attention when you're back on Monday 9 November, just reply to this email and we'll pick it up.\n\nBest,\nLedgerline Support"
+    }
+  },
+  {
+    "ticketId": "LL-5003",
+    "source": "recorded",
+    "suggestedAt": "2026-11-04T23:03:44.377Z",
+    "model": "claude-sonnet-5-5",
+    "promptVersion": "p-48be27bc",
+    "agentNote": "Harriet is a client of Saltmarsh Studio, not a Ledgerline customer, and there is no matching account. If appropriate, forward her request to Saltmarsh Studio or tell her to contact them directly.",
+    "kind": "not-a-request",
+    "reason": "misdirected",
+    "explanation": "This is a reply from a customer's own client asking Saltmarsh Studio to reissue its invoice, so it was sent to Ledgerline by mistake.",
+    "evidence": [
+      {
+        "quote": "We received the invoice below, but our company address has changed. Please could you reissue it to:",
+        "supports": "category"
+      },
+      {
+        "quote": "Saltmarsh Studio has sent you invoice INV-0932 for £1,250.00, due 14 November 2026.",
+        "supports": "category"
+      }
+    ],
+    "triageAnyway": {
+      "ticketId": "LL-5003",
+      "source": "recorded",
+      "suggestedAt": "2026-11-04T23:03:57.628Z",
+      "model": "claude-sonnet-5-5",
+      "promptVersion": "p-48be27bc",
+      "agentNote": "This looks misdirected: Harriet is a client of a Ledgerline customer (Saltmarsh Studio), not a customer herself, and there's no matching account. The category fit is weak because none of the options describe this case, so check whether it's worth passing on to Saltmarsh Studio.",
+      "kind": "triage",
+      "category": {
+        "value": "Billing",
+        "confidence": 0.35,
+        "runnerUp": {
+          "value": "How-to",
+          "confidence": 0.25
+        }
+      },
+      "urgency": {
+        "value": "Normal",
+        "confidence": 0.6,
+        "runnerUp": {
+          "value": "High",
+          "confidence": 0.2
+        }
+      },
+      "evidence": [
+        {
+          "quote": "Please could you reissue it to:",
+          "supports": "category"
+        },
+        {
+          "quote": "Re: Invoice INV-0932 from Saltmarsh Studio",
+          "supports": "category"
+        },
+        {
+          "quote": "due 14 November 2026",
+          "supports": "urgency"
+        },
+        {
+          "quote": "Invoices you create for your own clients use your own numbering, set in Settings → Invoice numbering.",
+          "supports": "draft",
+          "article": "Invoices and billing"
+        }
+      ],
+      "draft": "Hi Harriet,\n\nThanks for getting in touch. The invoice INV-0932 was sent to you by Saltmarsh Studio, who issued it using Ledgerline, so it isn't an invoice from Ledgerline itself.\n\nBecause Saltmarsh Studio creates and numbers their own invoices, the change of address and the PO number 44-1093 need to come through them. Please send them the same details you sent us, and they can reissue the invoice to Kingfisher Dental Care.\n\nBest,\nLedgerline Support"
+    }
+  },
+  {
+    "ticketId": "LL-5004",
+    "source": "recorded",
+    "suggestedAt": "2026-11-04T23:03:45.365Z",
+    "model": "claude-sonnet-5-5",
+    "promptVersion": "p-48be27bc",
+    "agentNote": "Draft invoices aren't currently shown in the Outstanding total as far as the help center says, but I couldn't confirm that from the articles. Please verify before sending, and log the request with the product team if appropriate.}",
+    "kind": "triage",
+    "category": {
+      "value": "Feature request",
+      "confidence": 0.93,
+      "runnerUp": {
+        "value": "How-to",
+        "confidence": 0.04
+      }
+    },
+    "urgency": {
+      "value": "Low",
+      "confidence": 0.8,
+      "runnerUp": {
+        "value": "Normal",
+        "confidence": 0.17
+      }
+    },
+    "evidence": [
+      {
+        "quote": "could the \"Outstanding\" total include draft invoices as a separate line?",
+        "supports": "category"
+      },
+      {
+        "quote": "it would help to see the full picture",
+        "supports": "urgency"
+      },
+      {
+        "quote": "One small thing",
+        "supports": "urgency"
+      }
+    ],
+    "draft": "Hi Yuki,\n\nThanks so much for the kind words about the new dashboard. We're glad seeing overdue invoices at a glance has saved you time.\n\nThanks also for the suggestion to show draft invoices as a separate line in the \"Outstanding\" total. That would help you see the full picture while drafts wait on client approval, and we've passed it along as a feature request.\n\nBest,\nLedgerline Support"
+  },
+  {
+    "ticketId": "LL-5005",
+    "source": "recorded",
+    "suggestedAt": "2026-11-04T23:03:38.429Z",
+    "model": "claude-sonnet-5-5",
+    "promptVersion": "p-48be27bc",
+    "agentNote": "Check whether anything changed in currency handling around September and try to reproduce on the Tremblay account. If you can, escalate to engineering, since affected invoices may already have gone to clients in the wrong currency.",
+    "kind": "triage",
+    "category": {
+      "value": "Bug",
+      "confidence": 0.68,
+      "runnerUp": {
+        "value": "How-to",
+        "confidence": 0.22
+      }
+    },
+    "urgency": {
+      "value": "Normal",
+      "confidence": 0.55,
+      "runnerUp": {
+        "value": "High",
+        "confidence": 0.33
+      }
+    },
+    "evidence": [
+      {
+        "quote": "new invoices for them still come out in USD",
+        "supports": "category"
+      },
+      {
+        "quote": "The ones from before September were fine.",
+        "supports": "category"
+      },
+      {
+        "quote": "Did a setting change, or am I doing something wrong?",
+        "supports": "category"
+      },
+      {
+        "quote": "new invoices for them still come out in USD",
+        "supports": "urgency"
+      }
+    ],
+    "draft": "Hi Marc,\n\nThanks for flagging this. I understand that your Canadian clients are set to CAD in their client profiles, but new invoices for them are coming out in USD, while invoices from before September were fine.\n\nI can't yet say whether a setting changed or something else is going on, so we'll look into it. To help us check, could you send us the invoice number of one affected invoice and the name of the client it was for?\n\nOnce we have that, we'll investigate and get back to you.\n\nBest,\nLedgerline Support"
+  },
+  {
+    "ticketId": "LL-5006",
+    "source": "recorded",
+    "suggestedAt": "2026-11-04T23:03:41.738Z",
+    "model": "claude-sonnet-5-5",
+    "promptVersion": "p-48be27bc",
+    "agentNote": "The help-center articles don't cover late fees, so the cause and the fee removal need confirming with engineering or billing before sending. Also check whether other accounts got late fees on invoices that were paid on time, since Tasha asked.",
+    "kind": "triage",
+    "category": {
+      "value": "Bug",
+      "confidence": 0.75,
+      "runnerUp": {
+        "value": "Billing",
+        "confidence": 0.15
+      }
+    },
+    "urgency": {
+      "value": "High",
+      "confidence": 0.55,
+      "runnerUp": {
+        "value": "Normal",
+        "confidence": 0.3
+      }
+    },
+    "evidence": [
+      {
+        "quote": "Late fee added to an invoice that was paid on time",
+        "supports": "category"
+      },
+      {
+        "quote": "The payment shows in Ledgerline as received on the 14th.",
+        "supports": "category"
+      },
+      {
+        "quote": "sent them a new copy showing a balance due",
+        "supports": "urgency"
+      },
+      {
+        "quote": "Can you remove the fee and tell me what went wrong?",
+        "supports": "urgency"
+      }
+    ],
+    "draft": "Hi Tasha,\n\nThank you for flagging this, and I'm sorry for the trouble with Redwood Medical Centre. From what you describe, invoice INV-1187 was paid on 14 October, a day before its due date, and the payment shows as received on the 14th. The $85.00 late fee and the balance due on the copy sent on the 16th should not have appeared.\n\n[Status of the $85.00 fee removal and corrected invoice copy]. [Explanation of what went wrong, and whether other accounts were affected].\n\nWe'll keep you updated as we learn more, so you have something clear to tell Redwood Medical Centre.\n\nBest,\nLedgerline Support"
+  },
+  {
+    "ticketId": "LL-5007",
+    "source": "recorded",
+    "suggestedAt": "2026-11-04T23:03:41.836Z",
+    "model": "claude-sonnet-5-5",
+    "promptVersion": "p-48be27bc",
+    "agentNote": "The invoice number Pieter quoted (LL-INV-118842) doesn't match the LB- format, so please find the right invoice on the account. Also check whether the VAT number in their billing settings was applied to past invoices, and whether a corrected invoice or VAT refund is possible.",
+    "kind": "triage",
+    "category": {
+      "value": "Billing",
+      "confidence": 0.8,
+      "runnerUp": {
+        "value": "Bug",
+        "confidence": 0.15
+      }
+    },
+    "urgency": {
+      "value": "Normal",
+      "confidence": 0.55,
+      "runnerUp": {
+        "value": "High",
+        "confidence": 0.35
+      }
+    },
+    "evidence": [
+      {
+        "quote": "The invoice Ledgerline sent us for October (LL-INV-118842) doesn't show our VAT number",
+        "supports": "category"
+      },
+      {
+        "quote": "it looks like we've been charged Dutch VAT incorrectly",
+        "supports": "category"
+      },
+      {
+        "quote": "Can you reissue the invoice with it, and check the previous months too?",
+        "supports": "urgency"
+      },
+      {
+        "quote": "If a charge from Ledgerline looks wrong, reply with the LB- invoice number and we'll check it within one business day.",
+        "supports": "draft",
+        "article": "Invoices and billing"
+      },
+      {
+        "quote": "Invoices from Ledgerline to you are numbered LB- followed by digits and are listed in Settings → Billing → Invoices.",
+        "supports": "draft",
+        "article": "Invoices and billing"
+      }
+    ],
+    "draft": "Hi Pieter,\n\nThanks for flagging this, and sorry for the trouble with your October invoice. I understand your VAT number doesn't appear on it and that you think Dutch VAT was charged incorrectly.\n\nInvoices from Ledgerline to you are numbered LB- followed by digits and are listed in Settings → Billing → Invoices. Could you reply with the LB- number for October, and for any earlier months you'd like us to look at? Once we have them, we'll check the charges within one business day.\n\nBest,\nLedgerline Support"
+  },
+  {
+    "ticketId": "LL-5008",
+    "source": "recorded",
+    "suggestedAt": "2026-11-04T23:03:41.657Z",
+    "model": "claude-sonnet-5-5",
+    "promptVersion": "p-48be27bc",
+    "agentNote": "The help center has nothing on deleting or anonymising client personal data while keeping invoices, so please confirm with the product or compliance team what Ledgerline supports. If it can't be done, this is really a feature request. Katrin's one-month deadline from 20 October falls around 20 November, so reply quickly.}",
+    "kind": "triage",
+    "category": {
+      "value": "How-to",
+      "confidence": 0.5,
+      "runnerUp": {
+        "value": "Feature request",
+        "confidence": 0.35
+      }
+    },
+    "urgency": {
+      "value": "High",
+      "confidence": 0.55,
+      "runnerUp": {
+        "value": "Normal",
+        "confidence": 0.25
+      }
+    },
+    "evidence": [
+      {
+        "quote": "How do we do this in Ledgerline without deleting the invoices themselves?",
+        "supports": "category"
+      },
+      {
+        "quote": "the contact details in his client record, the email history and his portal login",
+        "supports": "category"
+      },
+      {
+        "quote": "We have to respond within one month of his request, which arrived on 20 October.",
+        "supports": "urgency"
+      }
+    ],
+    "draft": "Hi Katrin,\n\nThank you for your message. We understand you need to remove your former client's personal data, while keeping his invoices from 2022 to 2024, and that you have to respond within one month of his request on 20 October.\n\nWe're checking the exact steps for this in Ledgerline and will come back to you with a clear answer by [date].\n\nBest,\nLedgerline Support"
+  },
+  {
+    "ticketId": "LL-5009",
+    "source": "recorded",
+    "suggestedAt": "2026-11-04T23:03:29.250Z",
+    "model": "claude-sonnet-5-5",
+    "promptVersion": "p-48be27bc",
+    "agentNote": "Ahmed has 10 seats but only 4 active users and is questioning the plan's value, so this could turn into a cancellation. Consider looping in his account manager, and confirm the Scale vs Growth feature differences and mid-term credit policy before sending.",
+    "kind": "triage",
+    "category": {
+      "value": "Billing",
+      "confidence": 0.55,
+      "runnerUp": {
+        "value": "Cancellation risk",
+        "confidence": 0.3
+      }
+    },
+    "urgency": {
+      "value": "Normal",
+      "confidence": 0.75,
+      "runnerUp": {
+        "value": "Low",
+        "confidence": 0.15
+      }
+    },
+    "evidence": [
+      {
+        "quote": "Do we still need the Scale plan?",
+        "supports": "category"
+      },
+      {
+        "quote": "What would we lose if we moved to Growth?",
+        "supports": "category"
+      },
+      {
+        "quote": "Business has slowed down a lot this year and we're down to four people who use Ledgerline.",
+        "supports": "category"
+      },
+      {
+        "quote": "if we change mid-term, do we get anything back?",
+        "supports": "urgency"
+      },
+      {
+        "quote": "Downgrades take effect on your next renewal date.",
+        "supports": "draft",
+        "article": "Changing your plan"
+      },
+      {
+        "quote": "Adding seats is charged pro rata; removing seats takes effect on your next renewal date.",
+        "supports": "draft",
+        "article": "Changing your plan"
+      },
+      {
+        "quote": "An account owner can change plans in Settings → Billing → Plan.",
+        "supports": "draft",
+        "article": "Changing your plan"
+      },
+      {
+        "quote": "Single sign-on is available on the Scale plan.",
+        "supports": "draft",
+        "article": "Passwords and access"
+      }
+    ],
+    "draft": "Hi Ahmed,\n\nThanks for getting in touch. A downgrade from Scale to Growth takes effect on your next renewal date, so the plan wouldn't change mid-term. Removing seats works the same way, which may matter now that four of you use Ledgerline.\n\nOn what you'd lose by moving to Growth, here is what we know: [differences between Scale and Growth, including multi-currency invoicing]. Single sign-on is available on the Scale plan, so please tell us if your team uses it.\n\nAs for getting anything back if you change mid-term, [refund or credit policy for mid-term plan changes]. An account owner can make the change in Settings → Billing → Plan.\n\nBest,\nLedgerline Support"
+  },
+  {
+    "ticketId": "LL-5010",
+    "source": "recorded",
+    "suggestedAt": "2026-11-04T23:03:30.315Z",
+    "model": "claude-sonnet-5-5",
+    "promptVersion": "p-48be27bc",
+    "agentNote": "Check whether Joanna is the account owner, since only an owner can turn off renewal, and whether renewal has been switched off ahead of 30 November. Consider letting the account manager know, as this is a churn to accounting software after three years.",
+    "kind": "triage",
     "category": {
       "value": "Cancellation risk",
+      "confidence": 0.9,
+      "runnerUp": {
+        "value": "How-to",
+        "confidence": 0.07
+      }
+    },
+    "urgency": {
+      "value": "Normal",
+      "confidence": 0.55,
+      "runnerUp": {
+        "value": "High",
+        "confidence": 0.35
+      }
+    },
+    "evidence": [
+      {
+        "quote": "Please cancel our subscription at the end of the current term",
+        "supports": "category"
+      },
+      {
+        "quote": "We've decided to move our invoicing into our accounting software",
+        "supports": "category"
+      },
+      {
+        "quote": "we renew on 30 November",
+        "supports": "urgency"
+      },
+      {
+        "quote": "Before then I'll need to export all our invoices and client records.",
+        "supports": "urgency"
+      },
+      {
+        "quote": "An account owner can turn off renewal at any time before the renewal date in Settings → Billing → Plan.",
+        "supports": "draft",
+        "article": "Cancelling or not renewing"
+      },
+      {
+        "quote": "You keep full access until the end of the period you've paid for.",
+        "supports": "draft",
+        "article": "Cancelling or not renewing"
+      },
+      {
+        "quote": "After that, your account stays available read-only for 90 days, so you can still export your data; then it's deleted.",
+        "supports": "draft",
+        "article": "Cancelling or not renewing"
+      },
+      {
+        "quote": "You can export your invoices, clients and payments at any time, on every plan, from Settings → Data → Export.",
+        "supports": "draft",
+        "article": "Exporting your data"
+      },
+      {
+        "quote": "Tick \"Include invoice PDFs\" to add a PDF of every invoice in a zip file.",
+        "supports": "draft",
+        "article": "Exporting your data"
+      },
+      {
+        "quote": "File attachments on invoices are not included in exports; download them from each invoice.",
+        "supports": "draft",
+        "article": "Exporting your data"
+      },
+      {
+        "quote": "Exports of more than 5,000 invoices are prepared in the background and emailed to you as a download link within 24 hours.",
+        "supports": "draft",
+        "article": "Exporting your data"
+      }
+    ],
+    "draft": "Hi Joanna,\n\nThank you for letting us know, and for being with us for three years. An account owner can turn off renewal at any time before the renewal date in Settings → Billing → Plan. Once renewal is turned off before 30 November, your subscription won't auto-renew, and you keep full access until the end of the period you've paid for.\n\nOn the export: you can export your invoices, clients and payments at any time from Settings → Data → Export. Each type downloads as its own CSV file, and if you tick \"Include invoice PDFs\" you'll also get a PDF of every invoice in a zip file. File attachments on invoices are not included, so those need to be downloaded from each invoice.\n\nIf you have more than 5,000 invoices, the export is prepared in the background and emailed to you as a download link within 24 hours, so it's worth starting it a little ahead of time. After your term ends, your account stays available read-only for 90 days, so you can still export your data during that time.\n\nBest,\nLedgerline Support"
+  },
+  {
+    "ticketId": "LL-5011",
+    "source": "recorded",
+    "suggestedAt": "2026-11-04T23:03:26.157Z",
+    "model": "claude-sonnet-5-5",
+    "promptVersion": "p-48be27bc",
+    "agentNote": "Patrick's renewal date isn't in the email, so check it, as urgency rises if renewal is close. Loop in his account manager about a possible price lock on an annual plan before sending, and confirm the contact date in the draft.",
+    "kind": "triage",
+    "category": {
+      "value": "Cancellation risk",
+      "confidence": 0.7,
+      "runnerUp": {
+        "value": "Billing",
+        "confidence": 0.2
+      }
+    },
+    "urgency": {
+      "value": "Normal",
+      "confidence": 0.55,
+      "runnerUp": {
+        "value": "High",
+        "confidence": 0.3
+      }
+    },
+    "evidence": [
+      {
+        "quote": "Otherwise we'll have to look at other options before renewal.",
+        "supports": "category"
+      },
+      {
+        "quote": "our monthly bill goes from $186 to $261, about 40% more, for the same features.",
+        "supports": "category"
+      },
+      {
+        "quote": "before renewal",
+        "supports": "urgency"
+      },
+      {
+        "quote": "If you're reviewing your tools before a renewal, your account manager can walk you through your options.",
+        "supports": "draft",
+        "article": "Cancelling or not renewing"
+      }
+    ],
+    "draft": "Hi Patrick,\n\nThank you for being so open with us, and for staying with us since 2021. I understand that a rise from $186 to $261 a month is hard to justify when the features are the same.\n\nSince you're looking at your options before renewal, your account manager can walk you through them, including your idea of an annual plan. I'll ask [account manager name] to contact you by [date].\n\nBest,\nLedgerline Support"
+  },
+  {
+    "ticketId": "LL-5012",
+    "source": "recorded",
+    "suggestedAt": "2026-11-04T23:03:20.186Z",
+    "model": "claude-sonnet-5-5",
+    "promptVersion": "p-48be27bc",
+    "agentNote": "Please log this against the existing approval-workflow feature request, if there is one, and add Haddad Consulting (Growth, 10 seats) as an interested account. The draft says the idea will be passed to product, so make sure that happens.",
+    "kind": "triage",
+    "category": {
+      "value": "Feature request",
+      "confidence": 0.96,
+      "runnerUp": {
+        "value": "How-to",
+        "confidence": 0.02
+      }
+    },
+    "urgency": {
+      "value": "Low",
+      "confidence": 0.85,
+      "runnerUp": {
+        "value": "Normal",
+        "confidence": 0.13
+      }
+    },
+    "evidence": [
+      {
+        "quote": "We'd love an optional approval step, so junior staff can draft invoices but a partner has to approve them before they go out.",
+        "supports": "category"
+      },
+      {
+        "quote": "No urgency, just something we'd use.",
+        "supports": "urgency"
+      }
+    ],
+    "draft": "Hi Nina,\n\nThanks for the suggestion. An optional approval step, where junior staff draft invoices and a partner approves them before they go out, is a clear and useful idea.\n\nI've passed it on to our product team so it's on record. I can't promise whether or when it will be built, but I'll make sure your use case is noted.\n\nBest,\nLedgerline Support"
+  },
+  {
+    "ticketId": "LL-5013",
+    "source": "recorded",
+    "suggestedAt": "2026-11-04T23:03:16.597Z",
+    "model": "claude-sonnet-5-5",
+    "promptVersion": "p-48be27bc",
+    "agentNote": "Sam says they are evaluating other tools that handle multiple entities, so this is a possible churn risk on a 15-seat Scale account. Please confirm with product whether multi-entity support exists or is planned before sending, and consider looping in the account manager.",
+    "kind": "triage",
+    "category": {
+      "value": "Feature request",
+      "confidence": 0.5,
+      "runnerUp": {
+        "value": "Cancellation risk",
+        "confidence": 0.38
+      }
+    },
+    "urgency": {
+      "value": "Normal",
+      "confidence": 0.6,
+      "runnerUp": {
+        "value": "Low",
+        "confidence": 0.2
+      }
+    },
+    "evidence": [
+      {
+        "quote": "Is there any way to manage both from one account, with separate invoice numbering and bank details for each?",
+        "supports": "category"
+      },
+      {
+        "quote": "We're looking at a couple of tools that do this, so it would help to know if it's on your roadmap.",
+        "supports": "category"
+      },
+      {
+        "quote": "so it would help to know if it's on your roadmap",
+        "supports": "urgency"
+      }
+    ],
+    "draft": "Hi Sam,\n\nThanks for getting in touch, and for explaining how your two companies are set up. Managing Greenhaven Landscapes Ltd and Greenhaven Nurseries Ltd from one login, with separate invoice numbering and bank details for each, is a reasonable thing to want.\n\n[Whether managing several legal entities from one account is supported today, and any roadmap information that can be shared]\n\nIf there's anything else that would help you compare options, just reply to this email.\n\nBest,\nLedgerline Support"
+  },
+  {
+    "ticketId": "LL-5014",
+    "source": "recorded",
+    "suggestedAt": "2026-11-04T23:08:13.762Z",
+    "model": "claude-sonnet-5-5",
+    "promptVersion": "p-48be27bc",
+    "agentNote": "The help-center articles don't say whether invoices have a dedicated PO number field, so please check this with the product team before sending. If there isn't one, log the feature request and consider escalating, since about $48,000 of invoices to their biggest client are being rejected.",
+    "kind": "triage",
+    "category": {
+      "value": "Feature request",
+      "confidence": 0.6,
+      "runnerUp": {
+        "value": "How-to",
+        "confidence": 0.33
+      }
+    },
+    "urgency": {
+      "value": "Urgent",
+      "confidence": 0.5,
+      "runnerUp": {
+        "value": "High",
+        "confidence": 0.42
+      }
+    },
+    "evidence": [
+      {
+        "quote": "If not, can you add one?",
+        "supports": "category"
+      },
+      {
+        "quote": "Is there a PO field I'm missing?",
+        "supports": "category"
+      },
+      {
+        "quote": "They've rejected three invoices this month totalling about $48,000, so this is costing us.",
+        "supports": "urgency"
+      },
+      {
+        "quote": "Our biggest client, a hospital group, has started rejecting invoices that don't show their purchase order number in a dedicated field.",
+        "supports": "urgency"
+      }
+    ],
+    "draft": "Hi Victor,\n\nThanks for explaining the situation. I understand that your client's AP system isn't picking up the PO number you type into the notes, and that three rejected invoices totalling about $48,000 this month is costing you.\n\nOn your question about a PO field: [whether a dedicated PO number field exists on invoices today]. [Next step if there is no such field, such as a workaround or passing the request to the product team].\n\nWe'll keep you updated as soon as we have more.\n\nBest,\nLedgerline Support"
+  },
+  {
+    "ticketId": "LL-5015",
+    "source": "recorded",
+    "suggestedAt": "2026-11-04T23:03:13.677Z",
+    "model": "claude-sonnet-5-5",
+    "promptVersion": "p-48be27bc",
+    "agentNote": "The help center doesn't say whether invoices can show bank details or whether bank transfers are marked as paid automatically, so please confirm both before sending. If neither is supported, this is better treated as a feature request.",
+    "kind": "triage",
+    "category": {
+      "value": "How-to",
+      "confidence": 0.5,
+      "runnerUp": {
+        "value": "Feature request",
+        "confidence": 0.4
+      }
+    },
+    "urgency": {
+      "value": "Normal",
+      "confidence": 0.65,
+      "runnerUp": {
+        "value": "Low",
+        "confidence": 0.3
+      }
+    },
+    "evidence": [
+      {
+        "quote": "Can I put our bank details on the invoice",
+        "supports": "category"
+      },
+      {
+        "quote": "will Ledgerline mark the invoice as paid when the money arrives",
+        "supports": "category"
+      },
+      {
+        "quote": "A few of our café clients would rather pay by bank transfer than card.",
+        "supports": "urgency"
+      }
+    ],
+    "draft": "Hi Chloe,\n\nThanks for getting in touch about bank transfers for your café clients.\n\nOn adding your bank details to an invoice: [whether bank details can be added to invoices, and how]. On marking invoices as paid: [whether Ledgerline marks an invoice as paid when a bank transfer arrives, or whether you mark it yourself].\n\nBest,\nLedgerline Support"
+  },
+  {
+    "ticketId": "LL-5016",
+    "source": "recorded",
+    "suggestedAt": "2026-11-04T23:03:16.576Z",
+    "model": "claude-sonnet-5-5",
+    "promptVersion": "p-48be27bc",
+    "agentNote": "The help center only says numbering is set in Settings → Invoice numbering. It doesn't cover changing the prefix mid-year or restarting the counter, so please confirm that before sending, and whether the change can be scheduled for 1 January or must be made manually. If it can't be done, this may become a feature request.",
+    "kind": "triage",
+    "category": {
+      "value": "How-to",
+      "confidence": 0.6,
+      "runnerUp": {
+        "value": "Feature request",
+        "confidence": 0.3
+      }
+    },
+    "urgency": {
+      "value": "Normal",
+      "confidence": 0.5,
+      "runnerUp": {
+        "value": "Low",
+        "confidence": 0.45
+      }
+    },
+    "evidence": [
+      {
+        "quote": "From 1 January we’d like our invoice numbers to start with “QC27-” instead of “QC-”, and restart at 001.",
+        "supports": "category"
+      },
+      {
+        "quote": "Is that possible without messing up this year’s numbers?",
+        "supports": "category"
+      },
+      {
+        "quote": "Not urgent, just planning ahead.",
+        "supports": "urgency"
+      },
+      {
+        "quote": "Invoices you create for your own clients use your own numbering, set in Settings → Invoice numbering.",
+        "supports": "draft",
+        "article": "Invoices and billing"
+      }
+    ],
+    "draft": "Hi Jasper,\n\nThanks for planning ahead. The numbering on invoices you create for your own clients is set in Settings → Invoice numbering, so that's where the prefix is managed.\n\nFor your question about switching to \"QC27-\" from 1 January and restarting at 001 without affecting this year's numbers: [confirmation of how the prefix change and counter restart work alongside existing invoice numbers]. We'll make sure you have the full picture well before the new year.\n\nBest,\nLedgerline Support"
+  },
+  {
+    "ticketId": "LL-5017",
+    "source": "recorded",
+    "suggestedAt": "2026-11-04T23:03:05.342Z",
+    "model": "claude-sonnet-5-5",
+    "promptVersion": "p-48be27bc",
+    "agentNote": "The help center doesn't say whether the aging report can be run for a past date or exported, so please confirm with the product team before sending. If it can't, log this as a feature request and check how close the 7th is.",
+    "kind": "triage",
+    "category": {
+      "value": "Feature request",
       "confidence": 0.5,
       "runnerUp": {
         "value": "How-to",
@@ -15,23 +803,23 @@
     },
     "urgency": {
       "value": "High",
-      "confidence": 0.5,
+      "confidence": 0.6,
       "runnerUp": {
-        "value": "Normal",
-        "confidence": 0.38
+        "value": "Urgent",
+        "confidence": 0.25
       }
     },
     "evidence": [
       {
-        "quote": "before she decides on next year's tools",
+        "quote": "I can see the aging report on the dashboard, but it only shows today's figures.",
         "supports": "category"
       },
       {
-        "quote": "Could you tell me how to export everything we have in Ledgerline?",
+        "quote": "Is there a way to run it for a past date, and can it export to Excel?",
         "supports": "category"
       },
       {
-        "quote": "Our renewal is on 15 December, so it would help to know what's possible in the next couple of weeks.",
+        "quote": "They need it by the 7th.",
         "supports": "urgency"
       },
       {
@@ -40,7 +828,1034 @@
         "article": "Exporting your data"
       },
       {
-        "quote": "Choose what to include and a date range; the default is everything since your account was created.",
+        "quote": "Each type downloads as its own CSV file.",
+        "supports": "draft",
+        "article": "Exporting your data"
+      }
+    ],
+    "draft": "Hi Ruth,\n\nThanks for the details, and I understand your auditors need this by the 7th. You're right that the aging report on the dashboard shows today's figures. On running it for a past date or exporting it to Excel, [answer on past-date aging report and Excel export].\n\nIn the meantime, you can export your invoices, clients and payments at any time from Settings → Data → Export, and choose a date range. Each type downloads as its own CSV file, which you can use to work out your 31 October aging by client.\n\nBest,\nLedgerline Support"
+  },
+  {
+    "ticketId": "LL-5018",
+    "source": "recorded",
+    "suggestedAt": "2026-11-04T23:03:02.633Z",
+    "model": "claude-sonnet-5-5",
+    "promptVersion": "p-48be27bc",
+    "agentNote": "None of the help-center articles cover credit notes, so confirm whether Ledgerline supports them before replying. If it doesn't, re-categorize this as a Feature request and suggest a workaround for the VAT treatment.",
+    "kind": "triage",
+    "category": {
+      "value": "How-to",
+      "confidence": 0.7,
+      "runnerUp": {
+        "value": "Feature request",
+        "confidence": 0.25
+      }
+    },
+    "urgency": {
+      "value": "Normal",
+      "confidence": 0.7,
+      "runnerUp": {
+        "value": "High",
+        "confidence": 0.2
+      }
+    },
+    "evidence": [
+      {
+        "quote": "How do I issue a credit note?",
+        "supports": "category"
+      },
+      {
+        "quote": "What's the right way to issue a credit for the returned items in Ledgerline?",
+        "supports": "category"
+      },
+      {
+        "quote": "I don't want to mess up our VAT return.",
+        "supports": "urgency"
+      }
+    ],
+    "draft": "Hi Helen,\n\nThanks for your email, and for the clear details about the 12 of 40 planters returned on an invoice that has already been paid. Here is how to handle the credit: [how to issue a credit note for a paid invoice in Ledgerline, and whether to edit the paid invoice or create a separate document].\n\nOn your VAT return, [how credit notes and their tax are reflected in Ledgerline's tax figures]. We want to make sure your records stay accurate.\n\nBest,\nLedgerline Support"
+  },
+  {
+    "ticketId": "LL-5019",
+    "source": "recorded",
+    "suggestedAt": "2026-11-04T23:03:01.158Z",
+    "model": "claude-sonnet-5-5",
+    "promptVersion": "p-48be27bc",
+    "agentNote": "None of the help-center articles cover recording partial payments, so please confirm the steps and that reminders only chase the remaining balance before sending. If partial payments aren't supported, this is really a feature request and the draft needs rewriting.",
+    "kind": "triage",
+    "category": {
+      "value": "How-to",
+      "confidence": 0.7,
+      "runnerUp": {
+        "value": "Feature request",
+        "confidence": 0.2
+      }
+    },
+    "urgency": {
+      "value": "Normal",
+      "confidence": 0.75,
+      "runnerUp": {
+        "value": "Low",
+        "confidence": 0.15
+      }
+    },
+    "evidence": [
+      {
+        "quote": "How do I record the $1,500 so the invoice shows the right balance and the reminders only chase what's left?",
+        "supports": "category"
+      },
+      {
+        "quote": "will pay the rest next month",
+        "supports": "urgency"
+      }
+    ],
+    "draft": "Hi Ben,\n\nThanks for getting in touch. You'd like to record the $1,500 bank transfer against your $3,000 invoice so it shows the right balance and reminders only chase what's left.\n\nHere's how to do that: [steps for recording a partial payment, and confirmation that reminders only chase the remaining balance].\n\nLet us know if anything doesn't look right once you've tried it.\n\nBest,\nLedgerline Support"
+  },
+  {
+    "ticketId": "LL-5020",
+    "source": "recorded",
+    "suggestedAt": "2026-11-04T23:03:05.556Z",
+    "model": "claude-sonnet-5-5",
+    "promptVersion": "p-48be27bc",
+    "agentNote": "The help center has no article on custom sending domains, SPF or DKIM, so the draft leaves the switch-back advice and the SPF guidance as placeholders. Please check with engineering or deliverability before sending, and consider whether Delgado's domain verification is passing SPF alignment.",
+    "kind": "triage",
+    "category": {
+      "value": "Bug",
+      "confidence": 0.45,
+      "runnerUp": {
+        "value": "How-to",
+        "confidence": 0.4
+      }
+    },
+    "urgency": {
+      "value": "High",
+      "confidence": 0.55,
+      "runnerUp": {
+        "value": "Urgent",
+        "confidence": 0.25
+      }
+    },
+    "evidence": [
+      {
+        "quote": "Invoices going to spam since we set up our own domain",
+        "supports": "category"
+      },
+      {
+        "quote": "he isn't sure about SPF, because we already have one for Google Workspace",
+        "supports": "category"
+      },
+      {
+        "quote": "at least five clients have told us our invoices landed in spam, and two only found them after a reminder",
+        "supports": "urgency"
+      },
+      {
+        "quote": "Should we switch back to the Ledgerline address for now?",
+        "supports": "urgency"
+      }
+    ],
+    "draft": "Hi Rosa,\n\nThanks for flagging this, and I'm sorry your clients are finding your invoices in spam. I understand that five clients have been affected so far and two only saw their invoices after a reminder.\n\nOn your question about switching back to the Ledgerline address, [guidance on whether to switch back in the meantime]. We're also looking into the SPF question, since you already have an SPF record for Google Workspace, and will confirm [correct SPF setup for a domain that also uses Google Workspace].\n\nTo help us investigate, could you send us the full email headers from one of the invoices that landed in spam? It would also help to know which email providers your affected clients use.\n\nBest,\nLedgerline Support"
+  },
+  {
+    "ticketId": "LL-5021",
+    "source": "recorded",
+    "suggestedAt": "2026-11-04T23:02:53.322Z",
+    "model": "claude-sonnet-5-5",
+    "promptVersion": "p-48be27bc",
+    "agentNote": "This looks like a platform-side webhook problem, so please escalate to engineering now. The customer's last received event was evt_31c0a7 at 13:52:11Z on Oct 29, and the delivery log shows no attempts for the three invoices, which suggests the events aren't being dispatched at all.",
+    "kind": "triage",
+    "category": {
+      "value": "Bug",
+      "confidence": 0.9,
+      "runnerUp": {
+        "value": "How-to",
+        "confidence": 0.04
+      }
+    },
+    "urgency": {
+      "value": "High",
+      "confidence": 0.55,
+      "runnerUp": {
+        "value": "Urgent",
+        "confidence": 0.35
+      }
+    },
+    "evidence": [
+      {
+        "quote": "Since around 14:00 UTC on Oct 29 we haven't received a single invoice.paid event, though invoice.created and invoice.sent are still arriving.",
+        "supports": "category"
+      },
+      {
+        "quote": "the delivery log in your dashboard shows nothing for these invoices, not even failed attempts.",
+        "supports": "category"
+      },
+      {
+        "quote": "Customers are paying and not getting access, so we're unlocking them by hand for now.",
+        "supports": "urgency"
+      }
+    ],
+    "draft": "Hi Alex,\n\nThanks for the detailed report. We understand that invoice.paid events for webhook wh_8f2c91d4 stopped arriving after around 14:00 UTC on Oct 29, including for INV-20931, INV-20944 and INV-20950, while invoice.created and invoice.sent still come through.\n\nWe're sorry your customers are waiting on access, and we know you're unlocking them by hand in the meantime. We'll check whether anything changed on our side and update you by [time of next update].\n\nBest,\nLedgerline Support"
+  },
+  {
+    "ticketId": "LL-5022",
+    "source": "recorded",
+    "suggestedAt": "2026-11-04T23:02:53.507Z",
+    "model": "claude-sonnet-5-5",
+    "promptVersion": "p-48be27bc",
+    "agentNote": "Likely a scheduling or sending failure for 14 recurring invoices on Romano Fitness's account; please check them and escalate to engineering quickly given the payment and rent deadline. No help article covers pushing out stuck scheduled invoices, so don't promise a manual send until it's confirmed possible.",
+    "kind": "triage",
+    "category": {
+      "value": "Bug",
+      "confidence": 0.85,
+      "runnerUp": {
+        "value": "How-to",
+        "confidence": 0.1
+      }
+    },
+    "urgency": {
+      "value": "Urgent",
+      "confidence": 0.55,
+      "runnerUp": {
+        "value": "High",
+        "confidence": 0.4
+      }
+    },
+    "evidence": [
+      {
+        "quote": "This morning only 200 went out.",
+        "supports": "category"
+      },
+      {
+        "quote": "The other 14 show \"Scheduled\" with yesterday's date and haven't moved.",
+        "supports": "category"
+      },
+      {
+        "quote": "if they don't get it today their payments will be late, and our rent is due on the 5th",
+        "supports": "urgency"
+      }
+    ],
+    "draft": "Hi Sofia,\n\nThanks for flagging this, and I'm sorry for the trouble. I understand that 14 of your 214 recurring membership invoices are still showing \"Scheduled\" with yesterday's date, while the other 200 went out this morning.\n\nWe're looking into why those 14 haven't been sent, and I'll update you as soon as I have [status update and expected send time]. I know the timing matters, with many of your members paying automatically when the invoice arrives and your rent due on the 5th.\n\nCould you reply with the names of two or three of the affected members? That will help us find what's holding them back.\n\nBest,\nLedgerline Support"
+  },
+  {
+    "ticketId": "LL-5023",
+    "source": "recorded",
+    "suggestedAt": "2026-11-04T23:02:52.814Z",
+    "model": "claude-sonnet-5-5",
+    "promptVersion": "p-48be27bc",
+    "agentNote": "This looks like a possible time zone conversion problem in PDF and email rendering, so consider flagging it to engineering. Clients are already receiving invoices with early due dates, so it's worth checking soon.",
+    "kind": "triage",
+    "category": {
+      "value": "Bug",
+      "confidence": 0.94,
+      "runnerUp": {
+        "value": "Feature request",
+        "confidence": 0.03
+      }
+    },
+    "urgency": {
+      "value": "Normal",
+      "confidence": 0.6,
+      "runnerUp": {
+        "value": "Low",
+        "confidence": 0.22
+      }
+    },
+    "evidence": [
+      {
+        "quote": "the PDF and the email to the client both say 31 October, and the due date is a day early too",
+        "supports": "category"
+      },
+      {
+        "quote": "The date in the editor is correct, and our account time zone is set to Pacific/Auckland.",
+        "supports": "category"
+      },
+      {
+        "quote": "It's not urgent, since clients haven't complained yet",
+        "supports": "urgency"
+      },
+      {
+        "quote": "it'll confuse them when the due dates don't match our terms",
+        "supports": "urgency"
+      }
+    ],
+    "draft": "Hi Liam,\n\nThanks for the clear description. Invoices dated 1 November show 31 October on the PDF and in the client email, with the due date a day early too, even though the editor shows the right date and your account time zone is set to Pacific/Auckland.\n\nCould you send us the number of one affected invoice, and tell us whether every invoice shows the wrong date or only some of them? That will help us track down what's going on.\n\nBest,\nLedgerline Support"
+  },
+  {
+    "ticketId": "LL-5024",
+    "source": "recorded",
+    "suggestedAt": "2026-11-04T23:02:53.622Z",
+    "model": "claude-sonnet-5-5",
+    "promptVersion": "p-48be27bc",
+    "agentNote": "The help center has nothing on the Xero integration, so the draft's cleanup and fix details are placeholders. Please check with engineering whether re-authorising Xero breaks contact matching before advising the customer on merging or deleting contacts.",
+    "kind": "triage",
+    "category": {
+      "value": "Bug",
+      "confidence": 0.8,
+      "runnerUp": {
+        "value": "How-to",
+        "confidence": 0.15
+      }
+    },
+    "urgency": {
+      "value": "Normal",
+      "confidence": 0.55,
+      "runnerUp": {
+        "value": "High",
+        "confidence": 0.35
+      }
+    },
+    "evidence": [
+      {
+        "quote": "every invoice that syncs creates a new contact in Xero instead of matching the existing one",
+        "supports": "category"
+      },
+      {
+        "quote": "Since we reconnected Xero last week (it asked us to re-authorise)",
+        "supports": "category"
+      },
+      {
+        "quote": "Our bookkeeper is not thrilled.",
+        "supports": "urgency"
+      }
+    ],
+    "draft": "Hi Grace,\n\nThanks for the clear details, and sorry for the mess in your Xero contacts. Since you re-authorised Xero last week, each synced invoice has created a new contact instead of matching the existing one, which is not how it should behave.\n\nWe're looking into why the matching stopped working. To help us find it, could you send us the invoice numbers for the three \"Atlas Coffee Roasters\" invoices and tell us the date you reconnected Xero?\n\nOn cleaning up the duplicates already created, [guidance on cleaning up duplicate contacts]. We'd rather you hold off on any clean-up until we confirm this is fixed, so it isn't repeated.\n\nBest,\nLedgerline Support"
+  },
+  {
+    "ticketId": "LL-5025",
+    "source": "recorded",
+    "suggestedAt": "2026-11-04T23:02:41.462Z",
+    "model": "claude-sonnet-5-5",
+    "promptVersion": "p-48be27bc",
+    "agentNote": "Likely a PDF font/encoding issue with Polish diacritics, so please escalate to engineering with the examples from the email. The customer has clients rejecting invoices, so consider asking for a workaround to offer them.}",
+    "kind": "triage",
+    "category": {
+      "value": "Bug",
+      "confidence": 0.88,
+      "runnerUp": {
+        "value": "How-to",
+        "confidence": 0.08
+      }
+    },
+    "urgency": {
+      "value": "High",
+      "confidence": 0.6,
+      "runnerUp": {
+        "value": "Normal",
+        "confidence": 0.25
+      }
+    },
+    "evidence": [
+      {
+        "quote": "Polish characters missing in invoice PDFs",
+        "supports": "category"
+      },
+      {
+        "quote": "Polish letters are replaced with empty boxes.",
+        "supports": "category"
+      },
+      {
+        "quote": "In the editor everything looks correct. It’s only the PDF.",
+        "supports": "category"
+      },
+      {
+        "quote": "their accounting systems reject the invoice",
+        "supports": "urgency"
+      }
+    ],
+    "draft": "Hi Paweł,\n\nThank you for the clear examples, and I'm sorry for the trouble this is causing with your clients. Since the names look right in the editor but show as boxes in the PDF, this needs a closer look from us.\n\nCould you send us the invoice number of one affected invoice? That will help us reproduce the problem.\n\nWe'll update you as soon as we know more: [status and expected fix timing]. In the meantime: [workaround, if any].\n\nBest,\nLedgerline Support"
+  },
+  {
+    "ticketId": "LL-5026",
+    "source": "recorded",
+    "suggestedAt": "2026-11-04T23:02:43.400Z",
+    "model": "claude-sonnet-5-5",
+    "promptVersion": "p-48be27bc",
+    "agentNote": "The help center doesn't cover SSO provisioning errors, a domain allowlist or seat limits, so check the account's SSO configuration and seat usage, and escalate to engineering if it isn't a simple setup issue.",
+    "kind": "triage",
+    "category": {
+      "value": "Bug",
+      "confidence": 0.5,
+      "runnerUp": {
+        "value": "How-to",
+        "confidence": 0.3
+      }
+    },
+    "urgency": {
+      "value": "High",
+      "confidence": 0.7,
+      "runnerUp": {
+        "value": "Normal",
+        "confidence": 0.2
+      }
+    },
+    "evidence": [
+      {
+        "quote": "Okta SSO: new hires get 'User not assigned to this application'",
+        "supports": "category"
+      },
+      {
+        "quote": "SSO has been working fine for our existing staff since we set it up in June.",
+        "supports": "category"
+      },
+      {
+        "quote": "They can't do much until they're in, so I'd appreciate a quick look.",
+        "supports": "urgency"
+      },
+      {
+        "quote": "Single sign-on is available on the Scale plan.",
+        "supports": "draft",
+        "article": "Passwords and access"
+      }
+    ],
+    "draft": "Hi Mei Lin,\n\nThanks for the detail, and for checking the Okta assignments and group already. Single sign-on is available on your Scale plan, and since it has worked for your existing staff since June, we'll look into why the four new hires are being blocked.\n\nTo help us narrow it down, could you send us the email addresses of the four new hires, exactly as they appear in Okta and in Ledgerline? It would also help to know roughly when one of them last tried to sign in.\n\nWe'll get back to you by [follow-up time] once we've looked at your account's SSO setup.\n\nBest,\nLedgerline Support"
+  },
+  {
+    "ticketId": "LL-5027",
+    "source": "recorded",
+    "suggestedAt": "2026-11-04T23:02:43.854Z",
+    "model": "claude-sonnet-5-5",
+    "promptVersion": "p-48be27bc",
+    "agentNote": "Escalate right away and check the account's ownership-transfer and identity-verification process. The help articles don't cover ownership transfer or an activity log, so confirm both before replying.}</br>",
+    "kind": "triage",
+    "category": {
+      "value": "How-to",
+      "confidence": 0.45,
+      "runnerUp": {
+        "value": "Feature request",
+        "confidence": 0.2
+      }
+    },
+    "urgency": {
+      "value": "Urgent",
+      "confidence": 0.9,
+      "runnerUp": {
+        "value": "High",
+        "confidence": 0.08
+      }
+    },
+    "evidence": [
+      {
+        "quote": "URGENT: remove a former employee's admin access",
+        "supports": "urgency"
+      },
+      {
+        "quote": "it wasn't on good terms",
+        "supports": "urgency"
+      },
+      {
+        "quote": "I need his access removed today and ownership moved to me.",
+        "supports": "urgency"
+      },
+      {
+        "quote": "He still has admin access to our Ledgerline account, and I can't remove him because he's the account owner, not me.",
+        "supports": "category"
+      },
+      {
+        "quote": "Please also tell me if there's a way to see what he's done in the account since Friday.",
+        "supports": "category"
+      },
+      {
+        "quote": "Account owners and admins can resend invitations and remove teammates in Settings → Team.",
+        "supports": "draft",
+        "article": "Passwords and access"
+      }
+    ],
+    "draft": "Hi Owen,\n\nThanks for flagging this, and I'm sorry you're dealing with it. We're treating it as urgent because a former employee still has admin access.\n\nTeammates can normally be removed in Settings → Team by an account owner or admin. Since Craig is the account owner, moving ownership to you and removing his access needs our help. To verify who you are, we'll need [verification steps]. Once that's done, we'll [next steps for ownership transfer and access removal].\n\nOn seeing what he's done since Friday, [answer on activity history].\n\nBest,\nLedgerline Support"
+  },
+  {
+    "ticketId": "LL-5028",
+    "source": "recorded",
+    "suggestedAt": "2026-11-04T23:02:42.299Z",
+    "model": "claude-sonnet-5-5",
+    "promptVersion": "p-48be27bc",
+    "agentNote": "The help center has no article on recovering 2FA access, so follow the internal identity-verification process and fill in the placeholder. She is the only admin and has month-end invoicing waiting, so this should move fast.",
+    "kind": "triage",
+    "category": {
+      "value": "How-to",
+      "confidence": 0.55,
+      "runnerUp": {
+        "value": "Bug",
+        "confidence": 0.2
+      }
+    },
+    "urgency": {
+      "value": "Urgent",
+      "confidence": 0.55,
+      "runnerUp": {
+        "value": "High",
+        "confidence": 0.4
+      }
+    },
+    "evidence": [
+      {
+        "quote": "Locked out – new phone, no 2FA codes",
+        "supports": "category"
+      },
+      {
+        "quote": "Now I can't log in because it asks for a code I don't have.",
+        "supports": "category"
+      },
+      {
+        "quote": "We have about 30 invoices to send for month end and I'm stuck.",
+        "supports": "urgency"
+      },
+      {
+        "quote": "I'm the only admin on our account.",
+        "supports": "urgency"
+      }
+    ],
+    "draft": "Hi Ines,\n\nSorry about the lockout, and thanks for explaining what happened. We know you have about 30 invoices to send for month end, so we'll help you get back in as quickly as we can.\n\nTo confirm it's you, we need the following from you: [identity verification steps]. Once we've verified you, we'll help you get past the code prompt on your new phone.\n\nBest,\nLedgerline Support"
+  },
+  {
+    "ticketId": "LL-5029",
+    "source": "recorded",
+    "suggestedAt": "2026-11-04T23:02:25.709Z",
+    "model": "claude-sonnet-5-5",
+    "promptVersion": "p-48be27bc",
+    "agentNote": "Customer is on a Scale plan and says supplier payments depend on the card this week, so please check the account for a duplicate charge now and prioritise the refund. Fill in the refund timeline before sending.",
+    "kind": "triage",
+    "category": {
+      "value": "Billing",
+      "confidence": 0.95,
+      "runnerUp": {
+        "value": "Bug",
+        "confidence": 0.04
+      }
+    },
+    "urgency": {
+      "value": "Urgent",
+      "confidence": 0.7,
+      "runnerUp": {
+        "value": "High",
+        "confidence": 0.27
+      }
+    },
+    "evidence": [
+      {
+        "quote": "Our company card was charged $4,788.00 twice on 30 October",
+        "supports": "category"
+      },
+      {
+        "quote": "Charged twice for our annual renewal",
+        "supports": "category"
+      },
+      {
+        "quote": "The second charge has pushed the card close to its limit, and we have supplier payments going out on that card this week.",
+        "supports": "urgency"
+      },
+      {
+        "quote": "If a charge from Ledgerline looks wrong, reply with the LB- invoice number and we'll check it within one business day.",
+        "supports": "draft",
+        "article": "Invoices and billing"
+      }
+    ],
+    "draft": "Hi Martin,\n\nI'm sorry about the duplicate charge, and I understand the timing is a problem with supplier payments going out on that card this week. We've noted that your company card was charged $4,788.00 twice on 30 October, both described as \"LEDGERLINE ANNUAL\".\n\nTo help us check this, could you reply with the LB- invoice number for the renewal? We'll check the charge within one business day.\n\nOnce we've confirmed the duplicate, we'll email you about the refund. The expected refund timing is [refund timeline].\n\nBest,\nLedgerline Support"
+  },
+  {
+    "ticketId": "LL-5030",
+    "source": "recorded",
+    "suggestedAt": "2026-11-04T23:02:31.277Z",
+    "model": "claude-sonnet-5-5",
+    "promptVersion": "p-48be27bc",
+    "agentNote": "The help center says removed seats only reduce the plan at the next renewal, so the credit for October may need a decision or an exception from you. Fiona wants this resolved before Thursday, so check the account's renewal date and reply early.",
+    "kind": "triage",
+    "category": {
+      "value": "Billing",
+      "confidence": 0.8,
+      "runnerUp": {
+        "value": "Bug",
+        "confidence": 0.12
+      }
+    },
+    "urgency": {
+      "value": "High",
+      "confidence": 0.5,
+      "runnerUp": {
+        "value": "Urgent",
+        "confidence": 0.3
+      }
+    },
+    "evidence": [
+      {
+        "quote": "our October invoice from Ledgerline still charges for 30 seats",
+        "supports": "category"
+      },
+      {
+        "quote": "Can you bring us down to 24 and credit the difference for October?",
+        "supports": "category"
+      },
+      {
+        "quote": "Our budget review is on Thursday, and I’d like this sorted before then.",
+        "supports": "urgency"
+      },
+      {
+        "quote": "Adding seats is charged pro rata; removing seats takes effect on your next renewal date.",
+        "supports": "draft",
+        "article": "Changing your plan"
+      },
+      {
+        "quote": "If a charge from Ledgerline looks wrong, reply with the LB- invoice number and we'll check it within one business day.",
+        "supports": "draft",
+        "article": "Invoices and billing"
+      }
+    ],
+    "draft": "Hi Fiona,\n\nThanks for flagging this, and sorry for the hassle ahead of your budget review. Removing seats takes effect on your next renewal date, which may be why your plan still shows 30 seats even though the Users page says 24 of 30 are used. Your next renewal date is [renewal date].\n\nWe'd like to check the October charge for you. Could you reply with the LB- invoice number for that invoice? We'll check it within one business day.\n\nOn the credit for October, [credit decision] once we've reviewed the invoice.\n\nBest,\nLedgerline Support"
+  },
+  {
+    "ticketId": "LL-5031",
+    "source": "recorded",
+    "suggestedAt": "2026-11-04T23:02:31.284Z",
+    "model": "claude-sonnet-5-5",
+    "promptVersion": "p-48be27bc",
+    "agentNote": "No help-center article covers payment links, so the draft has a placeholder for the workaround. Please check why the links expired early (this is the second report this week) and get Marlowe a working link before their Tuesday payment run; their AP team said bank details would also work.",
+    "kind": "triage",
+    "category": {
+      "value": "Bug",
+      "confidence": 0.82,
+      "runnerUp": {
+        "value": "How-to",
+        "confidence": 0.08
+      }
+    },
+    "urgency": {
+      "value": "Urgent",
+      "confidence": 0.6,
+      "runnerUp": {
+        "value": "High",
+        "confidence": 0.33
+      }
+    },
+    "evidence": [
+      {
+        "quote": "This is the second client this week who says the \"Pay now\" link on their invoice has expired.",
+        "supports": "category"
+      },
+      {
+        "quote": "This one was only sent on the 27th.",
+        "supports": "category"
+      },
+      {
+        "quote": "We'd like to pay this before our payment run on Tuesday.",
+        "supports": "urgency"
+      },
+      {
+        "quote": "We can't pay by card without it.",
+        "supports": "urgency"
+      }
+    ],
+    "draft": "Hi Derek,\n\nThanks for flagging this, and for forwarding the whole chain. We understand Marlowe Hotels would like to pay INV-0311 before their payment run on Tuesday, so we're treating it as a priority.\n\nWe're looking into why the \"Pay now\" link expired on an invoice sent on the 27th. In the meantime, [steps to get Marlowe Hotels a working payment link for INV-0311].\n\nCould you also tell us which other client's invoice had the same problem earlier this week? That will help us find the cause.\n\nBest,\nLedgerline Support"
+  },
+  {
+    "ticketId": "LL-5032",
+    "source": "recorded",
+    "suggestedAt": "2026-11-04T23:02:32.317Z",
+    "model": "claude-sonnet-5-5",
+    "promptVersion": "p-48be27bc",
+    "agentNote": "This is a repeat of LL-4977, where Joel attributed the shortfall to card fees, but Hannah's figures (£96.20 fees vs £412.80 short, and £388.15 short on 20 Oct) don't support that. Please confirm the payout report attachment came through and consider escalating to whoever handles the Stripe integration, since her month-end close is blocked.}",
+    "kind": "triage",
+    "category": {
+      "value": "Bug",
+      "confidence": 0.55,
+      "runnerUp": {
+        "value": "Billing",
+        "confidence": 0.25
+      }
+    },
+    "urgency": {
+      "value": "High",
+      "confidence": 0.55,
+      "runnerUp": {
+        "value": "Urgent",
+        "confidence": 0.25
+      }
+    },
+    "evidence": [
+      {
+        "quote": "the invoices show as paid in full, but the payout is lower than the total",
+        "supports": "category"
+      },
+      {
+        "quote": "Still not resolved, I’m afraid.",
+        "supports": "category"
+      },
+      {
+        "quote": "Our month-end reconciliation can’t close until I can explain the rest.",
+        "supports": "urgency"
+      },
+      {
+        "quote": "Could someone look at this properly this time?",
+        "supports": "urgency"
+      }
+    ],
+    "draft": "Hi Hannah,\n\nI'm sorry this is still unresolved. You've checked that the Stripe fees for the 28 October payout come to £96.20, not the £412.80 shortfall, so card fees don't explain the gap.\n\nWe'll take another look at this payout and the earlier one from 20 October, using the payout report you attached. I know your month-end reconciliation is waiting on this, and we'll update you by [time of next update].\n\nBest,\nLedgerline Support"
+  },
+  {
+    "ticketId": "LL-5033",
+    "source": "recorded",
+    "suggestedAt": "2026-11-04T23:02:20.129Z",
+    "model": "claude-sonnet-5-5",
+    "promptVersion": "p-48be27bc",
+    "agentNote": "This is a ten-point email mixing a possible bug (skipped recurring invoice), a billing check (nine seats charged), and several feature requests. It also carries a renewal-risk signal: the owner asked whether moving to Ledgerline was the right call, and she is weighing annual billing. Consider looping in the account manager, and she offered a call after 2pm Eastern.",
+    "kind": "triage",
+    "category": {
+      "value": "Bug",
+      "confidence": 0.45,
+      "runnerUp": {
+        "value": "Feature request",
+        "confidence": 0.2
+      }
+    },
+    "urgency": {
+      "value": "High",
+      "confidence": 0.55,
+      "runnerUp": {
+        "value": "Normal",
+        "confidence": 0.25
+      }
+    },
+    "evidence": [
+      {
+        "quote": "Harbor Point Marina, didn't go out at all",
+        "supports": "category"
+      },
+      {
+        "quote": "for October with no reason given",
+        "supports": "category"
+      },
+      {
+        "quote": "we have a quarter-end in a few weeks and our year-end audit starts in February",
+        "supports": "urgency"
+      },
+      {
+        "quote": "Point 3, the recurring invoices, because it's already cost us with a client.",
+        "supports": "urgency"
+      },
+      {
+        "quote": "If a charge from Ledgerline looks wrong, reply with the LB- invoice number and we'll check it within one business day.",
+        "supports": "draft",
+        "article": "Invoices and billing"
+      }
+    ],
+    "draft": "Hi Maggie,\n\nThank you for such a clear, organised email, and for the kind words about the move. We've read all ten points and will start with the four you said matter most.\n\nOn Harbor Point, we're sorry the October invoice was skipped with no reason given and that your client noticed before you did. Here is what we know: [explanation of why October's recurring invoice was skipped, and whether alerts for skipped invoices are available].\n\nOn your own bill, we'd like to check the October charge for nine seats. Could you reply with the LB- invoice number for that invoice? We'll check it within one business day. On the annual price for your plan, it is [annual Growth price for 7 seats].\n\nFor the tax rounding, the duplicate client records and the remaining points, we'll follow up with [answers to points 1, 2 and 4 to 10].\n\nBest,\nLedgerline Support"
+  },
+  {
+    "ticketId": "LL-5034",
+    "source": "recorded",
+    "suggestedAt": "2026-11-04T23:02:13.882Z",
+    "model": "claude-sonnet-5-5",
+    "promptVersion": "p-48be27bc",
+    "agentNote": "The help center doesn't say whether a read-only role exists or whether it uses a seat. Please check, then fill in the placeholder. If no such role exists, log this as a feature request. The BAS deadline date isn't stated, so it may be worth asking.",
+    "kind": "triage",
+    "category": {
+      "value": "Feature request",
+      "confidence": 0.5,
+      "runnerUp": {
+        "value": "How-to",
+        "confidence": 0.4
+      }
+    },
+    "urgency": {
+      "value": "Normal",
+      "confidence": 0.6,
+      "runnerUp": {
+        "value": "High",
+        "confidence": 0.3
+      }
+    },
+    "evidence": [
+      {
+        "quote": "Can I give him read-only access without using one of our paid seats?",
+        "supports": "category"
+      },
+      {
+        "quote": "I don't want him able to edit or send anything.",
+        "supports": "category"
+      },
+      {
+        "quote": "needs to see our invoices and payments for the quarterly BAS",
+        "supports": "urgency"
+      },
+      {
+        "quote": "You can export your invoices, clients and payments at any time, on every plan, from Settings → Data → Export.",
+        "supports": "draft",
+        "article": "Exporting your data"
+      },
+      {
+        "quote": "Choose what to include and a date range",
+        "supports": "draft",
+        "article": "Exporting your data"
+      }
+    ],
+    "draft": "Hi Rhiannon,\n\nThanks for getting in touch about access for Dev at Pillar & Post Accounting. I'm confirming whether read-only access is possible without using a paid seat: [answer on read-only access and seats].\n\nIn the meantime, you can export your invoices, clients and payments at any time, on every plan, from Settings → Data → Export. You can choose what to include and a date range, so you could send Dev just the quarter he needs for the BAS.\n\nBest,\nLedgerline Support"
+  },
+  {
+    "ticketId": "LL-5035",
+    "source": "recorded",
+    "suggestedAt": "2026-11-04T23:02:12.800Z",
+    "model": "claude-sonnet-5-5",
+    "promptVersion": "p-48be27bc",
+    "agentNote": "Possible numbering bug after the recent update on a Scale account; please check Greywell's numbering history and escalate to engineering for a root cause before replying. Nadia needs a written explanation for her auditor, so fill in the placeholders only with confirmed facts.",
+    "kind": "triage",
+    "category": {
+      "value": "Bug",
+      "confidence": 0.6,
+      "runnerUp": {
+        "value": "How-to",
+        "confidence": 0.25
+      }
+    },
+    "urgency": {
+      "value": "High",
+      "confidence": 0.5,
+      "runnerUp": {
+        "value": "Normal",
+        "confidence": 0.35
+      }
+    },
+    "evidence": [
+      {
+        "quote": "Since Thursday our invoice numbers have jumped.",
+        "supports": "category"
+      },
+      {
+        "quote": "nobody here changed the numbering settings",
+        "supports": "category"
+      },
+      {
+        "quote": "Our auditor needs a sequential series with an explanation for any gap.",
+        "supports": "urgency"
+      },
+      {
+        "quote": "Invoices you create for your own clients use your own numbering, set in Settings → Invoice numbering.",
+        "supports": "draft",
+        "article": "Invoices and billing"
+      }
+    ],
+    "draft": "Hi Nadia,\n\nThanks for flagging this, and I'm sorry for the trouble ahead of your audit. I understand your last invoice on Wednesday was INV-2026-0418 and the next one on Thursday came out as INV-2026-1000, with no change made to the numbering settings on your side.\n\nHere is what we know so far: [explanation of what caused the jump]. On whether 0419 to 0999 can still be used: [whether the skipped numbers can be reused]. The numbering for invoices you send to your own clients is set in Settings → Invoice numbering.\n\nI'm also preparing a written explanation for your audit file: [written statement for the audit file]. To help us check your account, could you send us a screenshot of what Settings → Invoice numbering shows right now, and tell us how many invoices you've sent since Thursday?\n\nBest,\nLedgerline Support"
+  },
+  {
+    "ticketId": "LL-5036",
+    "source": "recorded",
+    "suggestedAt": "2026-11-04T23:02:16.147Z",
+    "model": "claude-sonnet-5-5",
+    "promptVersion": "p-48be27bc",
+    "agentNote": "The customer writes in Spanish and the draft is in Spanish. Check whether the discount/tax calculation changed about two weeks ago and escalate to engineering if the example invoice FAC-2026-0912 reproduces it. The month-end close is on the 5th, so confirm today's date to set the urgency, and decide how to handle corrected invoices for the 23 affected ones.",
+    "kind": "triage",
+    "category": {
+      "value": "Bug",
+      "confidence": 0.8,
+      "runnerUp": {
+        "value": "How-to",
+        "confidence": 0.12
+      }
+    },
+    "urgency": {
+      "value": "High",
+      "confidence": 0.5,
+      "runnerUp": {
+        "value": "Urgent",
+        "confidence": 0.35
+      }
+    },
+    "evidence": [
+      {
+        "quote": "Error en el cálculo del IVA en facturas con descuento",
+        "supports": "category"
+      },
+      {
+        "quote": "las facturas que llevan un descuento calculan el IVA sobre el subtotal antes del descuento, no después",
+        "supports": "category"
+      },
+      {
+        "quote": "Necesitamos saber si es un error del sistema o una configuración nuestra antes del cierre del mes, que es el día 5.",
+        "supports": "urgency"
+      },
+      {
+        "quote": "dos de ellos nos pidieron facturas corregidas",
+        "supports": "urgency"
+      },
+      {
+        "quote": "The total on an invoice you create is calculated from its line items, discounts and the tax rates set in Settings → Tax.",
+        "supports": "draft",
+        "article": "Invoices and billing"
+      }
+    ],
+    "draft": "Hola Lucía,\n\nGracias por el detalle y por el ejemplo de la factura FAC-2026-0912; nos ayuda mucho. Entendemos que el cierre del mes es el día 5 y que dos de sus clientes ya pidieron facturas corregidas.\n\nSegún nuestro centro de ayuda, el total de una factura se calcula a partir de sus líneas, los descuentos y las tasas de impuestos definidas en Settings → Tax. Mientras lo revisamos, ¿podría confirmarnos si alguien cambió esas tasas o la configuración de impuestos en las últimas dos semanas?\n\nVamos a revisar si se trata de un error del sistema y le responderemos en cuanto tengamos novedades.\n\nSaludos,\nLedgerline Support"
+  },
+  {
+    "ticketId": "LL-5037",
+    "source": "recorded",
+    "suggestedAt": "2026-11-04T23:01:56.460Z",
+    "model": "claude-sonnet-5-5",
+    "promptVersion": "p-48be27bc",
+    "agentNote": "Gary says this is the third occurrence since August and threatens to leave, so treat it as a churn risk and loop in your account manager. Escalate to engineering, check whether reminders can be paused on his account right now, and arrange a call today at (555) 014-2290 as he requested.",
+    "kind": "triage",
+    "category": {
+      "value": "Bug",
+      "confidence": 0.8,
+      "runnerUp": {
+        "value": "Cancellation risk",
+        "confidence": 0.15
+      }
+    },
+    "urgency": {
+      "value": "Urgent",
+      "confidence": 0.6,
+      "runnerUp": {
+        "value": "High",
+        "confidence": 0.35
+      }
+    },
+    "evidence": [
+      {
+        "quote": "WHY ARE MY CUSTOMERS GETTING PAYMENT REMINDERS FOR INVOICES THEY ALREADY PAID",
+        "supports": "category"
+      },
+      {
+        "quote": "THE INVOICES SAY PAID. AND YOUR SYSTEM IS STILL SENDING THEM REMINDERS.",
+        "supports": "category"
+      },
+      {
+        "quote": "IF THIS HAPPENS AGAIN WE ARE MOVING TO SOMETHING ELSE.",
+        "supports": "category"
+      },
+      {
+        "quote": "TURN OFF THE REMINDERS ON MY ACCOUNT RIGHT NOW UNTIL THIS IS FIXED, AND SOMEONE CALL ME TODAY.",
+        "supports": "urgency"
+      },
+      {
+        "quote": "I HAVE NOW HAD FOUR CUSTOMERS CALL ME THIS MORNING",
+        "supports": "urgency"
+      }
+    ],
+    "draft": "Hi Gary,\n\nI'm sorry. Your customers have received \"Final notice\" emails for invoices they paid weeks ago, and you've told us this is the third time since August. That is not acceptable, especially with a county contract involved.\n\nWe are looking into this as a priority, and [status of pausing payment reminders on the account] . [Name of colleague] will call you today at [time] on the number you gave us.\n\nTo help us find the cause, could you reply with the invoice numbers of the four invoices that triggered these emails?\n\nBest,\nLedgerline Support"
+  },
+  {
+    "ticketId": "LL-5038",
+    "source": "recorded",
+    "suggestedAt": "2026-11-04T23:01:53.632Z",
+    "model": "claude-sonnet-5-5",
+    "promptVersion": "p-48be27bc",
+    "agentNote": "The email gives no detail, so category and urgency are guesses. \"Again\" suggests a repeat problem, so check this account's earlier tickets for the same issue and for any frustration worth escalating.",
+    "kind": "triage",
+    "category": {
+      "value": "Bug",
+      "confidence": 0.7,
+      "runnerUp": {
+        "value": "Cancellation risk",
+        "confidence": 0.1
+      }
+    },
+    "urgency": {
+      "value": "Normal",
+      "confidence": 0.45,
+      "runnerUp": {
+        "value": "High",
+        "confidence": 0.35
+      }
+    },
+    "evidence": [
+      {
+        "quote": "it's broken again",
+        "supports": "category"
+      },
+      {
+        "quote": "it's broken again",
+        "supports": "urgency"
+      }
+    ],
+    "draft": "Hi Kieran,\n\nThanks for getting in touch, and I'm sorry you're having trouble again. I'd like to get this sorted for you, but I don't yet know what's gone wrong.\n\nCould you tell us what you were trying to do and what happened instead? If you saw an error message, please send us the exact wording or a screenshot.\n\nOnce we have that, we'll look into it right away.\n\nBest,\nLedgerline Support"
+  },
+  {
+    "ticketId": "LL-5039",
+    "source": "recorded",
+    "suggestedAt": "2026-11-04T23:01:49.828Z",
+    "model": "claude-sonnet-5-5",
+    "promptVersion": "p-48be27bc",
+    "kind": "triage",
+    "category": {
+      "value": "How-to",
+      "confidence": 0.96,
+      "runnerUp": {
+        "value": "Feature request",
+        "confidence": 0.02
+      }
+    },
+    "urgency": {
+      "value": "Normal",
+      "confidence": 0.7,
+      "runnerUp": {
+        "value": "Low",
+        "confidence": 0.25
+      }
+    },
+    "evidence": [
+      {
+        "quote": "How do I add our logo to invoices?",
+        "supports": "category"
+      },
+      {
+        "quote": "Where do I upload it?",
+        "supports": "category"
+      },
+      {
+        "quote": "I'd like it to appear at the top of the invoices we send.",
+        "supports": "urgency"
+      },
+      {
+        "quote": "To add your logo to the invoices you send, upload it in Settings → Branding → Invoice logo.",
+        "supports": "draft",
+        "article": "Invoices and billing"
+      }
+    ],
+    "draft": "Hi Tom,\n\nThanks for getting in touch, and congratulations on the new logo! To add it to the invoices you send, upload it in Settings → Branding → Invoice logo.\n\nIf you run into any trouble once you're there, just reply and we'll help.\n\nBest,\nLedgerline Support"
+  },
+  {
+    "ticketId": "LL-5040",
+    "source": "recorded",
+    "suggestedAt": "2026-11-04T23:02:02.213Z",
+    "model": "claude-sonnet-5-5",
+    "promptVersion": "p-48be27bc",
+    "agentNote": "The renewal on 15 December and the tool review by the new finance director make this a possible churn risk, so consider looping in Fernhill's account manager before replying.",
+    "kind": "triage",
+    "category": {
+      "value": "Cancellation risk",
+      "confidence": 0.5,
+      "runnerUp": {
+        "value": "How-to",
+        "confidence": 0.45
+      }
+    },
+    "urgency": {
+      "value": "Normal",
+      "confidence": 0.5,
+      "runnerUp": {
+        "value": "High",
+        "confidence": 0.4
+      }
+    },
+    "evidence": [
+      {
+        "quote": "Exporting all our invoices and client records",
+        "supports": "category"
+      },
+      {
+        "quote": "before she decides on next year's tools",
+        "supports": "category"
+      },
+      {
+        "quote": "Our renewal is on 15 December",
+        "supports": "category"
+      },
+      {
+        "quote": "it would help to know what's possible in the next couple of weeks",
+        "supports": "urgency"
+      },
+      {
+        "quote": "Our renewal is on 15 December",
+        "supports": "urgency"
+      },
+      {
+        "quote": "You can export your invoices, clients and payments at any time, on every plan, from Settings → Data → Export.",
         "supports": "draft",
         "article": "Exporting your data"
       },
@@ -75,11 +1890,6 @@
         "article": "Using the Ledgerline API"
       },
       {
-        "quote": "Each invoice's PDF is available from the invoice's pdf endpoint.",
-        "supports": "draft",
-        "article": "Using the Ledgerline API"
-      },
-      {
         "quote": "An account owner creates API keys in Settings → Developers.",
         "supports": "draft",
         "article": "Using the Ledgerline API"
@@ -95,21 +1905,22 @@
         "article": "Cancelling or not renewing"
       }
     ],
-    "draft": "Hi Aisha,\n\nYes, you can export all of it yourself at any time, on every plan, from Settings → Data → Export. Choose what to include and a date range; the default is everything since your account was created. Each type (invoices, clients and payments) downloads as its own CSV file.\n\nTick \"Include invoice PDFs\" to add a PDF of every invoice in a zip file. File attachments on invoices are not included in exports, so those need to be downloaded from each invoice. Exports of more than 5,000 invoices are prepared in the background and emailed to you as a download link within 24 hours.\n\nOn the API: it's available on the Growth plan, so you have access to it. It can read your full history of invoices, clients and payments with no date limit, and each invoice's PDF is available from the invoice's pdf endpoint. An account owner creates API keys in Settings → Developers, and the reference is at developers.ledgerline.example.\n\nSince your new finance director is reviewing tools ahead of your 15 December renewal, your account manager can also walk you through your options. Just let us know if you'd like us to set that up.\n\nBest,\nLedgerline Support",
-    "agentNote": "The renewal is 15 December and a new finance director is reviewing next year's tools, so this may be an early churn signal; consider looping in the account manager. The help center doesn't say whether client exports include contact details, so check that before confirming it."
+    "draft": "Hi Aisha,\n\nYou can export your invoices, clients and payments at any time, on every plan, from Settings → Data → Export. Each type downloads as its own CSV file. Tick \"Include invoice PDFs\" to add a PDF of every invoice in a zip file.\n\nFile attachments on invoices are not included in exports, so you'll need to download them from each invoice. Exports of more than 5,000 invoices are prepared in the background and emailed to you as a download link within 24 hours.\n\nThe API is available on the Growth plan, so it's an option for you as well as the CSV export. It can read your full history of invoices, clients and payments, with no date limit. An account owner creates API keys in Settings → Developers, and the API reference is at developers.ledgerline.example.\n\nSince you're reviewing your tools ahead of your 15 December renewal, your account manager can also walk you through your options.\n\nBest,\nLedgerline Support"
   },
   {
     "ticketId": "vague",
-    "kind": "triage",
     "source": "recorded",
-    "suggestedAt": "2026-11-04T22:46:44.502Z",
+    "suggestedAt": "2026-11-04T23:04:06.433Z",
     "model": "claude-sonnet-5-5",
+    "promptVersion": "p-48be27bc",
+    "agentNote": "The email doesn't say whether this is a Ledgerline (LB-) invoice or one Sam created for their own client, so the category is uncertain. Check Sam's account for last month's LB- invoice before replying.",
+    "kind": "triage",
     "category": {
       "value": "Billing",
       "confidence": 0.45,
       "runnerUp": {
         "value": "Bug",
-        "confidence": 0.4
+        "confidence": 0.35
       }
     },
     "urgency": {
@@ -123,6 +1934,10 @@
     "evidence": [
       {
         "quote": "The amounts on last month's invoice don't look right.",
+        "supports": "category"
+      },
+      {
+        "quote": "invoice amounts",
         "supports": "category"
       },
       {
@@ -140,7 +1955,6 @@
         "article": "Invoices and billing"
       }
     ],
-    "draft": "Hi Sam,\n\nThanks for flagging this, we're happy to take a look. Could you tell us whether the invoice was one Ledgerline sent to you, or one you created for your own client?\n\nIf it's from Ledgerline, please reply with the LB- invoice number and we'll check it within one business day. If it's one you created, the total is calculated from its line items, discounts and the tax rates set in Settings → Tax, so it's worth checking those. Please also tell us which amounts look wrong and what you expected to see.\n\nBest,\nLedgerline Support",
-    "agentNote": "The email doesn't say whether this is a Ledgerline charge (Billing) or an invoice Sam created in the product (possible Bug). Check Sam's account for last month's LB- invoice while waiting for a reply."
+    "draft": "Hi Sam,\n\nThanks for getting in touch, and sorry for the worry about the amounts. Could you tell us whether this is an invoice Ledgerline sent you, or one you created for your own client?\n\nIf it's a charge from Ledgerline, reply with the LB- invoice number and we'll check it within one business day.\n\nIf it's an invoice you created, the total is calculated from its line items, discounts and the tax rates set in Settings → Tax, so those are worth a look. Tell us what looks off and we can dig in.\n\nBest,\nLedgerline Support"
   }
 ]

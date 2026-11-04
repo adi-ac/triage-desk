@@ -161,6 +161,18 @@ const Output = z.object({
   agentNote: z.string().nullable(),
 });
 
+/**
+ * Placeholders that are instructions to the support agent ("[Confirm whether
+ * a PO field exists]") rather than gaps for a fact ("[invoice number]").
+ * Advice belongs in agentNote; a run with one of these is rejected.
+ */
+const AGENT_INSTRUCTION =
+  /^\[\s*(agent\b|note\b|todo\b|(confirm|check|verify|consider|add|insert|include|describe|explain|ask|loop|escalate|mention|make sure|find out|look up|update|replace|fill in|decide|investigate|follow up)\b)|\bagent\b|\bsupport team\b/i;
+
+function instructionPlaceholders(draft: string): string[] {
+  return (draft.match(/\[[^\]\n]+\]/g) ?? []).filter((p) => AGENT_INSTRUCTION.test(p));
+}
+
 /** The request a person sends with "Triage anyway". */
 const TRIAGE_ANYWAY = `A person reviewed your suggestion that this isn't a request and chose "Triage anyway". Set kind to "triage" and give a category, urgency, evidence and draft as for any request.`;
 
@@ -236,6 +248,9 @@ async function ask(email: Email, forced: boolean) {
   }
   if (!o.category || !o.urgency || o.draft === null || o.notARequest)
     return { ...base, problem: "invalid: triage with missing or not-a-request fields", raw };
+  const instructions = instructionPlaceholders(o.draft);
+  if (instructions.length > 0)
+    return { ...base, problem: `invalid: placeholder is an instruction to the agent: ${instructions.join(", ")}`, raw };
   const suggestion: TriageSuggestion = {
     ...meta,
     kind: "triage",

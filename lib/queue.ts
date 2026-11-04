@@ -1,5 +1,6 @@
 import type { Ticket } from "@/fixtures/tickets";
-import type { Category, Suggestion, TriageSuggestion, Urgency } from "./suggestion";
+import { confidenceThresholds, toPercent } from "./confidence";
+import type { Category, SuggestedField, Suggestion, TriageSuggestion, Urgency } from "./suggestion";
 
 /** What a person has decided for a ticket's fields; null while still the model's suggestion. */
 export type FieldDecisions = { category: Category | null; urgency: Urgency | null };
@@ -9,17 +10,30 @@ export const undecided: FieldDecisions = { category: null, urgency: null };
 const highStakesCategories: readonly Category[] = ["Billing", "Cancellation risk"];
 
 /**
+ * The values that count toward stakes for one field: a person's decision if
+ * there is one; otherwise the top pick, plus the runner-up only when it's
+ * within the 15-point margin (the same test as "unsure"). A far-behind
+ * runner-up, such as Cancellation risk at 10% behind Bug at 70%, doesn't count.
+ */
+function stakesValues<T extends string>(field: SuggestedField<T>, decided: T | null): T[] {
+  if (decided) return [decided];
+  const r = field.runnerUp;
+  const close = r && toPercent(field.confidence) - toPercent(r.confidence) < confidenceThresholds.margin;
+  return close ? [field.value, r.value] : [field.value];
+}
+
+/**
  * High stakes: the category is Billing or Cancellation risk, or the urgency
- * is Urgent, counting the runner-up as well as the top pick. Once a person
- * decides a field, only their value counts. When Claude is unsure, assume
- * the higher stakes, so a likely cancellation can't sink just because the
- * top guess was How-to.
+ * is Urgent, counting a close runner-up as well as the top pick. Once a
+ * person decides a field, only their value counts. When Claude is unsure
+ * between two values, assume the higher stakes, so a likely cancellation
+ * can't sink just because the top guess was How-to.
  */
 export function isHighStakes(s: TriageSuggestion, d: FieldDecisions): boolean {
-  const categories = d.category ? [d.category] : [s.category.value, s.category.runnerUp?.value];
-  const urgencies = d.urgency ? [d.urgency] : [s.urgency.value, s.urgency.runnerUp?.value];
+  const categories = stakesValues(s.category, d.category);
+  const urgencies = stakesValues(s.urgency, d.urgency);
   return (
-    categories.some((c) => c !== undefined && highStakesCategories.includes(c)) ||
+    categories.some((c) => highStakesCategories.includes(c)) ||
     urgencies.includes("Urgent" satisfies Urgency)
   );
 }
