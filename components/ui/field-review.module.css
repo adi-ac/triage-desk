@@ -66,3 +66,30 @@
   padding: 0;
   list-style: none;
 }
+
+.evidence {
+  display: grid;
+  gap: 4px;
+  margin-block-start: 4px;
+}
+
+.evidence .label {
+  margin: 0;
+}
+
+.quotes {
+  display: grid;
+  gap: 4px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+/* Hover or focus marks the same quote in the email. */
+.quote {
+  inline-size: fit-content;
+  max-inline-size: 100%;
+  border-radius: 2px;
+  color: var(--ink);
+  cursor: default;
+}

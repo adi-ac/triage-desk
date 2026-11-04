@@ -11,7 +11,7 @@ These hold on every screen. If a design seems to need an exception, ask; don't m
 1. **Anything Claude produced renders as a suggestion until a person acts on it.** Suggestions are pencil: dashed `--suggested-border`, gray. Use `Chip state="suggested"`, `Tag tone="ai"`, `TimelineRow actor="ai"`, `DraftEditor state="suggested"`. It becomes decided, edited or approved only when a person sets, edits or approves it. Why: if model output looks like a decision, nobody can tell what was checked.
 2. **A confidence value always shows as `ConfidenceMeter`: a bar, a percentage and a level word. Never as a chip or a tag**, and never as a bare number. The one exception is history: once a field is kept or switched, FieldReview replaces its meter with a quiet note, "Claude suggested How-to · 48%". Why: high confidence shares Petrol with decisions, so shape and words are what keep them apart; and confidence belongs to suggestions, so a meter beside a value must never show confidence in a different value.
 3. **A decided chip always says how it was decided: who set it, or "Approved as suggested".** `Chip state="decided"` requires either `decidedBy` (`"you"` or the person's name) or `asSuggested`. Why: same as rule 2. A solid petrol chip with no name could be the model.
-4. **Petrol is only for decisions, high confidence, the selected queue item and Approve.** Decisions means anything a person set: `Chip state="decided"`, `Tag tone="human"`, `TimelineRow actor="human"`. The focus ring (`--focus-ring`, the accent) is the one documented exception: keyboard focus must always be clearly visible, and it only appears while tabbing, so it never competes with Approve. Nothing else uses an `--accent*`, `--decided-*` or `--confidence-high*` token: no petrol links, info banners, headings or icons. Why: Petrol means "a person did this" or "fine to go ahead". A third meaning breaks both.
+4. **Petrol is only for decisions, high confidence, the selected queue item and Approve.** Decisions means anything a person set: `Chip state="decided"`, `Tag tone="human"`, `TimelineRow actor="human"`. The focus ring (`--focus-ring`, the accent) is the one documented exception: keyboard focus must always be clearly visible, and it only appears while tabbing, so it never competes with Approve. Nothing else uses an `--accent*`, `--decided-*` or `--confidence-high*` token: no petrol links, info banners, headings or icons. A reply a team rule sent has no Petrol at all, since no person acted: FieldReview `readOnly`, DraftEditor `state="sent-by-rule"`, ApproveBar `sentBy="rule"`. Why: Petrol means "a person did this" or "fine to go ahead". A third meaning breaks both.
 5. **Approve stays disabled while any blocker is open, and the blockers are listed next to it.** Exactly three things block, and nothing else:
    - an unsure field that no one has kept or switched: under 60%, or within 15 points of its runner-up;
    - any unfilled `[placeholder]` in the draft;
@@ -19,9 +19,11 @@ These hold on every screen. If a design seems to need an exception, ask; don't m
 
    Get them from `approveBlockers()` in `@/lib/approve`; never write your own checks. It returns one `{ target, message }` per blocker: `target` is the field's name or `"draft"`, and `message` is a sentence with the number that tripped it.
 
-   Approve lives in the triage pane's pinned footer, as `ApproveBar` in Pane's `footer`. ApproveBar shows the button and a one-line summary ("3 things to resolve: Category, Urgency, Draft") whose items jump to the field. The full list stays in the card, in a `Banner tone="warning"` titled "Approve is blocked" whose `id` is ApproveBar's `blockersId`. Never hide Approve until the reply is sent; never leave it enabled while a blocker is open; never pin it with negative margins or `position: sticky` of your own.
+   Approve lives in the triage pane's pinned footer, as `ApproveBar` in Pane's `footer`. ApproveBar shows the button and a one-line summary ("3 things to resolve: Category, Urgency, Draft") whose items jump to where each is fixed. There is no separate blocker list: each reason sits where it's fixed. An unsure field shows it in its meter's hint; the draft gets the blocker's `message` as DraftEditor's `blocker`, and its unfilled placeholders are highlighted in the text. Never hide Approve until the reply is sent; never leave it enabled while a blocker is open; never pin it with negative margins or `position: sticky` of your own.
 
-   After sending, ApproveBar swaps the button for "Sent by you · <time>" and a secondary button: "Next ticket" in the inbox (`afterSend="next-ticket"`), "Back to inbox" for a ticket opened on its own (`afterSend="back-to-inbox"`). The draft becomes `state="approved"` (read-only), and the timeline gets a row: "approved and sent the reply". A draft written for a value a person has since overridden is a warning, not a blocker: pass it as DraftEditor's `warning`. Why: block only where a wrong send is costly, and Approve must always be visible without layout hacks.
+   The one exception: a ticket with no model output has no Approve. Its triage pane says plainly that Claude hasn't triaged it yet, and has no footer.
+
+   After sending, ApproveBar swaps the button for "Sent by you · <time>" and a secondary button: "Next ticket" in the inbox (`afterSend="next-ticket"`), "Back to inbox" for a ticket opened on its own (`afterSend="back-to-inbox"`). The draft becomes `state="approved"` (read-only), and the timeline gets a row: "approved and sent the reply". A draft written for a value a person has since overridden is a warning, not a blocker: pass it as DraftEditor's `warning`. Why: block only where a wrong send is costly; Approve must always be visible without layout hacks; and the reason should sit where you fix it, not in a list you read in one place and act on in another.
 6. **Model output is always labeled with its source: recorded, live or hand-written.** Every screen that shows model output carries exactly one `OutputSource`, which can't be dismissed. Hand-written output is allowed during the build only and must be replaced by recorded output before shipping. LL-5040 stays hand-written until the API key is added. Why: an unlabeled canned example undoes the honesty claim the piece rests on (brief, First screen).
 7. **Approving never turns an untouched field into "Set by you".** On Approve, each field a person kept or switched shows `decidedBy="you"`; each field nobody touched shows `asSuggested`, labeled "Approved as suggested". `FieldReview` does this when you pass `approved`. The timeline gives them separate rows (see TimelineRow). Why: the record must never claim a person chose something they didn't look at.
 
@@ -34,7 +36,6 @@ const blockers = approveBlockers({ fields, draft });
   footer={
     <ApproveBar
       blockers={blockers}
-      blockersId="approve-blockers"
       targets={{ category: "field-category", urgency: "field-urgency", draft: "draft-reply" }}
       onApprove={approve}
       sentAt={sentAt}
@@ -45,15 +46,11 @@ const blockers = approveBlockers({ fields, draft });
 >
   <FieldReview id="field-category" … />
   <FieldReview id="field-urgency" … />
-  <DraftEditor id="draft-reply" … />
-  {blockers.length > 0 && (
-    <Banner id="approve-blockers" tone="warning" title="Approve is blocked">
-      {blockers.map((b) => <p key={b.target}>{b.message}</p>)}
-    </Banner>
-  )}
+  <DraftEditor id="draft-reply" blocker={blockers.find((b) => b.target === "draft")?.message} … />
 </Pane>
 
-// Incorrect: a home-made blocker (a stale draft is a warning), and Approve outside the footer
+// Incorrect: the reasons gathered in a list away from where they're fixed, and a home-made blocker
+<Banner tone="warning" title="Approve is blocked">{blockers.map((b) => <p>{b.message}</p>)}</Banner>
 <Button variant="primary" disabled={draftIsStale}>Approve and send</Button>
 ```
 
@@ -116,13 +113,17 @@ Screens are built from `Pane`s in a shell grid. Never hand-build a tray, a card 
 
 **Shell** (the screen's `<main>`; the page background is already `--page`). Padding 16px below 768px, 24px from 768px. Gap between panes: 16px. A header row (screen title, and the `OutputSource` when the screen shows model output) spans every column. Nothing ever scrolls sideways.
 
-With a queue (the inbox, where a person works through tickets):
+With a queue (the inbox, where a person works through tickets). The inbox is `/tickets/[id]`, so every open ticket has its own URL; `/` redirects to the first-screen ticket. Its header row holds the screen title, the open ticket's `OutputSource` (when it has model output) and, below 1200px, the "Queue" Button.
 
 | Width | Columns |
 | --- | --- |
 | 1200px and up | `320px minmax(0, 1fr) 400px`: queue, email, triage. The shell is `100dvh` tall and each pane's card scrolls on its own. |
-| 768–1199px | `minmax(0, 1fr) 360px`: email, triage. The queue moves behind a secondary "Queue" Button in the header row. |
-| Below 768px | One column: email, then triage. The "Queue" Button stays in the header. |
+| 768–1199px | `minmax(0, 1fr) 360px`: email, triage. The queue moves behind a secondary "Queue" Button in the header row, which opens it in a `Sheet` with the open ticket highlighted and scrolled into view; picking a ticket or Escape closes it. |
+| Below 768px | One column: email, then triage. The "Queue" Button stays in the header; the Sheet is full width. |
+
+**Queue order** comes from `orderQueue()` in `@/lib/queue`; never sort it yourself. Triaged tickets first: high stakes before normal, then the least sure first. High stakes means the category is Billing or Cancellation risk, or the urgency is Urgent, counting the runner-up as well as the top pick; once a person decides a field, only their value counts. Below them, in a group headed "Not triaged yet" (`text-overline`), tickets with no model output, newest first, each with a neutral "Not triaged" Tag. Why: when Claude is unsure, assume the higher stakes, so a likely cancellation can't sink just because the top guess was How-to.
+
+**Triage pane, top to bottom:** Category, then Urgency (each a FieldReview with its own evidence beneath it; hovering or focusing a quote marks it in the email), then the draft, then the activity `Timeline` (collapsed, "Activity · 3"). Approve is in the footer.
 
 Without a queue (a single ticket opened on its own, from a link): the same shell minus the queue column. That's not an exception, so don't ask about it. After sending, ApproveBar offers "Back to inbox" instead of "Next ticket".
 
@@ -188,6 +189,8 @@ Reviewing one suggested field: category or urgency. Use it for every field a per
 - While suggested: the dashed chip, the ConfidenceMeter, and three small secondary Buttons: "Keep", "Switch to <runner-up>" and "Other…", which opens the full list. The override is one click, and none of these competes with Approve.
 - Once kept or switched: the solid chip ("Set by you") and a quiet "Change" link that reopens the controls. The meter gives way to a quiet note, "Claude suggested How-to · 48%" (rule 2).
 - `approved`: locks the field. An untouched field shows "Approved as suggested" (rule 7).
+- `readOnly`: a reply a team rule sent. The chip stays pencil and the meter stays; no controls, no Petrol.
+- `evidence`: this field's quotes, from `matchEvidence()` filtered by `supports`, listed beneath it. Pass `onEvidenceActive` and keep the quote in screen state for EmailBody's `activeQuote`; the quotes then respond to hover and keyboard focus.
 
 It's controlled: keep `value` (null until someone keeps or switches) on the screen, because the Approve blockers need it. Give it an `id` and pass that in ApproveBar's `targets`, so the summary can jump to it. `options` is `categories` or `urgencies` from `@/lib/suggestion`. Its heading is an h3, so put it in a Pane. After each choice, add a timeline row: "kept the category as How-to" or "set the category to Billing".
 
@@ -238,7 +241,7 @@ The only way to show a confidence value (rule 2). Pass `value` from 0 to 1, and 
 
 ### EmailBody
 
-The customer's email. Pass `body` and the model's `evidence`; it splits paragraphs, keeps line breaks, marks each quote in place with EvidenceMark, and drops any quote that doesn't match the email word for word.
+The customer's email. Pass `body` and the model's `evidence`; it splits paragraphs, keeps line breaks, marks each quote in place with EvidenceMark, and drops any quote that doesn't match the email word for word. `activeQuote` (from FieldReview's `onEvidenceActive`) turns that quote's dashed underline solid and 2px, and scrolls it into view if it's out of sight (instantly with reduced motion).
 
 ```tsx
 // Correct
@@ -274,7 +277,7 @@ The same quote in the evidence list beside the email, under the word for what it
 
 ### TimelineRow
 
-One entry in an activity timeline. Rows go in an `<ol>` with its list styles reset.
+One entry in the activity timeline. Rows go in a `Timeline`, which is collapsed by default behind "Activity · <count>".
 
 - `actor="ai"`: the model or a team rule. `name` defaults to "Model"; pass "Team rule" for rules. Dashed ring.
 - `actor="human"`: a person. `name` is required. Solid petrol dot.
@@ -327,7 +330,10 @@ The reply draft. `state` is required; the label shows it in words ("Draft reply 
 
 - `suggested`: the model's draft, untouched. Pencil: dashed border (rule 1). The first change a person types shows it as `edited` and calls `onStateChange("edited")`. Give each new draft its own `key`, so it starts suggested again.
 - `edited`: a person changed it, or wrote it from scratch. Solid control border.
-- `approved`: approved or sent. Read-only, in the decided style (rule 4).
+- `approved`: approved or sent by a person. Read-only, in the decided style (rule 4).
+- `sent-by-rule`: sent by a team rule without review. Read-only and still pencil; no Petrol.
+
+`blocker` takes the draft's blocker message from `approveBlockers()` and shows it under the draft (rule 5). Unfilled `[placeholders]` are always highlighted in the text: a `--warning-soft` fill with a dashed `--warning` underline.
 
 `note` says who drafted it, in every state ("Drafted by the model, edited by you"). `warning` shows something to check that doesn't block Approve, such as "The draft was written for How-to; the category is now Cancellation risk." Use `defaultValue` when the editor owns the text, or `value` and `onChange` when the screen does.
 
@@ -371,11 +377,11 @@ Every pane on a screen (see Layout). `title` names it; `meta` takes a short fact
 
 ### ApproveBar
 
-Approve and what follows it; it only goes in the triage Pane's `footer` (rule 5). Before sending: the primary "Approve and send" button, disabled while any blocker is open, and a one-line summary whose items jump to the field (`targets` maps each blocker target to an element id). After sending (`sentAt` set): "Sent by you · <time>" and "Next ticket" or "Back to inbox" (`afterSend`).
+Approve and what follows it; it only goes in the triage Pane's `footer` (rule 5). Before sending: the primary "Approve and send" button, disabled while any blocker is open, and a one-line summary whose items jump to where each is fixed (`targets` maps each blocker target to an element id). After sending (`sentAt` set): "Sent by you · <time>", or "Sent by rule · <time>" with `sentBy="rule"`, and "Next ticket" or "Back to inbox" (`afterSend`).
 
 ```tsx
 // Correct: a ticket opened on its own, outside the inbox
-<ApproveBar blockers={blockers} blockersId="approve-blockers" targets={targets} onApprove={approve} sentAt={sentAt} afterSend="back-to-inbox" onAfterSend={backToInbox} />
+<ApproveBar blockers={blockers} targets={targets} onApprove={approve} sentAt={sentAt} afterSend="back-to-inbox" onAfterSend={backToInbox} />
 
 // Incorrect: Next ticket where there's no queue to go to
 <ApproveBar … afterSend="next-ticket" onAfterSend={() => {}} />
@@ -391,6 +397,32 @@ Every time on screen (see Data, Times). Pass `dateTime` as ISO 8601.
 
 // Incorrect: formatted by hand, and in UTC
 <time>{ticket.receivedAt.slice(11, 16)}</time>
+```
+
+### Sheet
+
+A dialog-level panel from the left: `--surface-raised`, `--shadow-dialog` and the `--scrim`; full width on phones. Focus moves in on open and back to the opener on close; Escape or a click outside closes it. The inbox's Queue button is its one use: close it when a ticket is picked.
+
+```tsx
+// Correct
+<Sheet open={queueOpen} onClose={() => setQueueOpen(false)} title="Queue">{queueList}</Sheet>
+
+// Incorrect: a hand-built overlay with its own focus handling
+<div className={styles.overlay} onClick={close}>{queueList}</div>
+```
+
+### Timeline
+
+The activity record, collapsed by default behind "Activity · <count>". Children are TimelineRows, oldest first.
+
+```tsx
+// Correct
+<Timeline>
+  <TimelineRow actor="ai" at={suggestion.suggestedAt}>suggested How-to and Normal urgency, and drafted a reply</TimelineRow>
+</Timeline>
+
+// Incorrect: rows in a bare list, always open
+<ol>{rows}</ol>
 ```
 
 ### Severity

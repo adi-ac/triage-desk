@@ -15,8 +15,10 @@ import {
   QueueItem,
   SegmentedControl,
   Severity,
+  Sheet,
   Tag,
   Time,
+  Timeline,
   TimelineRow,
   confidenceThresholds,
 } from "@/components/ui";
@@ -36,6 +38,18 @@ const demoBlockers = approveBlockers({
 });
 const excerpt = firstScreen.body.split("\n\n").slice(1, 4).join("\n\n");
 
+function SheetDemo() {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <Button onClick={() => setOpen(true)}>Queue</Button>
+      <Sheet open={open} onClose={() => setOpen(false)} title="Queue">
+        <p className="text-small">The queue goes here.</p>
+      </Sheet>
+    </>
+  );
+}
+
 /** Live, so the controls can be tried: each theme pane keeps its own state. */
 function FieldReviewDemo() {
   const [category, setCategory] = useState<Category | null>(null);
@@ -44,6 +58,17 @@ function FieldReviewDemo() {
     <>
       <FieldReview label="Category" field={suggestion.category} options={categories} value={category} onValueChange={setCategory} />
       <FieldReview label="Urgency" field={suggestion.urgency} options={urgencies} value={urgency} onValueChange={setUrgency} />
+      <FieldReview
+        label="Category"
+        field={suggestion.category}
+        options={categories}
+        value={null}
+        onValueChange={() => {}}
+        evidence={suggestion.evidence.filter((e) => e.supports === "category")}
+        onEvidenceActive={() => {}}
+      />
+      <p className={`text-overline ${styles.muted}`}>Sent by a team rule</p>
+      <FieldReview label="Urgency" field={suggestion.urgency} options={urgencies} value={null} onValueChange={() => {}} readOnly />
       <p className={`text-overline ${styles.muted}`}>After Approve, untouched</p>
       <FieldReview label="Urgency" field={suggestion.urgency} options={urgencies} value={null} onValueChange={() => {}} approved />
     </>
@@ -249,9 +274,9 @@ export function ComponentsSection({ theme }: { theme: string }) {
       <Demo
         name="TimelineRow"
         props="actor: ai | human"
-        intro="The model and team rules get a dashed ring; a person gets a solid dot and must be named. A field approved untouched gets its own row, worded as approved as suggested, never as set."
+        intro="Rows go in a Timeline, which is collapsed by default behind Activity · count (open here). The model and team rules get a dashed ring; a person gets a solid dot and must be named. A field approved untouched gets its own row, worded as approved as suggested, never as set."
       >
-        <ol className={styles.timeline}>
+        <Timeline defaultOpen>
           <TimelineRow actor="ai" at="2026-11-02T16:48:00Z">
             suggested How-to at 64%, with Cancellation risk close behind
           </TimelineRow>
@@ -264,7 +289,7 @@ export function ComponentsSection({ theme }: { theme: string }) {
           <TimelineRow actor="human" name="Dana Ruiz" at="2026-11-02T16:55:00Z">
             approved the urgency as suggested: Normal
           </TimelineRow>
-        </ol>
+        </Timeline>
       </Demo>
 
       <Demo name="Banner" props="tone: info | warning | error" intro="Info is gray, not petrol, with a hairline ring so it stands out on a white card. The title says the tone in words and the fill carries the color, so no tone has a colored edge.">
@@ -303,7 +328,7 @@ export function ComponentsSection({ theme }: { theme: string }) {
 
       <Demo
         name="DraftEditor"
-        props="state: suggested | edited | approved"
+        props="state: suggested | edited | approved | sent-by-rule · blocker · warning"
         intro="Suggested is the model's untouched draft, dashed like any suggestion. Type in it and it turns edited, with a solid border. Approved is read-only in the decided style. The note keeps saying who drafted it."
       >
         <DraftEditor label="Draft reply" state="suggested" rows={3} note="Drafted by the model" defaultValue={draft} />
@@ -317,6 +342,15 @@ export function ComponentsSection({ theme }: { theme: string }) {
           warning="The draft was written for How-to; the category is now Cancellation risk. Check it still fits."
           defaultValue={draft}
         />
+        <DraftEditor
+          label="Draft reply"
+          state="suggested"
+          rows={3}
+          note="Drafted by the model"
+          blocker={demoBlockers.find((b) => b.target === "draft")?.message}
+          defaultValue={suggestion.draft}
+        />
+        <DraftEditor label="Reply" state="sent-by-rule" rows={3} note="Drafted by the model, sent by rule without review" defaultValue={draft} />
       </Demo>
 
       <Demo
@@ -341,7 +375,7 @@ export function ComponentsSection({ theme }: { theme: string }) {
         </Pane>
         <Pane
           title="Triage"
-          footer={<ApproveBar blockers={demoBlockers} blockersId="demo-blockers" targets={{}} onApprove={() => {}} sentAt={null} afterSend="next-ticket" onAfterSend={() => {}} />}
+          footer={<ApproveBar blockers={demoBlockers} targets={{}} onApprove={() => {}} sentAt={null} afterSend="next-ticket" onAfterSend={() => {}} />}
         >
           <p className="text-small">The triage pane puts ApproveBar in its footer.</p>
         </Pane>
@@ -350,13 +384,14 @@ export function ComponentsSection({ theme }: { theme: string }) {
       <Demo
         name="ApproveBar"
         props="blockers · targets · sentAt · afterSend: next-ticket | back-to-inbox"
-        intro="Approve, with a one-line summary of what blocks it; each item jumps to its field. The full list stays in the card. After sending: the sent line, and Next ticket in the inbox or Back to inbox for a ticket opened on its own."
+        intro="Approve, with a one-line summary of what blocks it; each item jumps to where it's fixed, and the reason is shown there (the field's hint, the draft's highlighted placeholders), not in a list. After sending: the sent line (by you, or by rule), and Next ticket in the inbox or Back to inbox for a ticket opened on its own."
       >
         <div className={styles.blocks}>
-          <ApproveBar blockers={demoBlockers} blockersId="demo-blockers" targets={{}} onApprove={() => {}} sentAt={null} afterSend="next-ticket" onAfterSend={() => {}} />
-          <ApproveBar blockers={[]} blockersId="demo-blockers" targets={{}} onApprove={() => {}} sentAt={null} afterSend="next-ticket" onAfterSend={() => {}} />
-          <ApproveBar blockers={[]} blockersId="demo-blockers" targets={{}} onApprove={() => {}} sentAt="2026-11-02T16:55:00Z" afterSend="next-ticket" onAfterSend={() => {}} />
-          <ApproveBar blockers={[]} blockersId="demo-blockers" targets={{}} onApprove={() => {}} sentAt="2026-11-02T16:55:00Z" afterSend="back-to-inbox" onAfterSend={() => {}} />
+          <ApproveBar blockers={demoBlockers} targets={{}} onApprove={() => {}} sentAt={null} afterSend="next-ticket" onAfterSend={() => {}} />
+          <ApproveBar blockers={[]} targets={{}} onApprove={() => {}} sentAt={null} afterSend="next-ticket" onAfterSend={() => {}} />
+          <ApproveBar blockers={[]} targets={{}} onApprove={() => {}} sentAt="2026-11-02T16:55:00Z" afterSend="next-ticket" onAfterSend={() => {}} />
+          <ApproveBar blockers={[]} targets={{}} onApprove={() => {}} sentAt="2026-11-02T16:55:00Z" afterSend="back-to-inbox" onAfterSend={() => {}} />
+          <ApproveBar blockers={[]} targets={{}} onApprove={() => {}} sentAt="2026-11-02T16:31:20Z" sentBy="rule" afterSend="next-ticket" onAfterSend={() => {}} />
         </div>
       </Demo>
 
@@ -369,6 +404,14 @@ export function ComponentsSection({ theme }: { theme: string }) {
           <Time dateTime={firstScreen.receivedAt} />
           <Time dateTime="2025-12-31T23:30:00Z" />
         </div>
+      </Demo>
+
+      <Demo
+        name="Sheet"
+        props="open · onClose · title"
+        intro="A dialog-level panel from the left: surface-raised, the dialog shadow and the scrim; full width on phones. Focus moves in on open and back to the button on close. Escape or a click outside closes it. The inbox's Queue button opens the queue in one."
+      >
+        <SheetDemo />
       </Demo>
 
       <Demo

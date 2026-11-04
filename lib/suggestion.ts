@@ -31,6 +31,17 @@ export type Evidence = {
   supports: EvidenceSupports;
 };
 
+/** A reply a team rule sent without review. Not model output: the rule acted on it. */
+export type RuleSend = {
+  ticketId: string;
+  /** The rule's name, e.g. "How-to questions". */
+  rule: string;
+  /** What the rule requires, in words: "How-to, confidence 90% or higher". */
+  condition: string;
+  /** ISO 8601. */
+  sentAt: string;
+};
+
 export type Suggestion = {
   ticketId: string;
   source: OutputSourceKind;

@@ -2,10 +2,11 @@
 
 import { useEffect, useId, useRef, useState } from "react";
 import { toPercent } from "@/lib/confidence";
-import type { SuggestedField } from "@/lib/suggestion";
+import type { Evidence, SuggestedField } from "@/lib/suggestion";
 import { Button } from "./button";
 import { Chip } from "./chip";
 import { ConfidenceMeter } from "./confidence-meter";
+import { EvidenceMark } from "./evidence-mark";
 import styles from "./field-review.module.css";
 
 export type FieldReviewProps<T extends string> = {
@@ -24,6 +25,15 @@ export type FieldReviewProps<T extends string> = {
   approved?: boolean;
   /** Who decides, for the decided chip. */
   decidedBy?: string;
+  /**
+   * Sent by a team rule: nobody decided, so the chip stays pencil, the
+   * meter stays, and there are no controls.
+   */
+  readOnly?: boolean;
+  /** This field's evidence, already matched to the email (matchEvidence), shown beneath it. */
+  evidence?: readonly Evidence[];
+  /** A quote is hovered or focused (null when it isn't), so the screen can mark it in the email. */
+  onEvidenceActive?: (quote: string | null) => void;
 };
 
 /**
@@ -44,6 +54,9 @@ export function FieldReview<T extends string>({
   onValueChange,
   approved = false,
   decidedBy = "you",
+  readOnly = false,
+  evidence = [],
+  onEvidenceActive,
 }: FieldReviewProps<T>) {
   const headingId = useId();
   const listId = useId();
@@ -64,7 +77,7 @@ export function FieldReview<T extends string>({
   const decided = value !== null;
   const shown = value ?? field.value;
   const alternative = shown === field.value ? field.runnerUp?.value : field.value;
-  const showControls = !approved && (!decided || reopened);
+  const showControls = !approved && !readOnly && (!decided || reopened);
   const others = options.filter((o) => o !== shown && o !== alternative);
 
   function choose(next: T) {
@@ -97,7 +110,7 @@ export function FieldReview<T extends string>({
         ) : (
           <Chip state="suggested">{field.value}</Chip>
         )}
-        {decided && !approved && !reopened && (
+        {decided && !approved && !readOnly && !reopened && (
           <button
             ref={changeRef}
             type="button"
@@ -115,7 +128,7 @@ export function FieldReview<T extends string>({
           Claude suggested {field.value} · <span className="text-mono">{toPercent(field.confidence)}%</span>
         </p>
       ) : (
-        <ConfidenceMeter value={field.confidence} runnerUp={field.runnerUp?.confidence} confirmed={approved} />
+        <ConfidenceMeter value={field.confidence} runnerUp={field.runnerUp?.confidence} confirmed={approved || readOnly} />
       )}
 
       {showControls && (
@@ -146,6 +159,29 @@ export function FieldReview<T extends string>({
             </li>
           ))}
         </ul>
+      )}
+
+      {evidence.length > 0 && (
+        <div className={styles.evidence}>
+          <p className={`text-overline ${styles.label}`}>Evidence</p>
+          <ul className={styles.quotes}>
+            {evidence.map((e) => (
+              <li
+                key={e.quote}
+                tabIndex={onEvidenceActive ? 0 : undefined}
+                className={`text-reading ${styles.quote}`}
+                onMouseEnter={() => onEvidenceActive?.(e.quote)}
+                onMouseLeave={() => onEvidenceActive?.(null)}
+                onFocus={() => onEvidenceActive?.(e.quote)}
+                onBlur={() => onEvidenceActive?.(null)}
+              >
+                <q>
+                  <EvidenceMark supports={e.supports}>{e.quote}</EvidenceMark>
+                </q>
+              </li>
+            ))}
+          </ul>
+        </div>
       )}
     </section>
   );

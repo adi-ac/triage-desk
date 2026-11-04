@@ -19,3 +19,9 @@
   --evidence: var(--evidence-urgency);
   --evidence-line: var(--evidence-urgency-line);
 }
+
+/* Its evidence item is hovered or focused. */
+.mark[data-active] {
+  text-decoration-style: solid;
+  text-decoration-thickness: 2px;
+}

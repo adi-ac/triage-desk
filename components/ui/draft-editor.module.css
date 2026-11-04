@@ -7,40 +7,85 @@
   color: var(--ink-3);
 }
 
+/* The box carries the border and fill; the textarea above it is transparent
+   so the placeholder highlights drawn behind it show through. */
+.box {
+  position: relative;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  background: var(--surface);
+}
+
+.backdrop,
 .textarea {
+  padding: 10px 12px;
+  /* 16px on phones, so iOS doesn't zoom on focus. */
+  font-size: var(--text-input-size);
+  white-space: pre-wrap;
+  overflow-wrap: break-word;
+}
+
+.backdrop {
+  position: absolute;
+  inset: 0;
+  max-inline-size: none;
+  overflow: hidden;
+  color: transparent;
+  pointer-events: none;
+}
+
+.textarea {
+  position: relative;
   display: block;
   inline-size: 100%;
   max-inline-size: none;
   min-block-size: 8lh;
   /* Grows with the draft where supported; rows sets the floor elsewhere. */
   field-sizing: content;
-  padding: 10px 12px;
-  border: 1px solid var(--line-strong);
+  margin: 0;
+  border: 0;
   border-radius: 8px;
-  /* 16px on phones, so iOS doesn't zoom on focus. */
-  font-size: var(--text-input-size);
   color: var(--ink);
-  background: var(--surface);
+  background: transparent;
   resize: vertical;
 }
 
-/* Pencil: the model's untouched draft. */
-.field[data-state="suggested"] .textarea {
-  color: var(--suggested-text);
+/* An unfilled [placeholder] blocks Approve: amber, dashed, like a warning to fix. */
+.placeholder {
+  color: transparent;
+  border-radius: 2px;
+  background: var(--warning-soft);
+  text-decoration: underline dashed var(--warning);
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+}
+
+/* Pencil: the model's untouched draft, or one a rule sent without review. */
+.field[data-state="suggested"] .box,
+.field[data-state="sent-by-rule"] .box {
   background: var(--suggested-fill);
   border: 1px var(--suggested-border-style) var(--suggested-border);
 }
 
-/* Ink: approved, so it's a record. Body text stays ink for reading; the
-   label carries the petrol. */
-.field[data-state="approved"] .textarea {
+.field[data-state="suggested"] .textarea,
+.field[data-state="sent-by-rule"] .textarea {
+  color: var(--suggested-text);
+}
+
+/* Ink: approved by a person, so it's a record. Body text stays ink for
+   reading; the label carries the petrol. */
+.field[data-state="approved"] .box {
   background: var(--decided-fill);
   border: 1px var(--decided-border-style) var(--decided-border);
-  resize: none;
 }
 
 .field[data-state="approved"] .label {
   color: var(--decided-text);
+}
+
+.field[data-state="approved"] .textarea,
+.field[data-state="sent-by-rule"] .textarea {
+  resize: none;
 }
 
 .textarea::placeholder {
@@ -49,8 +94,11 @@
 
 .textarea:disabled {
   color: var(--ink-3);
-  background: var(--bg);
   cursor: not-allowed;
+}
+
+.field:has(.textarea:disabled) .box {
+  background: var(--bg);
 }
 
 .note {

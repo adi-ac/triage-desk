@@ -24,6 +24,8 @@ export { Pane, type PaneProps } from "./pane";
 export { QueueItem, type QueueItemProps } from "./queue-item";
 export { SegmentedControl, type SegmentedControlProps, type SegmentedOption } from "./segmented-control";
 export { Severity, type SeverityLevel, type SeverityProps } from "./severity";
+export { Sheet, type SheetProps } from "./sheet";
 export { Tag, type TagProps, type TagTone } from "./tag";
 export { Time, type TimeProps } from "./time";
+export { Timeline, type TimelineProps } from "./timeline";
 export { TimelineRow, type TimelineActor, type TimelineRowProps } from "./timeline-row";
