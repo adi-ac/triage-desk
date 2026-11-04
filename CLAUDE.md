@@ -1,5 +1,9 @@
 @AGENTS.md
 
+## UI
+
+Before building any UI, read `DESIGN.md` and `docs/brief.md`.
+
 ## Git
 
 When a step is finished and type checks (`npx tsc --noEmit`) and lint (`pnpm lint`) pass, don't ask: commit on a branch, merge it into `main`, push `main`, and delete the branch.
