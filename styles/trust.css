@@ -17,7 +17,9 @@
  * decisions solid, and confidence and severity always carry a word.
  */
 
-:root {
+/* [data-theme] re-derives these inside a themed element (see elevation.css). */
+:root,
+[data-theme] {
   /* Pencil: the model's suggestion, not yet acted on. Text stays ink. */
   --suggested-border: var(--line-strong);
   --suggested-border-style: dashed;

@@ -80,6 +80,16 @@ What it can't claim is real-world use, so it gets tested with support agents and
 - Severity: urgent is the only solid fill (`surface` text on `critical`); high is `critical` on `critical-soft`; normal and low have no fill (`ink-2`, `ink-3`). Bars repeat the level without color, and every level carries its word.
 - Contrast: all 21 trust pairs pass in both themes (text 4.5:1 and Lc 60, non-text 3:1). The tightest is the pencil border on its own fill in light mode, at 3.48:1.
 
+**Components** (built 2026-11-04 in `components/ui`, shown at `/system` in light and dark side by side)
+- Ten base components: Button, Tag, Chip, ConfidenceMeter, EvidenceItem, TimelineRow, Banner, QueueItem, DraftEditor, SegmentedControl. Variants are TypeScript unions. No component takes `className` or `style`, and every color is a token from `styles/`, so a screen can't restyle the trust language.
+- High confidence and decisions share petrol, so the components keep them apart by shape and words. A ConfidenceMeter is always a bar, a percentage and a level word, with no border; it has no chip form. A decided Chip always has a solid border and names who set it: the types reject `state="decided"` without `decidedBy`. `/system` shows a high-confidence meter next to a decided chip in both themes so this can be checked by eye.
+- Not yet reviewed (my picks while building, to confirm):
+  - ConfidenceMeter derives its level from the rounded percentage, so the figure and the word never disagree: high from 85% (the team-rule example above), medium from 60%, low below.
+  - Button defaults to secondary. Danger is red text on secondary chrome, not a red fill, so it never outweighs Approve. Secondary and danger hover use a new `--button-bg-hover` token (`bg` in light, `ink` at 12% in dark).
+  - Banner info is gray, not petrol, and the open QueueItem is marked in gray, so petrol keeps to "a person did this" and "fine to go ahead".
+- Themes can now be scoped to any element with `data-theme`, not just `<html>`. Derived tokens (button fills, shadows, trust tokens) are re-declared on `[data-theme]` so they follow the scope. Values are unchanged.
+- Contrast: every new pair passes in both themes. Checking them showed that `ink-3` doesn't pass on any soft fill (4.08–4.21:1 in light, Lc 59.1–59.6 in dark), although `theme.css` said it did. Text on soft fills uses `ink-2` (at least 5.80:1 / Lc 69), and the `theme.css` note is corrected. The old `/system` confidence demo had put `ink-3` on the low-confidence fill; ConfidenceMeter uses `ink-2`.
+
 **Focus ring** (decided 2026-11-03): the accent, 2px with a 2px offset, set globally on `:focus-visible` via a `--focus-ring` role. It is at least 6.59:1 on `surface` and `bg` in both themes.
 
 ## Chain of must-be-trues

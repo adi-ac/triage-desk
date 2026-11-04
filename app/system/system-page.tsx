@@ -1,13 +1,21 @@
 "use client";
 
 import { useEffect, useState, useSyncExternalStore } from "react";
+import { SegmentedControl } from "@/components/ui";
 import { ColorSection } from "./color-section";
+import { ComponentsSection } from "./components-section";
 import { SurfacesSection } from "./surfaces-section";
 import { TrustSection } from "./trust-section";
 import { TypeSection } from "./type-section";
 import styles from "./system.module.css";
 
 type Theme = "system" | "light" | "dark";
+
+const themeOptions = [
+  { value: "system", label: "System" },
+  { value: "light", label: "Light" },
+  { value: "dark", label: "Dark" },
+] as const;
 
 const darkQuery = "(prefers-color-scheme: dark)";
 
@@ -22,6 +30,7 @@ const sections = [
   { id: "color", title: "Color", files: "styles/tokens.css, styles/theme.css" },
   { id: "surfaces", title: "Surfaces", files: "styles/elevation.css" },
   { id: "trust", title: "Trust signals", files: "styles/trust.css" },
+  { id: "components", title: "Components", files: "components/ui" },
 ] as const;
 
 export function SystemPage() {
@@ -53,20 +62,12 @@ export function SystemPage() {
             <code className="text-mono">docs/brief.md</code>.
           </p>
         </div>
-        <div className={styles.segmented} role="radiogroup" aria-label="Theme">
-          {(["system", "light", "dark"] as const).map((t) => (
-            <button
-              key={t}
-              type="button"
-              role="radio"
-              aria-checked={theme === t}
-              className={`text-body-strong ${styles.segment}`}
-              onClick={() => setTheme(t)}
-            >
-              {t[0].toUpperCase() + t.slice(1)}
-            </button>
-          ))}
-        </div>
+        <SegmentedControl
+          aria-label="Theme"
+          options={themeOptions}
+          value={theme}
+          onValueChange={setTheme}
+        />
       </header>
 
       <nav className={styles.nav} aria-label="Sections">
@@ -89,6 +90,7 @@ export function SystemPage() {
           {s.id === "color" && <ColorSection theme={resolved} />}
           {s.id === "surfaces" && <SurfacesSection theme={resolved} />}
           {s.id === "trust" && <TrustSection theme={resolved} />}
+          {s.id === "components" && <ComponentsSection theme={resolved} />}
         </section>
       ))}
     </main>

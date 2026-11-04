@@ -27,32 +27,6 @@
   color: var(--ink-3);
 }
 
-.segmented {
-  display: inline-flex;
-  padding: 2px;
-  gap: 2px;
-  border-radius: 8px;
-  background: var(--tray);
-  box-shadow: inset 0 0 0 var(--hairline) var(--line);
-}
-
-.segment {
-  appearance: none;
-  border: 0;
-  border-radius: 6px;
-  padding: 4px 10px;
-  background: transparent;
-  color: var(--ink-2);
-  cursor: pointer;
-  user-select: none;
-}
-
-.segment[aria-checked="true"] {
-  background: var(--button-bg);
-  box-shadow: var(--shadow-button);
-  color: var(--ink);
-}
-
 .card {
   background: var(--surface);
   border-radius: 12px;
@@ -584,12 +558,6 @@
   gap: 12px;
 }
 
-.chip {
-  padding: 1px 10px;
-  border-radius: 6px;
-  white-space: nowrap;
-}
-
 /* Both are flat: no shadow, no gradient. */
 .suggested {
   color: var(--suggested-text);
@@ -650,47 +618,6 @@
   justify-items: start;
 }
 
-.confidence {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 4px 10px 4px 0;
-  border-radius: 6px;
-  color: var(--confidence-text);
-}
-
-.confidence[data-level="high"] {
-  --confidence: var(--confidence-high);
-  --confidence-text: var(--confidence-high-text);
-}
-
-.confidence[data-level="medium"] {
-  --confidence: var(--confidence-medium);
-  --confidence-text: var(--confidence-medium-text);
-}
-
-.confidence[data-level="low"] {
-  --confidence: var(--confidence-low);
-  --confidence-text: var(--confidence-low-text);
-  padding-inline-start: 10px;
-  background: var(--confidence-low-fill);
-}
-
-.meter {
-  display: block;
-  inline-size: 48px;
-  block-size: 5px;
-  border-radius: 3px;
-  background: var(--confidence-track);
-  overflow: hidden;
-}
-
-.meter span {
-  display: block;
-  block-size: 100%;
-  background: var(--confidence);
-}
-
 .severities {
   display: flex;
   flex-wrap: wrap;
@@ -743,4 +670,79 @@
 
 .bars span[data-on="true"] {
   opacity: 1;
+}
+
+/* Components */
+
+.propsSpec {
+  display: block;
+  margin-block-start: 4px;
+  font-weight: 400;
+  white-space: normal;
+}
+
+/* Each pane sets its own data-theme, so it sets its own surface and ink too. */
+.themePair {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 12px;
+}
+
+.themePane {
+  display: grid;
+  gap: 12px;
+  align-content: start;
+  min-inline-size: 0;
+  padding: 16px;
+  border-radius: 10px;
+  color: var(--ink);
+  background: var(--surface);
+  box-shadow: inset 0 0 0 var(--hairline) var(--line);
+}
+
+.themePane > p {
+  margin: 0;
+}
+
+.inline {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 10px;
+}
+
+.compare {
+  display: grid;
+  gap: 10px;
+}
+
+.compareRow {
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr);
+  align-items: center;
+  justify-items: start;
+  gap: 12px;
+}
+
+.compare .inline {
+  padding-block-start: 10px;
+  border-block-start: var(--hairline) solid var(--line);
+}
+
+.chipGrid {
+  display: grid;
+  grid-template-columns: repeat(2, max-content);
+  gap: 10px 12px;
+  align-items: center;
+}
+
+.timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.queue {
+  display: grid;
+  gap: 2px;
 }

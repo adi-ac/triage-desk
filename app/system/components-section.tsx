@@ -1,0 +1,267 @@
+import type { ReactNode } from "react";
+import {
+  Banner,
+  Button,
+  Chip,
+  ConfidenceMeter,
+  DraftEditor,
+  EvidenceItem,
+  QueueItem,
+  SegmentedControl,
+  Tag,
+  TimelineRow,
+  confidenceThresholds,
+} from "@/components/ui";
+import { autoSendTicketId, firstScreenTicketId, tickets, type Ticket } from "@/fixtures/tickets";
+import type { Pair } from "./contrast";
+import { ContrastTable } from "./contrast-table";
+import styles from "./system.module.css";
+
+const firstScreen = tickets.find((t) => t.id === firstScreenTicketId)!;
+const autoSent = tickets.find((t) => t.id === autoSendTicketId)!;
+
+/** Pairs the components add on top of the ones theme.css and trust.css already check. */
+const pairs: Pair[] = [
+  { label: "Secondary button text on hover", fg: "--ink", bg: "--button-bg-hover", kind: "text" },
+  { label: "Danger button text", fg: "--critical", bg: "--button-bg", kind: "text" },
+  { label: "Danger button text on hover", fg: "--critical", bg: "--button-bg-hover", kind: "text" },
+  { label: "Tag and banner text on surface-2", fg: "--ink-2", bg: "--surface-2", kind: "text" },
+  { label: "Info banner edge on its fill", fg: "--line-strong", bg: "--surface-2", kind: "non-text" },
+  { label: "Warning banner edge on its fill", fg: "--warning", bg: "--warning-soft", kind: "non-text" },
+  { label: "Error banner edge on its fill", fg: "--critical", bg: "--critical-soft", kind: "non-text" },
+  { label: "Who set it, on a decided chip", fg: "--ink-2", bg: "--decided-fill", kind: "text" },
+  { label: "Low confidence hint on its fill", fg: "--ink-2", bg: "--confidence-low-fill", kind: "text" },
+  { label: "Draft text in the editor", fg: "--ink", bg: "--surface", kind: "text" },
+  { label: "Editor border on surface", fg: "--line-strong", bg: "--surface", kind: "non-text" },
+];
+
+/** Renders the same children in a light pane and a dark pane, side by side. */
+function ThemePair({ children }: { children: ReactNode }) {
+  return (
+    <div className={styles.themePair}>
+      {(["light", "dark"] as const).map((theme) => (
+        <div key={theme} data-theme={theme} className={styles.themePane}>
+          <p className={`text-overline ${styles.muted}`}>{theme === "light" ? "Light" : "Dark"}</p>
+          {children}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+function Demo({ name, props, intro, children }: { name: string; props?: string; intro: ReactNode; children: ReactNode }) {
+  return (
+    <section className={styles.card}>
+      <h3 className={`text-heading ${styles.cardTitle}`}>
+        {name}
+        {props && <code className={`text-mono-small ${styles.muted} ${styles.propsSpec}`}>{props}</code>}
+      </h3>
+      <p className={`text-body ${styles.muted} ${styles.cardIntro}`}>{intro}</p>
+      <ThemePair>{children}</ThemePair>
+    </section>
+  );
+}
+
+const time = (iso: string) => iso.slice(11, 16);
+const preview = (t: Ticket) => t.body.split("\n\n")[1] ?? "";
+
+export function ComponentsSection({ theme }: { theme: string }) {
+  return (
+    <>
+      <Demo
+        name="High confidence beside a decision"
+        intro={
+          <>
+            Both are petrol. They should still read as different things: the meter is a bar, a
+            figure and a level word with no border; the decision is a solid-bordered chip that
+            names who set it.
+          </>
+        }
+      >
+        <div className={styles.compare}>
+          <div className={styles.compareRow}>
+            <span className={`text-small ${styles.muted}`}>Category</span>
+            <Chip state="decided" decidedBy="you">
+              How-to
+            </Chip>
+          </div>
+          <div className={styles.compareRow}>
+            <span className={`text-small ${styles.muted}`}>Confidence</span>
+            <ConfidenceMeter value={0.92} />
+          </div>
+          <div className={styles.inline}>
+            <ConfidenceMeter value={0.92} />
+            <Chip state="decided" decidedBy="you">
+              How-to
+            </Chip>
+          </div>
+        </div>
+      </Demo>
+
+      <Demo
+        name="Button"
+        props="variant: primary | secondary | danger · size: default | small"
+        intro="Secondary is the default. Danger keeps the secondary chrome with red text, so it never outweighs Approve. Disabled is flat in every variant."
+      >
+        {(["default", "small"] as const).map((size) => (
+          <div key={size} className={styles.inline}>
+            <Button variant="primary" size={size}>
+              Approve and send
+            </Button>
+            <Button size={size}>Edit draft</Button>
+            <Button variant="danger" size={size}>
+              Discard draft
+            </Button>
+            <Button variant="primary" size={size} disabled>
+              Approve and send
+            </Button>
+          </div>
+        ))}
+      </Demo>
+
+      <Demo
+        name="Tag"
+        props="tone: neutral | warning | success | ai | human"
+        intro="ai is pencil (dashed, gray); human is ink (solid, petrol)."
+      >
+        <div className={styles.inline}>
+          <Tag>Billing</Tag>
+          <Tag tone="warning">Needs review</Tag>
+          <Tag tone="success">Sent</Tag>
+          <Tag tone="ai">Sent by rule</Tag>
+          <Tag tone="human">Edited</Tag>
+        </div>
+      </Demo>
+
+      <Demo
+        name="Chip"
+        props="state: default | suggested | decided · aiPick: boolean"
+        intro="Default is an option nobody has picked. A decided chip has to say who set it; the types don't allow one without. AI pick is a word, not a color."
+      >
+        <div className={styles.chipGrid}>
+          <Chip>Cancellation risk</Chip>
+          <Chip aiPick>How-to</Chip>
+          <Chip state="suggested">Normal</Chip>
+          <Chip state="suggested" aiPick>
+            How-to
+          </Chip>
+          <Chip state="decided" decidedBy="you">
+            High
+          </Chip>
+          <Chip state="decided" decidedBy="Dana Ruiz" aiPick>
+            How-to
+          </Chip>
+        </div>
+      </Demo>
+
+      <Demo
+        name="ConfidenceMeter"
+        props="value: 0–1"
+        intro={
+          <>
+            The level is derived inside, from the rounded percentage: high from{" "}
+            {confidenceThresholds.high}%, medium from {confidenceThresholds.medium}%, low below. Always
+            a bar, a figure and a word.
+          </>
+        }
+      >
+        <div className={styles.stack}>
+          {[0.92, 0.85, 0.71, 0.6, 0.48].map((v) => (
+            <ConfidenceMeter key={v} value={v} />
+          ))}
+        </div>
+      </Demo>
+
+      <Demo name="EvidenceItem" props="supports: category | urgency" intro="The quote, marked as it is in the email, under the word for what it supports.">
+        <div className={styles.stack}>
+          <EvidenceItem supports="category">how to export everything we have in Ledgerline</EvidenceItem>
+          <EvidenceItem supports="urgency">Our renewal is on 15 December</EvidenceItem>
+        </div>
+      </Demo>
+
+      <Demo
+        name="TimelineRow"
+        props="actor: ai | human"
+        intro="The model and team rules get a dashed ring; a person gets a solid dot and must be named."
+      >
+        <ol className={styles.timeline}>
+          <TimelineRow actor="ai" time="16:48">
+            suggested How-to at 64%, with Cancellation risk close behind
+          </TimelineRow>
+          <TimelineRow actor="ai" name="Team rule" time="16:48">
+            held it for review: below 85% and it mentions a renewal
+          </TimelineRow>
+          <TimelineRow actor="human" name="Dana Ruiz" time="16:52">
+            set the category to How-to
+          </TimelineRow>
+        </ol>
+      </Demo>
+
+      <Demo name="Banner" props="tone: info | warning | error" intro="Info is gray, not petrol. The title says the tone in words; the edge repeats it.">
+        <div className={styles.stack}>
+          <Banner title="Recorded example">These suggestions were recorded from the model, not generated live.</Banner>
+          <Banner tone="warning" title="Approve is blocked" action={<Button size="small">Use runner-up</Button>}>
+            The top two categories are 0.07 apart, below the 0.15 margin.
+          </Banner>
+          <Banner tone="error" title="Today's live-model limit is used up" action={<Button size="small">Try a recorded email</Button>}>
+            Paste-your-own is back tomorrow. The recorded examples still work.
+          </Banner>
+        </div>
+      </Demo>
+
+      <Demo name="QueueItem" intro="Content props only. The open ticket is a step darker with a gray bar, not petrol.">
+        <div className={styles.queue}>
+          <QueueItem
+            current
+            sender={firstScreen.from.name}
+            company={firstScreen.account?.company}
+            subject={firstScreen.subject}
+            preview={preview(firstScreen)}
+            time={time(firstScreen.receivedAt)}
+            dateTime={firstScreen.receivedAt}
+            meta={<Tag tone="warning">Needs review</Tag>}
+          />
+          <QueueItem
+            sender={autoSent.from.name}
+            company={autoSent.account?.company}
+            subject={autoSent.subject}
+            preview={preview(autoSent)}
+            time={time(autoSent.receivedAt)}
+            dateTime={autoSent.receivedAt}
+            meta={<Tag tone="ai">Sent by rule</Tag>}
+          />
+        </div>
+      </Demo>
+
+      <Demo name="DraftEditor" intro="Content props only. Works controlled or uncontrolled; 16px text on phones so iOS doesn't zoom.">
+        <DraftEditor
+          label="Draft reply"
+          note="Drafted by the model. Edit before sending."
+          defaultValue={
+            "Hi Aisha,\n\nThanks for checking before your renewal. You can export invoices, clients and payments from Settings → Export, as CSV with the PDFs in a zip."
+          }
+        />
+      </Demo>
+
+      <Demo name="SegmentedControl" intro="Content props only. Arrow keys move and select, like native radios. The theme switch at the top of this page uses it.">
+        <SegmentedControl
+          aria-label="Inbox filter"
+          options={[
+            { value: "review", label: "Needs review" },
+            { value: "rule", label: "Sent by rule" },
+            { value: "all", label: "All" },
+          ]}
+        />
+      </Demo>
+
+      <section className={styles.card}>
+        <h3 className={`text-heading ${styles.cardTitle}`}>Contrast</h3>
+        <p className={`text-body ${styles.muted} ${styles.cardIntro}`}>
+          New pairs the components add, measured in the page theme. Switch the theme at the top to
+          check the other one.
+        </p>
+        <ContrastTable pairs={pairs} theme={theme} />
+      </section>
+    </>
+  );
+}

@@ -1,0 +1,30 @@
+/* Flat at every state: a value is a record, not a button (see trust.css). */
+
+.chip {
+  display: inline-flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 1px 10px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  white-space: nowrap;
+  color: var(--ink);
+  background: var(--surface);
+}
+
+.chip[data-state="suggested"] {
+  color: var(--suggested-text);
+  background: var(--suggested-fill);
+  border: 1px var(--suggested-border-style) var(--suggested-border);
+}
+
+.chip[data-state="decided"] {
+  color: var(--decided-text);
+  background: var(--decided-fill);
+  border: 1px var(--decided-border-style) var(--decided-border);
+}
+
+.meta {
+  /* ink-2, not ink-3: ink-3 falls short on accent-soft (4.18:1 light, Lc 59 dark). */
+  color: var(--ink-2);
+}

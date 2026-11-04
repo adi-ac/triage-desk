@@ -1,0 +1,40 @@
+.field {
+  display: grid;
+  gap: 6px;
+}
+
+.label {
+  color: var(--ink-3);
+}
+
+.textarea {
+  display: block;
+  inline-size: 100%;
+  max-inline-size: none;
+  min-block-size: 8lh;
+  /* Grows with the draft where supported; rows sets the floor elsewhere. */
+  field-sizing: content;
+  padding: 10px 12px;
+  border: 1px solid var(--line-strong);
+  border-radius: 8px;
+  /* 16px on phones, so iOS doesn't zoom on focus. */
+  font-size: var(--text-input-size);
+  color: var(--ink);
+  background: var(--surface);
+  resize: vertical;
+}
+
+.textarea::placeholder {
+  color: var(--ink-3);
+}
+
+.textarea:disabled {
+  color: var(--ink-3);
+  background: var(--bg);
+  cursor: not-allowed;
+}
+
+.note {
+  margin: 0;
+  color: var(--ink-3);
+}

@@ -1,0 +1,48 @@
+/* No border at any level, so it never reads as a chip. Low adds a fill. */
+
+.meter {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding-block: 4px;
+  border-radius: 6px;
+  white-space: nowrap;
+  color: var(--confidence-text);
+}
+
+.meter[data-level="high"] {
+  --confidence: var(--confidence-high);
+  --confidence-text: var(--confidence-high-text);
+}
+
+.meter[data-level="medium"] {
+  --confidence: var(--confidence-medium);
+  --confidence-text: var(--confidence-medium-text);
+}
+
+.meter[data-level="low"] {
+  --confidence: var(--confidence-low);
+  --confidence-text: var(--confidence-low-text);
+  padding-inline: 10px;
+  background: var(--confidence-low-fill);
+}
+
+.track {
+  display: block;
+  flex: none;
+  inline-size: 48px;
+  block-size: 5px;
+  border-radius: 3px;
+  background: var(--confidence-track);
+  overflow: hidden;
+}
+
+.bar {
+  display: block;
+  block-size: 100%;
+  background: var(--confidence);
+}
+
+.hint {
+  color: var(--ink-2);
+}

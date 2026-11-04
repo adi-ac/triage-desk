@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { Chip, ConfidenceMeter } from "@/components/ui";
 import { firstScreenTicketId, tickets } from "@/fixtures/tickets";
 import type { Pair } from "./contrast";
 import { ContrastTable } from "./contrast-table";
@@ -77,11 +78,11 @@ export function TrustSection({ theme }: { theme: string }) {
             <p className={`text-overline ${styles.muted}`}>Pencil · suggested</p>
             <div className={styles.fieldRow}>
               <span className="text-small">Category</span>
-              <span className={`text-body-strong ${styles.chip} ${styles.suggested}`}>How-to</span>
+              <Chip state="suggested">How-to</Chip>
             </div>
             <div className={styles.fieldRow}>
               <span className="text-small">Urgency</span>
-              <span className={`text-body-strong ${styles.chip} ${styles.suggested}`}>Normal</span>
+              <Chip state="suggested">Normal</Chip>
             </div>
             <p className={`text-small ${styles.muted}`}>Suggested by the model, not yet reviewed</p>
           </div>
@@ -89,14 +90,18 @@ export function TrustSection({ theme }: { theme: string }) {
             <p className={`text-overline ${styles.muted}`}>Ink · decided</p>
             <div className={styles.fieldRow}>
               <span className="text-small">Category</span>
-              <span className={`text-body-strong ${styles.chip} ${styles.decided}`}>How-to</span>
+              <Chip state="decided" decidedBy="you">
+                How-to
+              </Chip>
             </div>
             <div className={styles.fieldRow}>
               <span className="text-small">Urgency</span>
-              <span className={`text-body-strong ${styles.chip} ${styles.decided}`}>High</span>
+              <Chip state="decided" decidedBy="you">
+                High
+              </Chip>
             </div>
             <p className={`text-small ${styles.muted}`}>
-              Set by you at <span className="text-mono-small">16:52</span>
+              Decided at <span className="text-mono-small">16:52</span>
             </p>
           </div>
         </div>
@@ -152,9 +157,9 @@ export function TrustSection({ theme }: { theme: string }) {
           High is petrol, like Approve: fine to go ahead. Medium turns the meter amber; low adds a fill and blocks Approve.
         </p>
         <div className={styles.stack}>
-          <Confidence level="high" value={0.92} />
-          <Confidence level="medium" value={0.71} />
-          <Confidence level="low" value={0.48} />
+          <ConfidenceMeter value={0.92} />
+          <ConfidenceMeter value={0.71} />
+          <ConfidenceMeter value={0.48} />
         </div>
       </section>
 
@@ -178,19 +183,6 @@ export function TrustSection({ theme }: { theme: string }) {
         <ContrastTable pairs={pairs} theme={theme} />
       </section>
     </>
-  );
-}
-
-function Confidence({ level, value }: { level: "high" | "medium" | "low"; value: number }) {
-  return (
-    <div className={`text-small ${styles.confidence}`} data-level={level}>
-      <span className={styles.meter} aria-hidden>
-        <span style={{ inlineSize: `${value * 100}%` }} />
-      </span>
-      <span className="text-mono">{Math.round(value * 100)}%</span>
-      <span>{level[0].toUpperCase() + level.slice(1)} confidence</span>
-      {level === "low" && <span className={styles.muted}>· confirm before approving</span>}
-    </div>
   );
 }
 

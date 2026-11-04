@@ -18,7 +18,12 @@
 
 :root {
   --hairline: 1px;
+}
 
+/* [data-theme] re-derives these inside a themed element, since a custom
+   property's var()s resolve where it's declared, not where it's used. */
+:root,
+[data-theme] {
   --button-primary-bg: linear-gradient(
     to bottom,
     color-mix(in oklch, var(--accent) 88%, white),
@@ -56,6 +61,8 @@
     0 1px 1.4px rgb(0 0 0 / 0.045),
     0 4px 8.4px -2.8px rgb(0 0 0 / 0.063);
   --button-bg: var(--surface);
+  /* Secondary and danger hover: a step darker than the surface. */
+  --button-bg-hover: var(--bg);
   --shadow-button:
     0 0 0 var(--hairline) rgb(0 0 0 / 0.12),
     var(--shadow-button-soft);
@@ -79,6 +86,7 @@
 
     /* Translucent, so a button reads lighter than whatever surface it's on. */
     --button-bg: color-mix(in oklch, var(--ink) 8%, transparent);
+    --button-bg-hover: color-mix(in oklch, var(--ink) 12%, transparent);
     --shadow-button:
       inset 0 1px 0 rgb(255 255 255 / 0.06),
       0 0 0 var(--hairline) rgb(255 255 255 / 0.12);
@@ -88,12 +96,13 @@
   }
 }
 
-:root[data-theme="dark"] {
+[data-theme="dark"] {
   --shadow-pane: 0 0 0 var(--hairline) rgb(255 255 255 / 0.07);
   --shadow-popover: 0 0 0 var(--hairline) rgb(255 255 255 / 0.1);
   --shadow-dialog: 0 0 0 var(--hairline) rgb(255 255 255 / 0.13);
 
   --button-bg: color-mix(in oklch, var(--ink) 8%, transparent);
+  --button-bg-hover: color-mix(in oklch, var(--ink) 12%, transparent);
   --shadow-button:
     inset 0 1px 0 rgb(255 255 255 / 0.06),
     0 0 0 var(--hairline) rgb(255 255 255 / 0.12);

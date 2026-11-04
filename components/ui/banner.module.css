@@ -1,0 +1,55 @@
+.banner {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+  padding: 10px 14px 10px 16px;
+  border-radius: 8px;
+  background: var(--banner-fill);
+  /* A bar on the leading edge carries the tone; the title says it in words. */
+  box-shadow:
+    inset 3px 0 0 var(--banner-edge),
+    inset 0 0 0 var(--hairline) var(--banner-ring, transparent);
+}
+
+.banner[data-tone="info"] {
+  --banner-fill: var(--surface-2);
+  --banner-edge: var(--line-strong);
+  --banner-ring: var(--line);
+  --banner-title: var(--ink);
+}
+
+.banner[data-tone="warning"] {
+  --banner-fill: var(--warning-soft);
+  --banner-edge: var(--warning);
+  --banner-title: var(--warning);
+}
+
+.banner[data-tone="error"] {
+  --banner-fill: var(--critical-soft);
+  --banner-edge: var(--critical);
+  --banner-title: var(--critical);
+}
+
+.text {
+  flex: 1 1 240px;
+  display: grid;
+  gap: 2px;
+}
+
+.title {
+  margin: 0;
+  color: var(--banner-title);
+}
+
+.body {
+  color: var(--ink-2);
+}
+
+.body p {
+  margin: 0;
+}
+
+.action {
+  flex: none;
+}

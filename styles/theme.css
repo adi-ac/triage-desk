@@ -1,10 +1,15 @@
 /*
  * Color roles. Components use these, never the primitives in tokens.css.
  * Dark mode follows the system unless <html data-theme> says otherwise.
+ * data-theme also works on any element, to show a theme inside a page in
+ * the other one (/system uses it to put light and dark side by side).
  *
  * Checked pairs (WCAG 2 and APCA, both themes):
- * - ink, ink-2, ink-3 on bg, surface, surface-2 and every *-soft fill:
- *   at least 4.5:1 and Lc 60, so all three work at small sizes.
+ * - ink, ink-2, ink-3 on bg, surface and surface-2: at least 4.5:1 and
+ *   Lc 60, so all three work at small sizes.
+ * - ink and ink-2 on every *-soft fill: at least 4.5:1 and Lc 60. ink-3 is
+ *   not for soft fills: it falls just short on all four in both themes
+ *   (4.08–4.21:1 in light, Lc 59.1–59.6 in dark).
  * - accent-text, warning, critical, success on bg, surface, surface-2 and
  *   their own *-soft fill: at least 4.5:1 and Lc 60.
  * - accent-ink on accent and accent-hover: at least 4.5:1 and Lc 60.
@@ -24,7 +29,8 @@
  *   every text role on page and tray in both themes.
  */
 
-:root {
+:root,
+[data-theme="light"] {
   color-scheme: light;
 
   --bg: var(--gray-50);
@@ -93,7 +99,7 @@
   }
 }
 
-:root[data-theme="dark"] {
+[data-theme="dark"] {
   color-scheme: dark;
 
   --bg: var(--gray-990);
