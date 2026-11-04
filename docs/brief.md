@@ -83,8 +83,8 @@ What it can't claim is real-world use, so it gets tested with support agents and
 **Components** (built 2026-11-04 in `components/ui`, shown at `/system` in light and dark side by side)
 - Ten base components: Button, Tag, Chip, ConfidenceMeter, EvidenceItem, TimelineRow, Banner, QueueItem, DraftEditor, SegmentedControl. Variants are TypeScript unions. No component takes `className` or `style`, and every color is a token from `styles/`, so a screen can't restyle the trust language.
 - High confidence and decisions share petrol, so the components keep them apart by shape and words. A ConfidenceMeter is always a bar, a percentage and a level word, with no border; it has no chip form. A decided Chip always has a solid border and names who set it: the types reject `state="decided"` without `decidedBy`. `/system` shows a high-confidence meter next to a decided chip in both themes so this can be checked by eye.
+- Confidence thresholds, confirmed 2026-11-04: high from 85% (the team-rule example above), medium from 60%, low below. ConfidenceMeter derives the level from the rounded percentage, so the figure and the word never disagree.
 - Not yet reviewed (my picks while building, to confirm):
-  - ConfidenceMeter derives its level from the rounded percentage, so the figure and the word never disagree: high from 85% (the team-rule example above), medium from 60%, low below.
   - Button defaults to secondary. Danger is red text on secondary chrome, not a red fill, so it never outweighs Approve. Secondary and danger hover use a new `--button-bg-hover` token (`bg` in light, `ink` at 12% in dark).
   - Banner info is gray, not petrol, and the open QueueItem is marked in gray, so petrol keeps to "a person did this" and "fine to go ahead".
 - Themes can now be scoped to any element with `data-theme`, not just `<html>`. Derived tokens (button fills, shadows, trust tokens) are re-declared on `[data-theme]` so they follow the scope. Values are unchanged.
