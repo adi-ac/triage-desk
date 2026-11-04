@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import { useState, type ReactNode } from "react";
 import {
   Banner,
   Button,
@@ -7,6 +7,7 @@ import {
   DraftEditor,
   EvidenceItem,
   EvidenceMark,
+  FieldReview,
   OutputSource,
   Pane,
   QueueItem,
@@ -16,12 +17,29 @@ import {
   TimelineRow,
   confidenceThresholds,
 } from "@/components/ui";
+import { suggestionFor } from "@/fixtures/suggestions";
 import { autoSendTicketId, firstScreenTicketId, tickets, type Ticket } from "@/fixtures/tickets";
+import { categories, urgencies, type Category, type Urgency } from "@/lib/suggestion";
 import type { Pair } from "./contrast";
 import { ContrastTable } from "./contrast-table";
 import styles from "./system.module.css";
 
 const firstScreen = tickets.find((t) => t.id === firstScreenTicketId)!;
+const suggestion = suggestionFor(firstScreenTicketId)!;
+
+/** Live, so the controls can be tried: each theme pane keeps its own state. */
+function FieldReviewDemo() {
+  const [category, setCategory] = useState<Category | null>(null);
+  const [urgency, setUrgency] = useState<Urgency | null>("High");
+  return (
+    <>
+      <FieldReview label="Category" field={suggestion.category} options={categories} value={category} onValueChange={setCategory} />
+      <FieldReview label="Urgency" field={suggestion.urgency} options={urgencies} value={urgency} onValueChange={setUrgency} />
+      <p className={`text-overline ${styles.muted}`}>After Approve, untouched</p>
+      <FieldReview label="Urgency" field={suggestion.urgency} options={urgencies} value={null} onValueChange={() => {}} approved />
+    </>
+  );
+}
 const autoSent = tickets.find((t) => t.id === autoSendTicketId)!;
 
 /** Pairs the components add on top of the ones theme.css and trust.css already check. */
@@ -163,6 +181,14 @@ export function ComponentsSection({ theme }: { theme: string }) {
             Normal
           </Chip>
         </div>
+      </Demo>
+
+      <Demo
+        name="FieldReview"
+        props="field · options · value · onValueChange · approved"
+        intro="Reviewing one suggested field. While suggested: small secondary Keep, Switch to the runner-up, and Other… for the full list, so the override is one click and never competes with Approve. Once decided: the solid chip and a quiet Change link that reopens it. Try it; the data is LL-5040's hand-written suggestion."
+      >
+        <FieldReviewDemo />
       </Demo>
 
       <Demo

@@ -1,0 +1,51 @@
+.field {
+  display: grid;
+  gap: 8px;
+  justify-items: start;
+  min-inline-size: 0;
+}
+
+.label {
+  margin: 0;
+  color: var(--ink-3);
+}
+
+.row {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 4px 12px;
+}
+
+/* Quiet on purpose: a text link in ink-2, never petrol, so it can't compete with Approve. */
+.change {
+  appearance: none;
+  border: 0;
+  padding: 0;
+  background: none;
+  color: var(--ink-2);
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  cursor: pointer;
+  transition: color 150ms ease-out;
+}
+
+@media (hover: hover) {
+  .change:hover {
+    color: var(--ink);
+  }
+}
+
+.controls,
+.options {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.options {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}

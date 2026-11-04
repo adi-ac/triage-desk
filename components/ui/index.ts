@@ -14,9 +14,10 @@ export {
   type ConfidenceMeterProps,
 } from "./confidence-meter";
 export { DraftEditor, type DraftEditorProps, type DraftState } from "./draft-editor";
-export { EvidenceItem, type EvidenceItemProps, type EvidenceSupports } from "./evidence-item";
+export { EvidenceItem, type EvidenceItemProps } from "./evidence-item";
 export { EvidenceMark, type EvidenceMarkProps } from "./evidence-mark";
-export { OutputSource, type OutputSourceKind, type OutputSourceProps } from "./output-source";
+export { FieldReview, type FieldReviewProps } from "./field-review";
+export { OutputSource, type OutputSourceProps } from "./output-source";
 export { Pane, type PaneProps } from "./pane";
 export { QueueItem, type QueueItemProps } from "./queue-item";
 export { SegmentedControl, type SegmentedControlProps, type SegmentedOption } from "./segmented-control";

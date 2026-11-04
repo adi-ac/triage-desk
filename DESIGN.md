@@ -17,9 +17,9 @@ These hold on every screen. If a design seems to need an exception, ask; don't m
    - any unfilled `[placeholder]` in the draft;
    - an empty draft.
 
-   Get them from `approveBlockers()` in `@/lib/approve`; never write your own checks. It returns one sentence per blocker, with the number that tripped it. Show them in a `Banner tone="warning"` titled "Approve is blocked" beside the button, linked with `aria-describedby`. Never hide Approve; never leave it enabled while a blocker is open. A draft written for a value a person has since overridden is a warning, not a blocker: pass it as DraftEditor's `warning`. Why: block only where a wrong send is costly.
+   Get them from `approveBlockers()` in `@/lib/approve`; never write your own checks. It returns one sentence per blocker, with the number that tripped it. Show them in a `Banner tone="warning"` titled "Approve is blocked" beside the button, linked with `aria-describedby`. Never hide Approve until the reply is sent; never leave it enabled while a blocker is open. After sending, the Approve button is replaced by a sent line, "Sent by you · 16:55" (`text-small`, `--ink-2`, the time in `text-mono-small`), and a secondary "Next ticket" Button. The draft becomes `state="approved"` (read-only), and the timeline gets a row: "approved and sent the reply". A draft written for a value a person has since overridden is a warning, not a blocker: pass it as DraftEditor's `warning`. Why: block only where a wrong send is costly.
 6. **Model output is always labeled with its source: recorded, live or hand-written.** Every screen that shows model output carries exactly one `OutputSource`, which can't be dismissed. Hand-written output is allowed during the build only and must be replaced by recorded output before shipping. LL-5040 stays hand-written until the API key is added. Why: an unlabeled canned example undoes the honesty claim the piece rests on (brief, First screen).
-7. **Approving never turns an untouched field into "Set by you".** On Approve, each field a person kept or switched shows `decidedBy="you"`; each field nobody touched shows `asSuggested`, labeled "Approved as suggested". The timeline gives them separate rows (see TimelineRow). Why: the record must never claim a person chose something they didn't look at.
+7. **Approving never turns an untouched field into "Set by you".** On Approve, each field a person kept or switched shows `decidedBy="you"`; each field nobody touched shows `asSuggested`, labeled "Approved as suggested". `FieldReview` does this when you pass `approved`. The timeline gives them separate rows (see TimelineRow). Why: the record must never claim a person chose something they didn't look at.
 
 ```tsx
 // Correct: rule 5
@@ -34,8 +34,25 @@ const blockers = approveBlockers({ fields, draft });
   </Banner>
 )}
 
+// Correct: after sending, Approve gives way to the sent line
+<p className={styles.sent}>Sent by you · <time className="text-mono-small" dateTime={sentAt}>16:55</time></p>
+<Button>Next ticket</Button>
+
 // Incorrect: a home-made blocker (a stale draft is a warning), and no reason beside the button
 <Button variant="primary" disabled={draftIsStale}>Approve and send</Button>
+```
+
+## Data
+
+Model output has one shape, `Suggestion`, in `@/lib/suggestion`, alongside `SuggestedField`, `Evidence`, `OutputSourceKind`, `EvidenceSupports` and the value lists `categories` and `urgencies`. Never define your own. Example output lives in `@/fixtures/suggestions` (`suggestionFor(ticketId)`), never in `fixtures/tickets.ts`, which holds inputs only. To check Approve, build each field with `approveField(name, suggestion.category, chosen)` and pass the fields to `approveBlockers` (both from `@/lib/approve`).
+
+```tsx
+// Correct
+import type { Suggestion } from "@/lib/suggestion";
+import { suggestionFor } from "@/fixtures/suggestions";
+
+// Incorrect: a screen-local copy of the shape drifts from everyone else's
+type MySuggestion = { category: string; confidence: number; recorded: boolean };
 ```
 
 ## Tokens
@@ -80,12 +97,23 @@ Never put `--ink-3` on a `*-soft` fill: it measures 4.08–4.21:1 in light and L
 
 Screens are built from `Pane`s in a shell grid. Never hand-build a tray, a card or their corners.
 
-**Shell** (the screen's `<main>`; the page background is already `--page`):
+**Shell** (the screen's `<main>`; the page background is already `--page`). Padding 16px below 768px, 24px from 768px. Gap between panes: 16px. A header row (screen title, and the `OutputSource` when the screen shows model output) spans every column. Nothing ever scrolls sideways.
 
-- Padding 16px below 768px, 24px from 768px. Gap between panes: 16px.
-- From 1200px: three columns, `320px minmax(0, 1fr) 400px`: queue, email, triage. The shell is `100dvh` tall and each pane's card scrolls on its own.
-- 768–1199px: two columns, `minmax(0, 1fr) 360px`: email, triage. The queue moves behind a "Queue" Button in the screen header.
-- Below 768px: one column, in the order email, triage. Nothing scrolls sideways.
+With a queue (the inbox, where a person works through tickets):
+
+| Width | Columns |
+| --- | --- |
+| 1200px and up | `320px minmax(0, 1fr) 400px`: queue, email, triage. The shell is `100dvh` tall and each pane's card scrolls on its own. |
+| 768–1199px | `minmax(0, 1fr) 360px`: email, triage. The queue moves behind a secondary "Queue" Button in the header row. |
+| Below 768px | One column: email, then triage. The "Queue" Button stays in the header. |
+
+Without a queue (a single ticket opened from a link, such as the first screen): the same shell minus the queue column. That's not an exception, so don't ask about it.
+
+| Width | Columns |
+| --- | --- |
+| 1200px and up | `minmax(0, 1fr) 400px`: email, triage, `100dvh` tall, each card scrolling on its own. |
+| 768–1199px | `minmax(0, 1fr) 360px`: email, triage. |
+| Below 768px | One column: email, then triage. |
 
 **Pane** is the only pane: a `--tray` band (14px corners, 4px padding, `--shadow-pane`) holding a header (`text-heading` title, optional meta) and a `--surface` card (10px corners, 16px padding). Corners are concentric: inner radius = outer radius − the padding between them.
 
@@ -93,7 +121,7 @@ Screens are built from `Pane`s in a shell grid. Never hand-build a tray, a card 
 
 ## Components
 
-Import from `@/components/ui`. No component accepts `className` or `style`. The variant unions below are the complete set: an unlisted variant is a bug, not an option. Lay components out from the parent's own CSS module, and never restyle them.
+Import every component and its props type from `@/components/ui`, never from a component's own file (`@/components/ui/chip`). ESLint rejects the file path. Data types such as `EvidenceSupports` come from `@/lib/suggestion`, not from a component. No component accepts `className` or `style`. The variant unions below are the complete set: an unlisted variant is a bug, not an option. Lay components out from the parent's own CSS module, and never restyle them.
 
 ### Button
 
@@ -136,9 +164,28 @@ A short label inside a row. A field value is a Chip.
 <Tag tone="success">92%</Tag>
 ```
 
+### FieldReview
+
+Reviewing one suggested field: category or urgency. Use it for every field a person reviews; never assemble chips, meters and buttons yourself.
+
+- While suggested: the dashed chip, the ConfidenceMeter, and three small secondary Buttons: "Keep", "Switch to <runner-up>" and "Other…", which opens the full list. The override is one click, and none of these competes with Approve.
+- Once decided: the solid chip ("Set by you") and a quiet "Change" link that reopens the controls.
+- `approved`: locks the field. An untouched field shows "Approved as suggested" (rule 7).
+
+It's controlled: keep `value` (null until someone keeps or switches) on the screen, because the Approve blockers need it. `options` is `categories` or `urgencies` from `@/lib/suggestion`. Its heading is an h3, so put it in a Pane. After each choice, add a timeline row: "kept the category as How-to" or "set the category to Billing".
+
+```tsx
+// Correct
+<FieldReview label="Category" field={suggestion.category} options={categories} value={category} onValueChange={setCategory} approved={sent} />
+
+// Incorrect: hand-built review controls; primary-looking buttons compete with Approve
+<Chip state="suggested">How-to</Chip>
+<Button variant="primary" onClick={keep}>Keep</Button>
+```
+
 ### Chip
 
-A field's value (category, urgency). A short label in a row is a Tag; a choice between views is a SegmentedControl.
+A field's value (category, urgency) shown on its own, such as in a list or a header. A field under review is a FieldReview. A short label in a row is a Tag; a choice between views is a SegmentedControl.
 
 - `suggested`: the model's value, not yet acted on (rule 1).
 - `decided`: decided by a person. Requires `decidedBy="you"` (or a name) when a person kept or switched it, or `asSuggested` when it was approved untouched (rules 3 and 7).

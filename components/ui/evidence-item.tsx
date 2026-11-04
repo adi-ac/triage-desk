@@ -1,8 +1,7 @@
 import type { ComponentProps } from "react";
+import type { EvidenceSupports } from "@/lib/suggestion";
 import { EvidenceMark } from "./evidence-mark";
 import styles from "./evidence-item.module.css";
-
-export type EvidenceSupports = "category" | "urgency";
 
 export type EvidenceItemProps = Omit<ComponentProps<"div">, "className" | "style"> & {
   /** Which suggestion the quote backs. Named in words, so color isn't the only cue. */

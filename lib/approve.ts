@@ -1,4 +1,5 @@
 import { confidenceThresholds, toPercent, unsureReason } from "./confidence";
+import type { SuggestedField } from "./suggestion";
 
 /** One triage field as the model suggested it, and whether a person has acted on it. */
 export type ApproveField = {
@@ -11,6 +12,11 @@ export type ApproveField = {
   /** A person kept or switched it. */
   confirmed: boolean;
 };
+
+/** An ApproveField from a suggested field and what a person chose for it (null: nothing yet). */
+export function approveField(name: string, field: SuggestedField, chosen: string | null): ApproveField {
+  return { name, value: field.value, confidence: field.confidence, runnerUp: field.runnerUp, confirmed: chosen !== null };
+}
 
 /** Unfilled [placeholders] in a draft, each listed once. */
 export function draftPlaceholders(draft: string): string[] {

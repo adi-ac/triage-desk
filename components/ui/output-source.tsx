@@ -1,12 +1,12 @@
 import type { ComponentProps } from "react";
+import type { OutputSourceKind } from "@/lib/suggestion";
 import { Banner } from "./banner";
 
-/**
+/*
  * Where a screen's model output came from. Every screen that shows model
  * output carries exactly one. hand-written is for the build only: it must be
  * replaced by recorded output before shipping, so it's a warning.
  */
-export type OutputSourceKind = "recorded" | "live" | "hand-written";
 
 const copy: Record<OutputSourceKind, { tone: "info" | "warning"; title: string; body: string }> = {
   recorded: {

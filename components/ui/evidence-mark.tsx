@@ -1,5 +1,5 @@
 import type { ComponentProps } from "react";
-import type { EvidenceSupports } from "./evidence-item";
+import type { EvidenceSupports } from "@/lib/suggestion";
 import styles from "./evidence-mark.module.css";
 
 export type EvidenceMarkProps = Omit<ComponentProps<"mark">, "className" | "style"> & {
