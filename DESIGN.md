@@ -8,10 +8,10 @@ The product's one idea: the interface makes it obvious when the model shouldn't 
 
 These hold on every screen. If a design seems to need an exception, ask; don't make one.
 
-1. **Anything Claude produced renders as a suggestion until a person acts on it.** Suggestions are pencil: dashed `--suggested-border`, gray. Use `Chip state="suggested"`, `Tag tone="ai"`, `TimelineRow actor="ai"`. It becomes `decided` only when a person sets, edits or approves it. Why: if model output looks like a decision, nobody can tell what was checked.
+1. **Anything Claude produced renders as a suggestion until a person acts on it.** Suggestions are pencil: dashed `--suggested-border`, gray. Use `Chip state="suggested"`, `Tag tone="ai"`, `TimelineRow actor="ai"`, `DraftEditor state="suggested"`. It becomes decided, edited or approved only when a person sets, edits or approves it. Why: if model output looks like a decision, nobody can tell what was checked.
 2. **A confidence value always shows as `ConfidenceMeter`: a bar, a percentage and a level word. Never as a chip or a tag**, and never as a bare number. Why: high confidence shares Petrol with decisions, so shape and words are what keep them apart.
 3. **A decided chip always says who set it.** `Chip state="decided"` requires `decidedBy`; pass `"you"` or the person's name. Why: same as rule 2. A solid petrol chip with no name could be the model.
-4. **Petrol is only for decisions, high confidence, the selected queue item and Approve.** Decisions means anything a person set: `Chip state="decided"`, `Tag tone="human"`, `TimelineRow actor="human"`. The one other use is the focus ring (`--focus-ring` is the accent, decided in the brief). Nothing else uses an `--accent*`, `--decided-*` or `--confidence-high*` token: no petrol links, info banners, headings or icons. Why: Petrol means "a person did this" or "fine to go ahead". A third meaning breaks both.
+4. **Petrol is only for decisions, high confidence, the selected queue item and Approve.** Decisions means anything a person set: `Chip state="decided"`, `Tag tone="human"`, `TimelineRow actor="human"`. The focus ring (`--focus-ring`, the accent) is the one documented exception: keyboard focus must always be clearly visible, and it only appears while tabbing, so it never competes with Approve. Nothing else uses an `--accent*`, `--decided-*` or `--confidence-high*` token: no petrol links, info banners, headings or icons. Why: Petrol means "a person did this" or "fine to go ahead". A third meaning breaks both.
 5. **Approve stays disabled while any blocker is open, and the blockers are listed next to it.** Each blocker is a sentence with the number that tripped it ("The top two categories are 0.07 apart, below the 0.15 margin."). Use a `Banner tone="warning"` titled "Approve is blocked" beside the button, linked with `aria-describedby`. Never hide Approve; never leave it enabled with a warning. Why: the first screen's whole point is that the interface stops a send it shouldn't trust, and says why.
 6. **Recorded examples are always labeled as recorded.** Any screen showing recorded model output carries a `Banner` (info) titled "Recorded example". It can't be dismissed. Why: an unlabeled canned example undoes the honesty claim the piece rests on (brief, First screen).
 
@@ -60,7 +60,7 @@ Never put `--ink-3` on a `*-soft` fill: it measures 4.08–4.21:1 in light and L
 
 **Elevation:** three levels and no more: `--shadow-pane`, `--shadow-popover`, `--shadow-dialog`. Suggestions and decisions are flat at every level. Raised means pressable.
 
-**Trust tokens** (`styles/trust.css`) name meanings: `--suggested-*`, `--decided-*`, `--evidence-*`, `--confidence-*`, `--severity-*`. When a component exists for the meaning, use the component, not the tokens. Severity has tokens but no component yet. If you need one, build it in `components/ui` from `--severity-*`; don't style it inline on a screen.
+**Trust tokens** (`styles/trust.css`) name meanings: `--suggested-*`, `--decided-*`, `--evidence-*`, `--confidence-*`, `--severity-*`. Every meaning has a component (Chip, EvidenceItem, ConfidenceMeter, Severity, DraftEditor); use the component, not the tokens. A new meaning gets a new component in `components/ui`, never inline styles on a screen.
 
 **Type:** use the role classes from `styles/type.css`: `text-title` (20), `text-heading` (16), `text-subheading` (14), `text-body` / `text-body-strong` (14), `text-reading` (the email), `text-small` (13), `text-overline` (12, uppercase labels), `text-mono` / `text-mono-small` (IDs, times, figures). Never set a one-off font size, and never go below 12px.
 
@@ -207,14 +207,38 @@ One ticket in the inbox list. `current` marks the ticket open beside the queue w
 
 ### DraftEditor
 
-The reply draft. Use `defaultValue` when the editor owns the text, or `value` and `onChange` when the screen does. It has no pencil state, so until a person edits or approves a model draft, `note` must say who drafted it (rule 1).
+The reply draft. `state` is required; the label shows it in words ("Draft reply · Suggested").
+
+- `suggested`: the model's draft, untouched. Pencil: dashed border (rule 1). The first change a person types shows it as `edited` and calls `onStateChange("edited")`. Give each new draft its own `key`, so it starts suggested again.
+- `edited`: a person changed it, or wrote it from scratch. Solid control border.
+- `approved`: approved or sent. Read-only, in the decided style (rule 4).
+
+`note` says who drafted it, in every state ("Drafted by the model, edited by you"). Use `defaultValue` when the editor owns the text, or `value` and `onChange` when the screen does.
+
+```
+Has a person approved or sent it?     → state="approved"
+Has a person typed in it, or written it? → state="edited"
+Is it the model's draft, untouched?   → state="suggested"
+```
 
 ```tsx
 // Correct
-<DraftEditor label="Draft reply" note="Drafted by the model. Edit before sending." defaultValue={draft} />
+<DraftEditor key={ticket.id} label="Draft reply" state="suggested" onStateChange={setDraftState} note="Drafted by the model" defaultValue={draft} />
 
-// Incorrect: a model draft with nothing saying it's a suggestion
-<DraftEditor label="Reply" defaultValue={draft} />
+// Incorrect: a model draft shown as a person's edit breaks rule 1, and the note is missing
+<DraftEditor label="Draft reply" state="edited" defaultValue={draft} />
+```
+
+### Severity
+
+How urgent a ticket is: `urgent`, `high`, `normal`, `low`. Only urgent is a solid fill; the bars repeat the level, and the word is always shown. For the model's suggested urgency as a field value, use a Chip ("High"); Severity is the ticket's level shown in lists and headers.
+
+```tsx
+// Correct
+<Severity level="high" />
+
+// Incorrect: a red Tag isn't a severity; it loses the bars and the level scale
+<Tag tone="warning">High</Tag>
 ```
 
 ### SegmentedControl

@@ -12,9 +12,10 @@ export {
   type ConfidenceLevel,
   type ConfidenceMeterProps,
 } from "./confidence-meter";
-export { DraftEditor, type DraftEditorProps } from "./draft-editor";
+export { DraftEditor, type DraftEditorProps, type DraftState } from "./draft-editor";
 export { EvidenceItem, type EvidenceItemProps, type EvidenceSupports } from "./evidence-item";
 export { QueueItem, type QueueItemProps } from "./queue-item";
 export { SegmentedControl, type SegmentedControlProps, type SegmentedOption } from "./segmented-control";
+export { Severity, type SeverityLevel, type SeverityProps } from "./severity";
 export { Tag, type TagProps, type TagTone } from "./tag";
 export { TimelineRow, type TimelineActor, type TimelineRowProps } from "./timeline-row";

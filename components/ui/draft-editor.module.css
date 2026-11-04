@@ -24,6 +24,25 @@
   resize: vertical;
 }
 
+/* Pencil: the model's untouched draft. */
+.field[data-state="suggested"] .textarea {
+  color: var(--suggested-text);
+  background: var(--suggested-fill);
+  border: 1px var(--suggested-border-style) var(--suggested-border);
+}
+
+/* Ink: approved, so it's a record. Body text stays ink for reading; the
+   label carries the petrol. */
+.field[data-state="approved"] .textarea {
+  background: var(--decided-fill);
+  border: 1px var(--decided-border-style) var(--decided-border);
+  resize: none;
+}
+
+.field[data-state="approved"] .label {
+  color: var(--decided-text);
+}
+
 .textarea::placeholder {
   color: var(--ink-3);
 }

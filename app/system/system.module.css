@@ -558,33 +558,6 @@
   gap: 12px;
 }
 
-/* Both are flat: no shadow, no gradient. */
-.suggested {
-  color: var(--suggested-text);
-  background: var(--suggested-fill);
-  border: 1px var(--suggested-border-style) var(--suggested-border);
-}
-
-.decided {
-  color: var(--decided-text);
-  background: var(--decided-fill);
-  border: 1px var(--decided-border-style) var(--decided-border);
-}
-
-.draft {
-  padding: 12px 14px;
-  border-radius: 10px;
-  max-inline-size: none;
-}
-
-.draft p {
-  margin: 0;
-}
-
-.draft p + p {
-  margin-block-start: 4px;
-}
-
 .evidence {
   color: inherit;
   padding-inline: 1px;
@@ -622,54 +595,6 @@
   display: flex;
   flex-wrap: wrap;
   gap: 12px;
-}
-
-.severity {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  padding: 1px 10px;
-  border-radius: 6px;
-  color: var(--severity-text);
-  background: var(--severity-fill);
-}
-
-.severity[data-level="urgent"] {
-  --severity-text: var(--severity-urgent-text);
-  --severity-fill: var(--severity-urgent-fill);
-}
-
-.severity[data-level="high"] {
-  --severity-text: var(--severity-high-text);
-  --severity-fill: var(--severity-high-fill);
-}
-
-.severity[data-level="normal"] {
-  --severity-text: var(--severity-normal-text);
-  --severity-fill: var(--severity-normal-fill);
-}
-
-.severity[data-level="low"] {
-  --severity-text: var(--severity-low-text);
-  --severity-fill: var(--severity-low-fill);
-}
-
-.bars {
-  display: inline-flex;
-  align-items: flex-end;
-  gap: 1.5px;
-  block-size: 10px;
-}
-
-.bars span {
-  inline-size: 3px;
-  border-radius: 1px;
-  background: currentColor;
-  opacity: 0.25;
-}
-
-.bars span[data-on="true"] {
-  opacity: 1;
 }
 
 /* Components */

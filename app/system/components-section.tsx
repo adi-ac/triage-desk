@@ -8,6 +8,7 @@ import {
   EvidenceItem,
   QueueItem,
   SegmentedControl,
+  Severity,
   Tag,
   TimelineRow,
   confidenceThresholds,
@@ -31,6 +32,9 @@ const pairs: Pair[] = [
   { label: "Who set it, on a decided chip", fg: "--ink-2", bg: "--decided-fill", kind: "text" },
   { label: "Low confidence hint on its fill", fg: "--ink-2", bg: "--confidence-low-fill", kind: "text" },
   { label: "Draft text in the editor", fg: "--ink", bg: "--surface", kind: "text" },
+  { label: "Suggested draft text", fg: "--suggested-text", bg: "--suggested-fill", kind: "text" },
+  { label: "Approved reply text", fg: "--ink", bg: "--decided-fill", kind: "text" },
+  { label: "Approved reply border on surface", fg: "--decided-border", bg: "--surface", kind: "non-text" },
   { label: "Editor border on surface", fg: "--line-strong", bg: "--surface", kind: "non-text" },
 ];
 
@@ -62,6 +66,8 @@ function Demo({ name, props, intro, children }: { name: string; props?: string; 
 }
 
 const time = (iso: string) => iso.slice(11, 16);
+const draft =
+  "Hi Aisha,\n\nThanks for checking before your renewal. You can export invoices, clients and payments from Settings → Export, as CSV with the PDFs in a zip.";
 const preview = (t: Ticket) => t.body.split("\n\n")[1] ?? "";
 
 export function ComponentsSection({ theme }: { theme: string }) {
@@ -232,14 +238,26 @@ export function ComponentsSection({ theme }: { theme: string }) {
         </div>
       </Demo>
 
-      <Demo name="DraftEditor" intro="Content props only. Works controlled or uncontrolled; 16px text on phones so iOS doesn't zoom.">
-        <DraftEditor
-          label="Draft reply"
-          note="Drafted by the model. Edit before sending."
-          defaultValue={
-            "Hi Aisha,\n\nThanks for checking before your renewal. You can export invoices, clients and payments from Settings → Export, as CSV with the PDFs in a zip."
-          }
-        />
+      <Demo
+        name="DraftEditor"
+        props="state: suggested | edited | approved"
+        intro="Suggested is the model's untouched draft, dashed like any suggestion. Type in it and it turns edited, with a solid border. Approved is read-only in the decided style. The note keeps saying who drafted it."
+      >
+        <DraftEditor label="Draft reply" state="suggested" rows={3} note="Drafted by the model" defaultValue={draft} />
+        <DraftEditor label="Draft reply" state="edited" rows={3} note="Drafted by the model, edited by you" defaultValue={draft} />
+        <DraftEditor label="Reply" state="approved" rows={3} note="Drafted by the model, approved by you at 16:55" defaultValue={draft} />
+      </Demo>
+
+      <Demo
+        name="Severity"
+        props="level: urgent | high | normal | low"
+        intro="Only urgent is a solid fill. The bars repeat the level without color, and the word is always there."
+      >
+        <div className={styles.inline}>
+          {(["urgent", "high", "normal", "low"] as const).map((level) => (
+            <Severity key={level} level={level} />
+          ))}
+        </div>
       </Demo>
 
       <Demo name="SegmentedControl" intro="Content props only. Arrow keys move and select, like native radios. The theme switch at the top of this page uses it.">

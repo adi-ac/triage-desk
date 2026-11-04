@@ -1,11 +1,13 @@
 import type { ReactNode } from "react";
-import { Chip, ConfidenceMeter } from "@/components/ui";
+import { Chip, ConfidenceMeter, DraftEditor, Severity } from "@/components/ui";
 import { firstScreenTicketId, tickets } from "@/fixtures/tickets";
 import type { Pair } from "./contrast";
 import { ContrastTable } from "./contrast-table";
 import styles from "./system.module.css";
 
 const ticket = tickets.find((t) => t.id === firstScreenTicketId)!;
+
+const draftText = "Hi Aisha, thanks for checking before your renewal. Here's what you can export…";
 
 const pairs: Pair[] = [
   { label: "Suggestion text on its fill", fg: "--suggested-text", bg: "--suggested-fill", kind: "text" },
@@ -106,18 +108,20 @@ export function TrustSection({ theme }: { theme: string }) {
           </div>
         </div>
         <div className={styles.pencilInk}>
-          <div className={`text-reading ${styles.draft} ${styles.suggested}`}>
-            <p className={`text-overline ${styles.muted}`}>Draft reply · suggested</p>
-            <p>
-              Hi Aisha, thanks for checking before your renewal. Here&apos;s what you can export…
-            </p>
-          </div>
-          <div className={`text-reading ${styles.draft} ${styles.decided}`}>
-            <p className="text-overline">Reply · approved and sent</p>
-            <p>
-              Hi Aisha, thanks for checking before your renewal. Here&apos;s what you can export…
-            </p>
-          </div>
+          <DraftEditor
+            label="Draft reply"
+            state="suggested"
+            rows={2}
+            note="Drafted by the model"
+            defaultValue={draftText}
+          />
+          <DraftEditor
+            label="Reply"
+            state="approved"
+            rows={2}
+            note="Drafted by the model, approved by you at 16:55"
+            defaultValue={draftText}
+          />
         </div>
       </section>
 
@@ -169,11 +173,8 @@ export function TrustSection({ theme }: { theme: string }) {
           Only urgent is solid. The bars repeat the level without color.
         </p>
         <div className={styles.severities}>
-          {(["urgent", "high", "normal", "low"] as const).map((level, i) => (
-            <span key={level} className={`text-body-strong ${styles.severity}`} data-level={level}>
-              <Bars filled={4 - i} total={4} />
-              {level[0].toUpperCase() + level.slice(1)}
-            </span>
+          {(["urgent", "high", "normal", "low"] as const).map((level) => (
+            <Severity key={level} level={level} />
           ))}
         </div>
       </section>
@@ -183,15 +184,5 @@ export function TrustSection({ theme }: { theme: string }) {
         <ContrastTable pairs={pairs} theme={theme} />
       </section>
     </>
-  );
-}
-
-function Bars({ filled, total }: { filled: number; total: number }) {
-  return (
-    <span className={styles.bars} aria-hidden>
-      {Array.from({ length: total }, (_, i) => (
-        <span key={i} data-on={i < filled} style={{ blockSize: `${4 + i * 2}px` }} />
-      ))}
-    </span>
   );
 }
