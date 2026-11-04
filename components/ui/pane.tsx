@@ -4,15 +4,18 @@ import styles from "./pane.module.css";
 export type PaneProps = Omit<ComponentProps<"section">, "className" | "style" | "title"> & {
   /** The pane's name, shown in the tray header. */
   title: string;
-  /** A short line or a Tag at the end of the header, e.g. a ticket ID. */
+  /** A short fact or a Tag at the end of the header, e.g. a ticket ID. Never a model suggestion. */
   meta?: ReactNode;
+  /** Pinned to the bottom of the card while its content scrolls: the triage pane's ApproveBar. */
+  footer?: ReactNode;
 };
 
 /**
  * A screen's pane: a gray tray holding the header and wrapping a white card.
- * The card scrolls on its own when the shell gives the pane a height.
+ * The card's content scrolls on its own when the shell gives the pane a
+ * height; the footer stays pinned at the bottom either way.
  */
-export function Pane({ title, meta, children, ...props }: PaneProps) {
+export function Pane({ title, meta, footer, children, ...props }: PaneProps) {
   const headingId = useId();
   return (
     <section aria-labelledby={headingId} {...props} className={styles.pane}>
@@ -22,7 +25,10 @@ export function Pane({ title, meta, children, ...props }: PaneProps) {
         </h2>
         {meta && <div className={`text-small ${styles.meta}`}>{meta}</div>}
       </div>
-      <div className={styles.card}>{children}</div>
+      <div className={styles.card}>
+        <div className={styles.content}>{children}</div>
+        {footer && <div className={styles.footer}>{footer}</div>}
+      </div>
     </section>
   );
 }

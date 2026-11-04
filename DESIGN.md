@@ -9,7 +9,7 @@ The product's one idea: the interface makes it obvious when the model shouldn't 
 These hold on every screen. If a design seems to need an exception, ask; don't make one.
 
 1. **Anything Claude produced renders as a suggestion until a person acts on it.** Suggestions are pencil: dashed `--suggested-border`, gray. Use `Chip state="suggested"`, `Tag tone="ai"`, `TimelineRow actor="ai"`, `DraftEditor state="suggested"`. It becomes decided, edited or approved only when a person sets, edits or approves it. Why: if model output looks like a decision, nobody can tell what was checked.
-2. **A confidence value always shows as `ConfidenceMeter`: a bar, a percentage and a level word. Never as a chip or a tag**, and never as a bare number. Why: high confidence shares Petrol with decisions, so shape and words are what keep them apart.
+2. **A confidence value always shows as `ConfidenceMeter`: a bar, a percentage and a level word. Never as a chip or a tag**, and never as a bare number. The one exception is history: once a field is kept or switched, FieldReview replaces its meter with a quiet note, "Claude suggested How-to · 48%". Why: high confidence shares Petrol with decisions, so shape and words are what keep them apart; and confidence belongs to suggestions, so a meter beside a value must never show confidence in a different value.
 3. **A decided chip always says how it was decided: who set it, or "Approved as suggested".** `Chip state="decided"` requires either `decidedBy` (`"you"` or the person's name) or `asSuggested`. Why: same as rule 2. A solid petrol chip with no name could be the model.
 4. **Petrol is only for decisions, high confidence, the selected queue item and Approve.** Decisions means anything a person set: `Chip state="decided"`, `Tag tone="human"`, `TimelineRow actor="human"`. The focus ring (`--focus-ring`, the accent) is the one documented exception: keyboard focus must always be clearly visible, and it only appears while tabbing, so it never competes with Approve. Nothing else uses an `--accent*`, `--decided-*` or `--confidence-high*` token: no petrol links, info banners, headings or icons. Why: Petrol means "a person did this" or "fine to go ahead". A third meaning breaks both.
 5. **Approve stays disabled while any blocker is open, and the blockers are listed next to it.** Exactly three things block, and nothing else:
@@ -17,7 +17,11 @@ These hold on every screen. If a design seems to need an exception, ask; don't m
    - any unfilled `[placeholder]` in the draft;
    - an empty draft.
 
-   Get them from `approveBlockers()` in `@/lib/approve`; never write your own checks. It returns one sentence per blocker, with the number that tripped it. Show them in a `Banner tone="warning"` titled "Approve is blocked" beside the button, linked with `aria-describedby`. Never hide Approve until the reply is sent; never leave it enabled while a blocker is open. After sending, the Approve button is replaced by a sent line, "Sent by you · 16:55" (`text-small`, `--ink-2`, the time in `text-mono-small`), and a secondary "Next ticket" Button. The draft becomes `state="approved"` (read-only), and the timeline gets a row: "approved and sent the reply". A draft written for a value a person has since overridden is a warning, not a blocker: pass it as DraftEditor's `warning`. Why: block only where a wrong send is costly.
+   Get them from `approveBlockers()` in `@/lib/approve`; never write your own checks. It returns one `{ target, message }` per blocker: `target` is the field's name or `"draft"`, and `message` is a sentence with the number that tripped it.
+
+   Approve lives in the triage pane's pinned footer, as `ApproveBar` in Pane's `footer`. ApproveBar shows the button and a one-line summary ("3 things to resolve: Category, Urgency, Draft") whose items jump to the field. The full list stays in the card, in a `Banner tone="warning"` titled "Approve is blocked" whose `id` is ApproveBar's `blockersId`. Never hide Approve until the reply is sent; never leave it enabled while a blocker is open; never pin it with negative margins or `position: sticky` of your own.
+
+   After sending, ApproveBar swaps the button for "Sent by you · <time>" and a secondary button: "Next ticket" in the inbox (`afterSend="next-ticket"`), "Back to inbox" for a ticket opened on its own (`afterSend="back-to-inbox"`). The draft becomes `state="approved"` (read-only), and the timeline gets a row: "approved and sent the reply". A draft written for a value a person has since overridden is a warning, not a blocker: pass it as DraftEditor's `warning`. Why: block only where a wrong send is costly, and Approve must always be visible without layout hacks.
 6. **Model output is always labeled with its source: recorded, live or hand-written.** Every screen that shows model output carries exactly one `OutputSource`, which can't be dismissed. Hand-written output is allowed during the build only and must be replaced by recorded output before shipping. LL-5040 stays hand-written until the API key is added. Why: an unlabeled canned example undoes the honesty claim the piece rests on (brief, First screen).
 7. **Approving never turns an untouched field into "Set by you".** On Approve, each field a person kept or switched shows `decidedBy="you"`; each field nobody touched shows `asSuggested`, labeled "Approved as suggested". `FieldReview` does this when you pass `approved`. The timeline gives them separate rows (see TimelineRow). Why: the record must never claim a person chose something they didn't look at.
 
@@ -25,26 +29,39 @@ These hold on every screen. If a design seems to need an exception, ask; don't m
 // Correct: rule 5
 const blockers = approveBlockers({ fields, draft });
 
-<Button variant="primary" disabled={blockers.length > 0} aria-describedby="approve-blockers">
-  Approve and send
-</Button>
-{blockers.length > 0 && (
-  <Banner id="approve-blockers" tone="warning" title="Approve is blocked">
-    {blockers.map((b) => <p key={b}>{b}</p>)}
-  </Banner>
-)}
+<Pane
+  title="Triage"
+  footer={
+    <ApproveBar
+      blockers={blockers}
+      blockersId="approve-blockers"
+      targets={{ category: "field-category", urgency: "field-urgency", draft: "draft-reply" }}
+      onApprove={approve}
+      sentAt={sentAt}
+      afterSend="next-ticket"
+      onAfterSend={openNextTicket}
+    />
+  }
+>
+  <FieldReview id="field-category" … />
+  <FieldReview id="field-urgency" … />
+  <DraftEditor id="draft-reply" … />
+  {blockers.length > 0 && (
+    <Banner id="approve-blockers" tone="warning" title="Approve is blocked">
+      {blockers.map((b) => <p key={b.target}>{b.message}</p>)}
+    </Banner>
+  )}
+</Pane>
 
-// Correct: after sending, Approve gives way to the sent line
-<p className={styles.sent}>Sent by you · <time className="text-mono-small" dateTime={sentAt}>16:55</time></p>
-<Button>Next ticket</Button>
-
-// Incorrect: a home-made blocker (a stale draft is a warning), and no reason beside the button
+// Incorrect: a home-made blocker (a stale draft is a warning), and Approve outside the footer
 <Button variant="primary" disabled={draftIsStale}>Approve and send</Button>
 ```
 
 ## Data
 
-Model output has one shape, `Suggestion`, in `@/lib/suggestion`, alongside `SuggestedField`, `Evidence`, `OutputSourceKind`, `EvidenceSupports` and the value lists `categories` and `urgencies`. Never define your own. Example output lives in `@/fixtures/suggestions` (`suggestionFor(ticketId)`), never in `fixtures/tickets.ts`, which holds inputs only. To check Approve, build each field with `approveField(name, suggestion.category, chosen)` and pass the fields to `approveBlockers` (both from `@/lib/approve`).
+Model output has one shape, `Suggestion`, in `@/lib/suggestion` (including `suggestedAt`, when the model made it), alongside `SuggestedField`, `Evidence`, `OutputSourceKind`, `EvidenceSupports` and the value lists `categories` and `urgencies`. Never define your own. Example output lives in `@/fixtures/suggestions` (`suggestionFor(ticketId)`), never in `fixtures/tickets.ts`, which holds inputs only. Show the email with `EmailBody`, passing `suggestion.evidence`; for the evidence list, `matchEvidence(body, evidence)` from `@/lib/evidence` gives the quotes that match word for word. Never search or split the email yourself.
+
+**Times** are ISO 8601 strings everywhere in data and props, and always render through `Time` (TimelineRow, QueueItem and ApproveBar already use it). It shows the viewer's time zone: the time alone if it's today, the date and time if older, the full timestamp with its zone on hover. Never format a time yourself, and never show UTC. To check Approve, build each field with `approveField(name, suggestion.category, chosen)` and pass the fields to `approveBlockers` (both from `@/lib/approve`).
 
 ```tsx
 // Correct
@@ -87,7 +104,7 @@ Never put `--ink-3` on a `*-soft` fill: it measures 4.08–4.21:1 in light and L
 
 **Elevation:** three levels and no more: `--shadow-pane`, `--shadow-popover`, `--shadow-dialog`. Suggestions and decisions are flat at every level. Raised means pressable.
 
-**Trust tokens** (`styles/trust.css`) name meanings: `--suggested-*`, `--decided-*`, `--evidence-*`, `--confidence-*`, `--severity-*`. Every meaning has a component (Chip, EvidenceMark, EvidenceItem, ConfidenceMeter, Severity, DraftEditor, OutputSource); use the component, not the tokens. A new meaning gets a new component in `components/ui`, never inline styles on a screen.
+**Trust tokens** (`styles/trust.css`) name meanings: `--suggested-*`, `--decided-*`, `--evidence-*`, `--confidence-*`, `--severity-*`. Every meaning has a component (Chip, FieldReview, EmailBody, EvidenceMark, EvidenceItem, ConfidenceMeter, Severity, DraftEditor, OutputSource, ApproveBar); use the component, not the tokens. A new meaning gets a new component in `components/ui`, never inline styles on a screen.
 
 **Type:** use the role classes from `styles/type.css`: `text-title` (20), `text-heading` (16), `text-subheading` (14), `text-body` / `text-body-strong` (14), `text-reading` (the email), `text-small` (13), `text-overline` (12, uppercase labels), `text-mono` / `text-mono-small` (IDs, times, figures). Never set a one-off font size, and never go below 12px.
 
@@ -107,7 +124,7 @@ With a queue (the inbox, where a person works through tickets):
 | 768–1199px | `minmax(0, 1fr) 360px`: email, triage. The queue moves behind a secondary "Queue" Button in the header row. |
 | Below 768px | One column: email, then triage. The "Queue" Button stays in the header. |
 
-Without a queue (a single ticket opened from a link, such as the first screen): the same shell minus the queue column. That's not an exception, so don't ask about it.
+Without a queue (a single ticket opened on its own, from a link): the same shell minus the queue column. That's not an exception, so don't ask about it. After sending, ApproveBar offers "Back to inbox" instead of "Next ticket".
 
 | Width | Columns |
 | --- | --- |
@@ -169,14 +186,14 @@ A short label inside a row. A field value is a Chip.
 Reviewing one suggested field: category or urgency. Use it for every field a person reviews; never assemble chips, meters and buttons yourself.
 
 - While suggested: the dashed chip, the ConfidenceMeter, and three small secondary Buttons: "Keep", "Switch to <runner-up>" and "Other…", which opens the full list. The override is one click, and none of these competes with Approve.
-- Once decided: the solid chip ("Set by you") and a quiet "Change" link that reopens the controls.
+- Once kept or switched: the solid chip ("Set by you") and a quiet "Change" link that reopens the controls. The meter gives way to a quiet note, "Claude suggested How-to · 48%" (rule 2).
 - `approved`: locks the field. An untouched field shows "Approved as suggested" (rule 7).
 
-It's controlled: keep `value` (null until someone keeps or switches) on the screen, because the Approve blockers need it. `options` is `categories` or `urgencies` from `@/lib/suggestion`. Its heading is an h3, so put it in a Pane. After each choice, add a timeline row: "kept the category as How-to" or "set the category to Billing".
+It's controlled: keep `value` (null until someone keeps or switches) on the screen, because the Approve blockers need it. Give it an `id` and pass that in ApproveBar's `targets`, so the summary can jump to it. `options` is `categories` or `urgencies` from `@/lib/suggestion`. Its heading is an h3, so put it in a Pane. After each choice, add a timeline row: "kept the category as How-to" or "set the category to Billing".
 
 ```tsx
 // Correct
-<FieldReview label="Category" field={suggestion.category} options={categories} value={category} onValueChange={setCategory} approved={sent} />
+<FieldReview id="field-category" label="Category" field={suggestion.category} options={categories} value={category} onValueChange={setCategory} approved={sent} />
 
 // Incorrect: hand-built review controls; primary-looking buttons compete with Approve
 <Chip state="suggested">How-to</Chip>
@@ -219,15 +236,27 @@ The only way to show a confidence value (rule 2). Pass `value` from 0 to 1, and 
 <ConfidenceMeter value={0.64} level="high" />
 ```
 
-### EvidenceMark
+### EmailBody
 
-A quote the model used, marked inside the email body: a fill and a dashed underline. `supports` is `category` (gray) or `urgency` (red). Wrap the exact words; drop any quote that doesn't match the email word for word.
+The customer's email. Pass `body` and the model's `evidence`; it splits paragraphs, keeps line breaks, marks each quote in place with EvidenceMark, and drops any quote that doesn't match the email word for word.
 
 ```tsx
 // Correct
-Our <EvidenceMark supports="urgency">renewal is on 15 December</EvidenceMark>.
+<EmailBody body={ticket.body} evidence={suggestion.evidence} />
 
-// Incorrect: a hand-built mark; use the component
+// Incorrect: a hand-written search-and-wrap loop; every screen would mark quotes differently
+{paragraphs.map((p) => <p>{markUp(p, evidence)}</p>)}
+```
+
+### EvidenceMark
+
+The mark EmailBody and EvidenceItem use: a fill and a dashed underline. `supports` is `category` (gray) or `urgency` (red). Screens don't use it directly; use EmailBody.
+
+```tsx
+// Correct (inside components only)
+<EvidenceMark supports="urgency">Our renewal is on 15 December</EvidenceMark>
+
+// Incorrect: a hand-built mark
 <mark style={{ background: "var(--evidence-urgency)" }}>renewal is on 15 December</mark>
 ```
 
@@ -254,10 +283,10 @@ On Approve, a field a person kept or switched already has its own row ("set the 
 
 ```tsx
 // Correct
-<TimelineRow actor="ai" name="Team rule" time="16:31">sent the reply without review</TimelineRow>
+<TimelineRow actor="ai" name="Team rule" at="2026-11-02T16:31:00Z">sent the reply without review</TimelineRow>
 
 // Incorrect: an automatic send recorded as a person's act breaks rule 1
-<TimelineRow actor="human" name="Team rule" time="16:31">sent the reply without review</TimelineRow>
+<TimelineRow actor="human" name="Team rule" at="2026-11-02T16:31:00Z">sent the reply without review</TimelineRow>
 ```
 
 ### Banner
@@ -286,10 +315,10 @@ One ticket in the inbox list. `current` marks the ticket open beside the queue w
 
 ```tsx
 // Correct
-<QueueItem current sender="Aisha Kamara" subject="Exporting all our invoices" preview="Could you tell me…" time="16:48" meta={<Tag tone="warning">Needs review</Tag>} />
+<QueueItem current sender="Aisha Kamara" subject="Exporting all our invoices" preview="Could you tell me…" receivedAt={ticket.receivedAt} meta={<Tag tone="warning">Needs review</Tag>} />
 
 // Incorrect: a confidence value as a tag (rule 2), and a meter here would be a block inside a button
-<QueueItem sender="Aisha Kamara" subject="Exporting all our invoices" preview="Could you tell me…" time="16:48" meta={<Tag>92%</Tag>} />
+<QueueItem sender="Aisha Kamara" subject="Exporting all our invoices" preview="Could you tell me…" receivedAt={ticket.receivedAt} meta={<Tag>92%</Tag>} />
 ```
 
 ### DraftEditor
@@ -330,14 +359,38 @@ The label for model output (rule 6). `source` is `recorded`, `live` or `hand-wri
 
 ### Pane
 
-Every pane on a screen (see Layout). `title` names it; `meta` takes a short line or a Tag, such as the ticket ID. Children go in the card.
+Every pane on a screen (see Layout). `title` names it; `meta` takes a short fact or a Tag, such as the ticket ID. Never put a model suggestion in `meta`, such as an unconfirmed urgency as a Severity; the header reads as settled (rule 1). Children go in the card, which scrolls on its own when the shell gives the pane a height. `footer` stays pinned at the bottom of the card; the triage pane puts ApproveBar there, and nothing else goes in a footer.
 
 ```tsx
-// Correct
-<Pane title="Triage" meta={<Severity level="high" />}>{children}</Pane>
+// Correct: meta holds facts, never a model suggestion (rule 1)
+<Pane title="Email" meta={<span className="text-mono-small">{ticket.id}</span>}>{children}</Pane>
 
 // Incorrect: a hand-built tray with its own corners
 <section className={styles.tray}><div className={styles.card}>{children}</div></section>
+```
+
+### ApproveBar
+
+Approve and what follows it; it only goes in the triage Pane's `footer` (rule 5). Before sending: the primary "Approve and send" button, disabled while any blocker is open, and a one-line summary whose items jump to the field (`targets` maps each blocker target to an element id). After sending (`sentAt` set): "Sent by you · <time>" and "Next ticket" or "Back to inbox" (`afterSend`).
+
+```tsx
+// Correct: a ticket opened on its own, outside the inbox
+<ApproveBar blockers={blockers} blockersId="approve-blockers" targets={targets} onApprove={approve} sentAt={sentAt} afterSend="back-to-inbox" onAfterSend={backToInbox} />
+
+// Incorrect: Next ticket where there's no queue to go to
+<ApproveBar … afterSend="next-ticket" onAfterSend={() => {}} />
+```
+
+### Time
+
+Every time on screen (see Data, Times). Pass `dateTime` as ISO 8601.
+
+```tsx
+// Correct
+<Time dateTime={ticket.receivedAt} />
+
+// Incorrect: formatted by hand, and in UTC
+<time>{ticket.receivedAt.slice(11, 16)}</time>
 ```
 
 ### Severity

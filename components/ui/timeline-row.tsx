@@ -1,13 +1,12 @@
 import type { ComponentProps } from "react";
+import { Time } from "./time";
 import styles from "./timeline-row.module.css";
 
 export type TimelineActor = "ai" | "human";
 
 type TimelineRowBase = Omit<ComponentProps<"li">, "className" | "style"> & {
-  /** Shown as written, e.g. "16:52". */
-  time: string;
-  /** Machine-readable time for the <time> element. */
-  dateTime?: string;
+  /** When it happened, ISO 8601. Shown in the viewer's time zone. */
+  at: string;
 };
 
 /**
@@ -19,16 +18,16 @@ type TimelineRowBase = Omit<ComponentProps<"li">, "className" | "style"> & {
 export type TimelineRowProps = TimelineRowBase &
   ({ actor: "ai"; name?: string } | { actor: "human"; name: string });
 
-export function TimelineRow({ actor, name, time, dateTime, children, ...props }: TimelineRowProps) {
+export function TimelineRow({ actor, name, at, children, ...props }: TimelineRowProps) {
   return (
     <li {...props} className={`text-small ${styles.row}`} data-actor={actor}>
       <span className={styles.marker} aria-hidden />
       <p className={styles.text}>
         <span className={styles.name}>{name ?? "Model"}</span> {children}
       </p>
-      <time className={`text-mono-small ${styles.time}`} dateTime={dateTime}>
-        {time}
-      </time>
+      <span className={styles.time}>
+        <Time dateTime={at} />
+      </span>
     </li>
   );
 }

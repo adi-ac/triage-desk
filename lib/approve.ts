@@ -18,6 +18,12 @@ export function approveField(name: string, field: SuggestedField, chosen: string
   return { name, value: field.value, confidence: field.confidence, runnerUp: field.runnerUp, confirmed: chosen !== null };
 }
 
+/**
+ * One thing blocking Approve. target is the field's name ("category") or
+ * "draft"; ApproveBar uses it to jump there. There's at most one per target.
+ */
+export type Blocker = { target: string; message: string };
+
 /** Unfilled [placeholders] in a draft, each listed once. */
 export function draftPlaceholders(draft: string): string[] {
   return [...new Set(draft.match(/\[[^\]\n]+\]/g) ?? [])];
@@ -30,8 +36,8 @@ export function draftPlaceholders(draft: string): string[] {
  * points of its runner-up), an unfilled [placeholder], and an empty draft.
  * A stale draft is a warning, not a blocker.
  */
-export function approveBlockers({ fields, draft }: { fields: ApproveField[]; draft: string }): string[] {
-  const blockers: string[] = [];
+export function approveBlockers({ fields, draft }: { fields: ApproveField[]; draft: string }): Blocker[] {
+  const blockers: Blocker[] = [];
 
   for (const field of fields) {
     if (field.confirmed) continue;
@@ -41,23 +47,28 @@ export function approveBlockers({ fields, draft }: { fields: ApproveField[]; dra
       ? `Keep ${field.value} or switch to ${field.runnerUp.value}.`
       : `Keep ${field.value} or change it.`;
     if (reason === "low") {
-      blockers.push(
-        `The model is ${toPercent(field.confidence)}% sure the ${field.name} is ${field.value}, below ${confidenceThresholds.medium}%. ${choice}`,
-      );
+      blockers.push({
+        target: field.name,
+        message: `The model is ${toPercent(field.confidence)}% sure the ${field.name} is ${field.value}, below ${confidenceThresholds.medium}%. ${choice}`,
+      });
     } else {
       const gap = toPercent(field.confidence) - toPercent(field.runnerUp!.confidence);
-      blockers.push(
-        `${field.value} leads ${field.runnerUp!.value} by ${gap} points for ${field.name}, inside the ${confidenceThresholds.margin}-point margin. ${choice}`,
-      );
+      blockers.push({
+        target: field.name,
+        message: `${field.value} leads ${field.runnerUp!.value} by ${gap} points for ${field.name}, inside the ${confidenceThresholds.margin}-point margin. ${choice}`,
+      });
     }
   }
 
   if (draft.trim() === "") {
-    blockers.push("The draft is empty.");
+    blockers.push({ target: "draft", message: "The draft is empty." });
   } else {
     const open = draftPlaceholders(draft);
     if (open.length > 0) {
-      blockers.push(`The draft has ${open.length} unfilled placeholder${open.length === 1 ? "" : "s"}: ${open.join(", ")}.`);
+      blockers.push({
+        target: "draft",
+        message: `The draft has ${open.length} unfilled placeholder${open.length === 1 ? "" : "s"}: ${open.join(", ")}.`,
+      });
     }
   }
 

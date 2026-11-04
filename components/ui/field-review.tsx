@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useRef, useState } from "react";
+import { toPercent } from "@/lib/confidence";
 import type { SuggestedField } from "@/lib/suggestion";
 import { Button } from "./button";
 import { Chip } from "./chip";
@@ -8,6 +9,8 @@ import { ConfidenceMeter } from "./confidence-meter";
 import styles from "./field-review.module.css";
 
 export type FieldReviewProps<T extends string> = {
+  /** Lets ApproveBar jump here: pass it in ApproveBar's targets. */
+  id?: string;
   /** The field's name, shown as its heading: "Category". */
   label: string;
   /** The model's pick, its confidence and the runner-up. */
@@ -27,10 +30,13 @@ export type FieldReviewProps<T extends string> = {
  * Reviewing one suggested field. While suggested: the dashed chip, its
  * confidence, and small secondary "Keep", "Switch to <runner-up>" and
  * "Other…" (the full list), so the override is one click and never competes
- * with Approve. Once decided: the solid chip and a quiet "Change" link that
- * reopens the controls. Put it in a Pane; its heading is an h3.
+ * with Approve. Once kept or switched: the solid chip and a quiet "Change"
+ * link that reopens the controls, and the meter gives way to a note of what
+ * Claude suggested, since a meter beside a value must never show confidence
+ * in a different value. Put it in a Pane; its heading is an h3.
  */
 export function FieldReview<T extends string>({
+  id,
   label,
   field,
   options,
@@ -74,7 +80,7 @@ export function FieldReview<T extends string>({
   }
 
   return (
-    <section aria-labelledby={headingId} className={styles.field}>
+    <section id={id} tabIndex={id ? -1 : undefined} aria-labelledby={headingId} className={styles.field}>
       <h3 id={headingId} className={`text-overline ${styles.label}`}>
         {label}
       </h3>
@@ -104,7 +110,13 @@ export function FieldReview<T extends string>({
         )}
       </div>
 
-      <ConfidenceMeter value={field.confidence} runnerUp={field.runnerUp?.confidence} confirmed={decided || approved} />
+      {decided ? (
+        <p className={`text-small ${styles.note}`}>
+          Claude suggested {field.value} · <span className="text-mono">{toPercent(field.confidence)}%</span>
+        </p>
+      ) : (
+        <ConfidenceMeter value={field.confidence} runnerUp={field.runnerUp?.confidence} confirmed={approved} />
+      )}
 
       {showControls && (
         <div className={styles.controls}>

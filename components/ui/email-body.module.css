@@ -1,0 +1,10 @@
+.body {
+  display: grid;
+  gap: 1em;
+}
+
+/* Keeps single line breaks, such as a signature's. */
+.paragraph {
+  margin: 0;
+  white-space: pre-line;
+}

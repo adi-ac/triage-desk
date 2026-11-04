@@ -1,5 +1,5 @@
-import type { ReactNode } from "react";
-import { Chip, ConfidenceMeter, DraftEditor, EvidenceMark, Severity } from "@/components/ui";
+import { Chip, ConfidenceMeter, DraftEditor, EmailBody, EvidenceMark, Severity } from "@/components/ui";
+import { suggestionFor } from "@/fixtures/suggestions";
 import { firstScreenTicketId, tickets } from "@/fixtures/tickets";
 import type { Pair } from "./contrast";
 import { ContrastTable } from "./contrast-table";
@@ -33,39 +33,11 @@ const pairs: Pair[] = [
   { label: "Focus ring on bg", fg: "--focus-ring", bg: "--bg", kind: "non-text" },
 ];
 
-/** Quotes from LL-5040 marked the way the triage panel will mark them. */
-const marks: { quote: string; supports: "category" | "urgency" }[] = [
-  { quote: "how to export everything we have in Ledgerline", supports: "category" },
-  { quote: "whether the API can pull the same history", supports: "category" },
-  { quote: "Our renewal is on 15 December", supports: "urgency" },
-];
-
-function markUp(text: string) {
-  const parts: ReactNode[] = [];
-  let rest = text;
-  let key = 0;
-  while (rest) {
-    const next = marks
-      .map((m) => ({ ...m, at: rest.indexOf(m.quote) }))
-      .filter((m) => m.at >= 0)
-      .sort((a, b) => a.at - b.at)[0];
-    if (!next) {
-      parts.push(rest);
-      break;
-    }
-    parts.push(rest.slice(0, next.at));
-    parts.push(
-      <EvidenceMark key={key++} supports={next.supports}>
-        {next.quote}
-      </EvidenceMark>,
-    );
-    rest = rest.slice(next.at + next.quote.length);
-  }
-  return parts;
-}
+/** LL-5040's hand-written evidence, marked the way the triage panel marks it. */
+const evidence = suggestionFor(firstScreenTicketId)!.evidence;
 
 export function TrustSection({ theme }: { theme: string }) {
-  const paragraphs = ticket.body.split("\n\n").slice(1, 4);
+  const excerpt = ticket.body.split("\n\n").slice(1, 4).join("\n\n");
 
   return (
     <>
@@ -142,13 +114,7 @@ export function TrustSection({ theme }: { theme: string }) {
             <EvidenceMark supports="urgency">Urgency</EvidenceMark>
           </span>
         </div>
-        <div className="text-reading">
-          {paragraphs.map((p, i) => (
-            <p key={i} className={styles.paragraph}>
-              {markUp(p)}
-            </p>
-          ))}
-        </div>
+        <EmailBody body={excerpt} evidence={evidence} />
       </section>
 
       <section className={styles.card}>

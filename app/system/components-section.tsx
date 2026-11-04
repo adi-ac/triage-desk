@@ -1,10 +1,12 @@
 import { useState, type ReactNode } from "react";
 import {
+  ApproveBar,
   Banner,
   Button,
   Chip,
   ConfidenceMeter,
   DraftEditor,
+  EmailBody,
   EvidenceItem,
   EvidenceMark,
   FieldReview,
@@ -14,11 +16,13 @@ import {
   SegmentedControl,
   Severity,
   Tag,
+  Time,
   TimelineRow,
   confidenceThresholds,
 } from "@/components/ui";
 import { suggestionFor } from "@/fixtures/suggestions";
 import { autoSendTicketId, firstScreenTicketId, tickets, type Ticket } from "@/fixtures/tickets";
+import { approveBlockers, approveField } from "@/lib/approve";
 import { categories, urgencies, type Category, type Urgency } from "@/lib/suggestion";
 import type { Pair } from "./contrast";
 import { ContrastTable } from "./contrast-table";
@@ -26,6 +30,11 @@ import styles from "./system.module.css";
 
 const firstScreen = tickets.find((t) => t.id === firstScreenTicketId)!;
 const suggestion = suggestionFor(firstScreenTicketId)!;
+const demoBlockers = approveBlockers({
+  fields: [approveField("category", suggestion.category, null), approveField("urgency", suggestion.urgency, null)],
+  draft: suggestion.draft,
+});
+const excerpt = firstScreen.body.split("\n\n").slice(1, 4).join("\n\n");
 
 /** Live, so the controls can be tried: each theme pane keeps its own state. */
 function FieldReviewDemo() {
@@ -86,7 +95,6 @@ function Demo({ name, props, intro, children }: { name: string; props?: string; 
   );
 }
 
-const time = (iso: string) => iso.slice(11, 16);
 const draft =
   "Hi Aisha,\n\nThanks for checking before your renewal. You can export invoices, clients and payments from Settings → Export, as CSV with the PDFs in a zip.";
 const preview = (t: Ticket) => t.body.split("\n\n")[1] ?? "";
@@ -216,7 +224,15 @@ export function ComponentsSection({ theme }: { theme: string }) {
         </div>
       </Demo>
 
-      <Demo name="EvidenceMark" props="supports: category | urgency" intro="Marks a quote inside the email itself: a fill and a dashed underline, since the model made the mark.">
+      <Demo
+        name="EmailBody"
+        props="body · evidence"
+        intro="The customer's email with the model's quotes marked in place. Quotes that don't match the email word for word are dropped. Every screen uses this; none marks quotes itself."
+      >
+        <EmailBody body={excerpt} evidence={[...suggestion.evidence, { quote: "a quote the email doesn't contain", supports: "category" }]} />
+      </Demo>
+
+      <Demo name="EvidenceMark" props="supports: category | urgency" intro="The mark EmailBody and EvidenceItem use: a fill and a dashed underline, since the model made the mark.">
         <p className="text-reading">
           Could you tell me <EvidenceMark supports="category">how to export everything we have in Ledgerline</EvidenceMark>?{" "}
           <EvidenceMark supports="urgency">Our renewal is on 15 December</EvidenceMark>.
@@ -236,16 +252,16 @@ export function ComponentsSection({ theme }: { theme: string }) {
         intro="The model and team rules get a dashed ring; a person gets a solid dot and must be named. A field approved untouched gets its own row, worded as approved as suggested, never as set."
       >
         <ol className={styles.timeline}>
-          <TimelineRow actor="ai" time="16:48">
+          <TimelineRow actor="ai" at="2026-11-02T16:48:00Z">
             suggested How-to at 64%, with Cancellation risk close behind
           </TimelineRow>
-          <TimelineRow actor="ai" name="Team rule" time="16:48">
+          <TimelineRow actor="ai" name="Team rule" at="2026-11-02T16:48:00Z">
             held it for review: below 85% and it mentions a renewal
           </TimelineRow>
-          <TimelineRow actor="human" name="Dana Ruiz" time="16:52">
+          <TimelineRow actor="human" name="Dana Ruiz" at="2026-11-02T16:52:00Z">
             set the category to Cancellation risk
           </TimelineRow>
-          <TimelineRow actor="human" name="Dana Ruiz" time="16:55">
+          <TimelineRow actor="human" name="Dana Ruiz" at="2026-11-02T16:55:00Z">
             approved the urgency as suggested: Normal
           </TimelineRow>
         </ol>
@@ -271,8 +287,7 @@ export function ComponentsSection({ theme }: { theme: string }) {
             company={firstScreen.account?.company}
             subject={firstScreen.subject}
             preview={preview(firstScreen)}
-            time={time(firstScreen.receivedAt)}
-            dateTime={firstScreen.receivedAt}
+            receivedAt={firstScreen.receivedAt}
             meta={<Tag tone="warning">Needs review</Tag>}
           />
           <QueueItem
@@ -280,8 +295,7 @@ export function ComponentsSection({ theme }: { theme: string }) {
             company={autoSent.account?.company}
             subject={autoSent.subject}
             preview={preview(autoSent)}
-            time={time(autoSent.receivedAt)}
-            dateTime={autoSent.receivedAt}
+            receivedAt={autoSent.receivedAt}
             meta={<Tag tone="ai">Sent by rule</Tag>}
           />
         </div>
@@ -317,10 +331,44 @@ export function ComponentsSection({ theme }: { theme: string }) {
         </div>
       </Demo>
 
-      <Demo name="Pane" intro="A gray tray holding the header and wrapping a white card, with concentric corners (14px tray, 10px card). Screens never build their own.">
+      <Demo
+        name="Pane"
+        props="title · meta · footer"
+        intro="A gray tray holding the header and wrapping a white card, with concentric corners (14px tray, 10px card). The footer stays pinned at the bottom of the card while the content scrolls. Screens never build their own."
+      >
         <Pane title="Email" meta={<span className="text-mono-small">LL-5040</span>}>
           <p className="text-reading">Could you tell me how to export everything we have in Ledgerline?</p>
         </Pane>
+        <Pane
+          title="Triage"
+          footer={<ApproveBar blockers={demoBlockers} blockersId="demo-blockers" targets={{}} onApprove={() => {}} sentAt={null} afterSend="next-ticket" onAfterSend={() => {}} />}
+        >
+          <p className="text-small">The triage pane puts ApproveBar in its footer.</p>
+        </Pane>
+      </Demo>
+
+      <Demo
+        name="ApproveBar"
+        props="blockers · targets · sentAt · afterSend: next-ticket | back-to-inbox"
+        intro="Approve, with a one-line summary of what blocks it; each item jumps to its field. The full list stays in the card. After sending: the sent line, and Next ticket in the inbox or Back to inbox for a ticket opened on its own."
+      >
+        <div className={styles.blocks}>
+          <ApproveBar blockers={demoBlockers} blockersId="demo-blockers" targets={{}} onApprove={() => {}} sentAt={null} afterSend="next-ticket" onAfterSend={() => {}} />
+          <ApproveBar blockers={[]} blockersId="demo-blockers" targets={{}} onApprove={() => {}} sentAt={null} afterSend="next-ticket" onAfterSend={() => {}} />
+          <ApproveBar blockers={[]} blockersId="demo-blockers" targets={{}} onApprove={() => {}} sentAt="2026-11-02T16:55:00Z" afterSend="next-ticket" onAfterSend={() => {}} />
+          <ApproveBar blockers={[]} blockersId="demo-blockers" targets={{}} onApprove={() => {}} sentAt="2026-11-02T16:55:00Z" afterSend="back-to-inbox" onAfterSend={() => {}} />
+        </div>
+      </Demo>
+
+      <Demo
+        name="Time"
+        props="dateTime"
+        intro="In the viewer's time zone: the time alone if it's today, the date and time if it's older, and the full timestamp with its zone on hover. Hover these."
+      >
+        <div className={styles.inline}>
+          <Time dateTime={firstScreen.receivedAt} />
+          <Time dateTime="2025-12-31T23:30:00Z" />
+        </div>
       </Demo>
 
       <Demo

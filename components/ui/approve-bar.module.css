@@ -1,0 +1,33 @@
+.bar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px 16px;
+}
+
+.summary,
+.sent {
+  margin: 0;
+  color: var(--ink-2);
+}
+
+/* Quiet links in ink-2, never petrol: they point at work, they aren't actions. */
+.jump {
+  appearance: none;
+  border: 0;
+  padding: 0;
+  background: none;
+  font: inherit;
+  color: inherit;
+  text-decoration: underline;
+  text-underline-offset: 3px;
+  text-decoration-thickness: 1px;
+  cursor: pointer;
+  transition: color 150ms ease-out;
+}
+
+@media (hover: hover) {
+  .jump:hover {
+    color: var(--ink);
+  }
+}

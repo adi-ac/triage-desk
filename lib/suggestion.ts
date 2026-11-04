@@ -34,6 +34,8 @@ export type Evidence = {
 export type Suggestion = {
   ticketId: string;
   source: OutputSourceKind;
+  /** When the model made the suggestion, ISO 8601. */
+  suggestedAt: string;
   category: SuggestedField<Category>;
   urgency: SuggestedField<Urgency>;
   evidence: Evidence[];

@@ -15,6 +15,7 @@ export const suggestions: readonly Suggestion[] = [
   {
     ticketId: firstScreenTicketId,
     source: "hand-written",
+    suggestedAt: "2026-11-02T16:48:20Z",
     // Unsure both ways: category under 60% and 7 points clear; urgency 6 points clear.
     category: { value: "How-to", confidence: 0.48, runnerUp: { value: "Cancellation risk", confidence: 0.41 } },
     urgency: { value: "Normal", confidence: 0.62, runnerUp: { value: "High", confidence: 0.56 } },
