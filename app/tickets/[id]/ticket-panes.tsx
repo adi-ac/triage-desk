@@ -8,6 +8,7 @@ import {
   DraftEditor,
   EmailBody,
   FieldReview,
+  NoActionReview,
   Pane,
   Time,
   Timeline,
@@ -18,8 +19,15 @@ import { tickets } from "@/fixtures/tickets";
 import { approveBlockers, approveField } from "@/lib/approve";
 import { flatQueue } from "@/lib/queue";
 import { matchEvidence } from "@/lib/evidence";
-import { categories, urgencies, type Category, type Suggestion, type Urgency } from "@/lib/suggestion";
-import { personRow, useInbox } from "../inbox-state";
+import {
+  categories,
+  urgencies,
+  type Category,
+  type NotARequestSuggestion,
+  type TriageSuggestion,
+  type Urgency,
+} from "@/lib/suggestion";
+import { modelRow, personRow, useInbox } from "../inbox-state";
 import styles from "./ticket.module.css";
 
 const targets = { category: "field-category", urgency: "field-urgency", draft: "draft-reply" };
@@ -28,8 +36,11 @@ export function TicketPanes() {
   const { id: ticketId } = useParams<{ id: string }>();
   const ticket = tickets.find((t) => t.id === ticketId);
   if (!ticket) notFound();
-  const suggestion = suggestionFor(ticketId);
+  const { effectiveFor } = useInbox();
+  const original = suggestionFor(ticketId);
+  const suggestion = effectiveFor(ticketId);
   const [activeQuote, setActiveQuote] = useState<string | null>(null);
+  const email = { body: ticket.body, subject: ticket.subject };
 
   return (
     <>
@@ -37,21 +48,27 @@ export function TicketPanes() {
           navigation), so the tab title comes from here; React puts it in <head>. */}
       <title>{`${ticketId} · Triage Desk`}</title>
       <Pane title="Email" meta={<span className="text-mono-small">{ticket.id}</span>}>
-        <article className={styles.email}>
-          <h3 className={`text-title ${styles.subject}`}>{ticket.subject || "(No subject)"}</h3>
-          <div className={`text-small ${styles.sender}`}>
-            <p>
-              <span className="text-body-strong">{ticket.from.name}</span>{" "}
-              <span className={styles.muted}>{ticket.from.email}</span>
-            </p>
-            <p className={styles.secondary}>
-              {ticket.account ? `${ticket.account.company} · ${ticket.account.plan}` : "No matching Ledgerline account"}
-            </p>
-            <p className={styles.muted}>
-              Received <Time dateTime={ticket.receivedAt} />
-            </p>
-          </div>
-          <EmailBody body={ticket.body} evidence={suggestion?.evidence} activeQuote={activeQuote} />
+        <article>
+          <EmailBody
+            subject={ticket.subject}
+            body={ticket.body}
+            evidence={suggestion?.evidence}
+            activeQuote={activeQuote}
+            meta={
+              <div className={`text-small ${styles.sender}`}>
+                <p>
+                  <span className="text-body-strong">{ticket.from.name}</span>{" "}
+                  <span className={styles.muted}>{ticket.from.email}</span>
+                </p>
+                <p className={styles.secondary}>
+                  {ticket.account ? `${ticket.account.company} · ${ticket.account.plan}` : "No matching Ledgerline account"}
+                </p>
+                <p className={styles.muted}>
+                  Received <Time dateTime={ticket.receivedAt} />
+                </p>
+              </div>
+            }
+          />
         </article>
       </Pane>
 
@@ -64,32 +81,57 @@ export function TicketPanes() {
             </p>
           </div>
         </Pane>
+      ) : suggestion.kind === "not-a-request" ? (
+        <NoActionTriage key={ticketId} ticketId={ticketId} email={email} suggestion={suggestion} onEvidenceActive={setActiveQuote} />
       ) : ruleSendFor(ticketId) ? (
-        <RuleSentTriage ticketId={ticketId} body={ticket.body} suggestion={suggestion} onEvidenceActive={setActiveQuote} />
+        <RuleSentTriage ticketId={ticketId} email={email} suggestion={suggestion} onEvidenceActive={setActiveQuote} />
       ) : (
-        <Triage key={ticketId} ticketId={ticketId} body={ticket.body} suggestion={suggestion} onEvidenceActive={setActiveQuote} />
+        <Triage
+          key={ticketId}
+          ticketId={ticketId}
+          email={email}
+          suggestion={suggestion}
+          prior={original?.kind === "not-a-request" ? original : undefined}
+          onEvidenceActive={setActiveQuote}
+        />
       )}
     </>
   );
 }
 
+type Email = { body: string; subject: string };
+
 type TriageProps = {
   ticketId: string;
-  body: string;
-  suggestion: Suggestion;
+  email: Email;
+  suggestion: TriageSuggestion;
+  /** The "Not a request" suggestion this replaced, after "Triage anyway". */
+  prior?: NotARequestSuggestion;
   onEvidenceActive: (quote: string | null) => void;
 };
 
-const evidenceFor = (body: string, s: Suggestion, supports: "category" | "urgency") =>
-  matchEvidence(body, s.evidence).filter((e) => e.supports === supports);
+const evidenceFor = (email: Email, s: { evidence: TriageSuggestion["evidence"] }, supports: "category" | "urgency") =>
+  matchEvidence(email.body, s.evidence, email.subject).filter((e) => e.supports === supports);
 
-const modelRowText = (s: Suggestion) =>
+const modelRowText = (s: TriageSuggestion) =>
   `suggested ${s.category.value} and ${s.urgency.value} urgency, and drafted a reply`;
 
-/** A ticket waiting for a person: review the fields and the draft, then Approve. */
-function Triage({ ticketId, body, suggestion, onEvidenceActive }: TriageProps) {
+const reasonText = (s: NotARequestSuggestion) => `suggested this isn't a request (${s.reason})`;
+
+function useNext(ticketId: string) {
   const router = useRouter();
-  const { stateFor, update, queue } = useInbox();
+  const { queue } = useInbox();
+  return () => {
+    const order = flatQueue(queue);
+    const i = order.findIndex((t) => t.id === ticketId);
+    router.push(`/tickets/${order[(i + 1) % order.length].id}`);
+  };
+}
+
+/** A ticket waiting for a person: review the fields and the draft, then Approve. */
+function Triage({ ticketId, email, suggestion, prior, onEvidenceActive }: TriageProps) {
+  const next = useNext(ticketId);
+  const { stateFor, update } = useInbox();
   const state = stateFor(ticketId);
   const sent = state.sentAt !== null;
 
@@ -133,12 +175,6 @@ function Triage({ ticketId, body, suggestion, onEvidenceActive }: TriageProps) {
     });
   };
 
-  const next = () => {
-    const order = flatQueue(queue);
-    const i = order.findIndex((t) => t.id === ticketId);
-    router.push(`/tickets/${order[(i + 1) % order.length].id}`);
-  };
-
   const stale = [
     state.category && state.category !== suggestion.category.value
       ? `The draft was written for ${suggestion.category.value}; the category is now ${state.category}.`
@@ -178,7 +214,7 @@ function Triage({ ticketId, body, suggestion, onEvidenceActive }: TriageProps) {
           onValueChange={chooseCategory}
           approved={sent}
           explainEstimate
-          evidence={evidenceFor(body, suggestion, "category")}
+          evidence={evidenceFor(email, suggestion, "category")}
           onEvidenceActive={onEvidenceActive}
         />
         <FieldReview
@@ -190,7 +226,7 @@ function Triage({ ticketId, body, suggestion, onEvidenceActive }: TriageProps) {
           onValueChange={chooseUrgency}
           approved={sent}
           explainEstimate={state.category !== null}
-          evidence={evidenceFor(body, suggestion, "urgency")}
+          evidence={evidenceFor(email, suggestion, "urgency")}
           onEvidenceActive={onEvidenceActive}
         />
         {suggestion.agentNote && <Banner title="Claude's note">{suggestion.agentNote}</Banner>}
@@ -213,8 +249,9 @@ function Triage({ ticketId, body, suggestion, onEvidenceActive }: TriageProps) {
           }}
         />
         <Timeline>
-          <TimelineRow actor="ai" at={suggestion.suggestedAt}>
-            {modelRowText(suggestion)}
+          {/* After "Triage anyway", the activity already holds Claude's new suggestion. */}
+          <TimelineRow actor="ai" at={(prior ?? suggestion).suggestedAt}>
+            {prior ? reasonText(prior) : modelRowText(suggestion)}
           </TimelineRow>
           {state.activity.map(({ id, actor, name, at, text }) =>
             actor === "human" ? (
@@ -234,15 +271,9 @@ function Triage({ ticketId, body, suggestion, onEvidenceActive }: TriageProps) {
 }
 
 /** A reply a team rule sent without review: a read-only record with no decision styling. */
-function RuleSentTriage({ ticketId, body, suggestion, onEvidenceActive }: TriageProps) {
-  const router = useRouter();
-  const { queue } = useInbox();
+function RuleSentTriage({ ticketId, email, suggestion, onEvidenceActive }: TriageProps) {
+  const next = useNext(ticketId);
   const send = ruleSendFor(ticketId)!;
-  const next = () => {
-    const order = flatQueue(queue);
-    const i = order.findIndex((t) => t.id === ticketId);
-    router.push(`/tickets/${order[(i + 1) % order.length].id}`);
-  };
 
   return (
     <Pane
@@ -261,7 +292,7 @@ function RuleSentTriage({ ticketId, body, suggestion, onEvidenceActive }: Triage
           onValueChange={() => {}}
           readOnly
           explainEstimate
-          evidence={evidenceFor(body, suggestion, "category")}
+          evidence={evidenceFor(email, suggestion, "category")}
           onEvidenceActive={onEvidenceActive}
         />
         <FieldReview
@@ -271,7 +302,7 @@ function RuleSentTriage({ ticketId, body, suggestion, onEvidenceActive }: Triage
           value={null}
           onValueChange={() => {}}
           readOnly
-          evidence={evidenceFor(body, suggestion, "urgency")}
+          evidence={evidenceFor(email, suggestion, "urgency")}
           onEvidenceActive={onEvidenceActive}
         />
         {suggestion.agentNote && <Banner title="Claude's note">{suggestion.agentNote}</Banner>}
@@ -290,6 +321,89 @@ function RuleSentTriage({ ticketId, body, suggestion, onEvidenceActive }: Triage
           <TimelineRow actor="ai" name="Team rule" at={send.sentAt}>
             sent the reply under &ldquo;{send.rule}&rdquo;
           </TimelineRow>
+        </Timeline>
+      </div>
+    </Pane>
+  );
+}
+
+type NoActionProps = {
+  ticketId: string;
+  email: Email;
+  suggestion: NotARequestSuggestion;
+  onEvidenceActive: (quote: string | null) => void;
+};
+
+/**
+ * Claude suggests the email isn't a request. Still a suggestion: a person
+ * keeps it (closing the ticket without a reply) or triages it anyway. No
+ * Approve here: there's no reply to approve.
+ */
+function NoActionTriage({ ticketId, email, suggestion, onEvidenceActive }: NoActionProps) {
+  const next = useNext(ticketId);
+  const { stateFor, update } = useInbox();
+  const state = stateFor(ticketId);
+  const anyway = suggestion.triageAnyway;
+
+  const keep = () =>
+    update(ticketId, (s) => {
+      const row = personRow("closed the ticket without a reply");
+      return { ...s, closedAt: row.at, activity: [...s.activity, row] };
+    });
+
+  const triageAnyway = anyway
+    ? () =>
+        update(ticketId, (s) => ({
+          ...s,
+          triagedAnyway: true,
+          draft: anyway.draft,
+          activity: [...s.activity, personRow("asked Claude to triage it anyway"), modelRow(modelRowText(anyway))],
+        }))
+    : undefined;
+
+  return (
+    <Pane
+      title="Triage"
+      footer={
+        state.closedAt ? (
+          <ApproveBar
+            blockers={[]}
+            targets={targets}
+            onApprove={() => {}}
+            sentAt={state.closedAt}
+            outcome="closed"
+            afterSend="next-ticket"
+            onAfterSend={next}
+          />
+        ) : undefined
+      }
+    >
+      <div className={styles.triage}>
+        <NoActionReview
+          reason={suggestion.reason}
+          explanation={suggestion.explanation}
+          evidence={matchEvidence(email.body, suggestion.evidence, email.subject)}
+          onEvidenceActive={onEvidenceActive}
+          closed={state.closedAt !== null}
+          onKeep={keep}
+          onTriageAnyway={triageAnyway}
+        />
+        {suggestion.agentNote && <Banner title="Claude's note">{suggestion.agentNote}</Banner>}
+        <Timeline>
+          <TimelineRow actor="ai" at={suggestion.suggestedAt}>
+            {reasonText(suggestion)}
+          </TimelineRow>
+          {state.activity.map(({ id, actor, name, at, text }) =>
+            actor === "human" ? (
+              <TimelineRow key={id} actor="human" name={name ?? "You"} at={at}>
+                {text}
+              </TimelineRow>
+            ) : (
+              <TimelineRow key={id} actor="ai" name={name} at={at}>
+                {text}
+              </TimelineRow>
+            ),
+          )}
         </Timeline>
       </div>
     </Pane>

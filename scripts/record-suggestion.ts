@@ -14,8 +14,14 @@
  *                     with its model and date) into a JSON array, replacing
  *                     any earlier recording for the same ticket
  *   --except <ids>    with "all", skip these comma-separated ticket IDs
+ *
+ * When Claude answers "Not a request", the script asks again as a person
+ * pressing "Triage anyway" would, and records that normal suggestion too,
+ * so the demo works without a live call. Every recording carries the
+ * prompt version: a hash of the prompt and schema.
  */
 
+import { createHash } from "node:crypto";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
@@ -23,7 +29,14 @@ import { helpArticles, helpArticleTitles } from "../fixtures/help-center.ts";
 import { tickets, vagueEmail } from "../fixtures/tickets.ts";
 import { toPercent, unsureReason } from "../lib/confidence.ts";
 import { matchEvidence } from "../lib/evidence.ts";
-import { categories, urgencies, type Suggestion } from "../lib/suggestion.ts";
+import {
+  categories,
+  notARequestReasons,
+  urgencies,
+  type NotARequestSuggestion,
+  type Suggestion,
+  type TriageSuggestion,
+} from "../lib/suggestion.ts";
 
 const MODEL = "claude-sonnet-5-5";
 /** Claude Sonnet 5.5, $ per million tokens. Thinking tokens bill as output. */
@@ -33,7 +46,9 @@ const PRICE = { input: 2, output: 10 };
 
 const HELP_CENTER = helpArticles.map((a) => `<article title="${a.title}">\n${a.body}\n</article>`).join("\n\n");
 
-const SYSTEM = `You triage support email for Ledgerline, a B2B invoicing product. For each email, suggest a category and an urgency, quote the evidence for them, and draft a reply a support agent will review before sending.
+const SYSTEM = `You triage support email for Ledgerline, a B2B invoicing product. For each email, first decide whether it's a request. If it is, suggest a category and an urgency, quote the evidence for them, and draft a reply a support agent will review before sending.
+
+Not a request: some emails need nothing from support. Use kind "not-a-request" for an automatic reply (out of office, a ticket-resolved notice), an empty message, one sent to the wrong place (such as a reply from a customer's own client), or one with nothing to do. Give the reason and one short sentence explaining it, quote what shows it as evidence supporting the category, and set category, urgency and draft to null. Never force a category onto an email that isn't a request. Otherwise use kind "triage" and set notARequest to null.
 
 Categories:
 - How-to: the customer wants to know how to do something Ledgerline already supports.
@@ -50,7 +65,7 @@ Urgencies:
 
 Confidence: give your honest probability (0 to 1) that each pick is right, and the same for the runner-up, the next most likely option. Treat them as parts of one distribution over all options, so a pick and its runner-up add up to at most 1. When the email is ambiguous, say so with your numbers rather than picking confidently.
 
-Evidence from the email: quote the exact words from the email, character for character, that support each pick. Mark each quote as supporting the category or the urgency, with article set to null. Only quote words that appear in the email.
+Evidence from the email: quote the exact words from the email's subject line or body, character for character, that support each pick. Mark each quote as supporting the category or the urgency, with article set to null. Only quote words that appear in the email.
 
 Draft: a short, friendly reply to the customer from "Ledgerline Support". It may state only facts found in the customer's email or in the help-center articles below. Anything else Ledgerline-specific that the reply needs, such as a date, an amount, a name or an account detail, is a placeholder in square brackets, for example [renewal price]. Never invent facts about Ledgerline. Each time the draft relies on an article, add an evidence item that supports "draft", gives the article's exact title, and quotes the sentence it relies on, character for character.
 
@@ -83,12 +98,24 @@ const fieldSchema = (options: readonly string[]) => ({
   additionalProperties: false,
 });
 
+const nullable = (schema: object) => ({ anyOf: [schema, { type: "null" }] });
+
 /** Sent as output_config.format, so the response always parses into this shape. */
 const OUTPUT_SCHEMA = {
   type: "object",
   properties: {
-    category: fieldSchema(categories),
-    urgency: fieldSchema(urgencies),
+    kind: { type: "string", enum: ["triage", "not-a-request"] },
+    notARequest: nullable({
+      type: "object",
+      properties: {
+        reason: { type: "string", enum: notARequestReasons },
+        explanation: { type: "string" },
+      },
+      required: ["reason", "explanation"],
+      additionalProperties: false,
+    }),
+    category: nullable(fieldSchema(categories)),
+    urgency: nullable(fieldSchema(urgencies)),
     evidence: {
       type: "array",
       items: {
@@ -102,10 +129,10 @@ const OUTPUT_SCHEMA = {
         additionalProperties: false,
       },
     },
-    draft: { type: "string" },
-    agentNote: { anyOf: [{ type: "string" }, { type: "null" }] },
+    draft: nullable({ type: "string" }),
+    agentNote: nullable({ type: "string" }),
   },
-  required: ["category", "urgency", "evidence", "draft", "agentNote"],
+  required: ["kind", "notARequest", "category", "urgency", "evidence", "draft", "agentNote"],
   additionalProperties: false,
 };
 
@@ -118,8 +145,10 @@ const field = <T extends readonly [string, ...string[]]>(options: T) =>
     runnerUp: z.object({ value: z.enum(options), confidence: probability }),
   });
 const Output = z.object({
-  category: field(categories),
-  urgency: field(urgencies),
+  kind: z.enum(["triage", "not-a-request"]),
+  notARequest: z.object({ reason: z.enum(notARequestReasons), explanation: z.string() }).nullable(),
+  category: field(categories).nullable(),
+  urgency: field(urgencies).nullable(),
   evidence: z.array(
     z.union([
       z
@@ -128,16 +157,23 @@ const Output = z.object({
       z.object({ quote: z.string(), supports: z.literal("draft"), article: z.enum(helpArticleTitles) }),
     ]),
   ),
-  draft: z.string(),
+  draft: z.string().nullable(),
   agentNote: z.string().nullable(),
 });
 
+/** The request a person sends with "Triage anyway". */
+const TRIAGE_ANYWAY = `A person reviewed your suggestion that this isn't a request and chose "Triage anyway". Set kind to "triage" and give a category, urgency, evidence and draft as for any request.`;
+
+/** Which prompt produced a recording: a hash of everything that shapes the answer. */
+const PROMPT_VERSION = `p-${createHash("sha256").update(SYSTEM).update(JSON.stringify(OUTPUT_SCHEMA)).update(TRIAGE_ANYWAY).digest("hex").slice(0, 8)}`;
+
 // --- The email -------------------------------------------------------------
 
-function emailFor(arg: string): { id: string; body: string; text: string } {
+function emailFor(arg: string): { id: string; subject: string; body: string; text: string } {
   if (arg === "vague") {
     return {
       id: "vague",
+      subject: vagueEmail.subject,
       body: vagueEmail.body,
       text: `From: ${vagueEmail.name}\nSubject: ${vagueEmail.subject}\n\n${vagueEmail.body}`,
     };
@@ -147,6 +183,7 @@ function emailFor(arg: string): { id: string; body: string; text: string } {
   const account = t.account ? `${t.account.company} (${t.account.plan})` : "no matching Ledgerline account";
   return {
     id: t.id,
+    subject: t.subject,
     body: t.body,
     text: `From: ${t.from.name} <${t.from.email}>\nAccount: ${account}\nSubject: ${t.subject}\n\n${t.body}`,
   };
@@ -156,7 +193,10 @@ function emailFor(arg: string): { id: string; body: string; text: string } {
 
 const client = new Anthropic();
 
-async function record(email: ReturnType<typeof emailFor>, run: number) {
+type Email = ReturnType<typeof emailFor>;
+
+/** One call to Claude. forced: the "Triage anyway" request. */
+async function ask(email: Email, forced: boolean) {
   const response = await client.beta.messages.create({
     model: MODEL,
     max_tokens: 16000,
@@ -164,39 +204,52 @@ async function record(email: ReturnType<typeof emailFor>, run: number) {
     betas: ["server-side-fallback-2026-07-01"],
     fallbacks: "default",
     system: SYSTEM,
-    messages: [{ role: "user", content: `Triage this email.\n\n${email.text}` }],
+    messages: [{ role: "user", content: `Triage this email.\n\n${email.text}${forced ? `\n\n${TRIAGE_ANYWAY}` : ""}` }],
     output_config: { format: { type: "json_schema", schema: OUTPUT_SCHEMA } },
   });
+  const cost = (response.usage.input_tokens * PRICE.input + response.usage.output_tokens * PRICE.output) / 1_000_000;
+  const base = { servedBy: response.model, stop: response.stop_reason as string, cost };
+  if (response.stop_reason === "refusal") return { ...base, problem: `refusal (${response.stop_details?.category ?? "no category"})` };
+  if (response.stop_reason === "max_tokens") return { ...base, problem: "max_tokens" };
 
-  const cost =
-    (response.usage.input_tokens * PRICE.input + response.usage.output_tokens * PRICE.output) / 1_000_000;
-  const servedBy = response.model;
-
-  if (response.stop_reason === "refusal") {
-    return { run, servedBy, stop: "refusal", category: response.stop_details?.category ?? null, cost };
-  }
-  if (response.stop_reason === "max_tokens") {
-    return { run, servedBy, stop: "max_tokens", cost };
-  }
-
-  const text = response.content.flatMap((b) => (b.type === "text" ? [b.text] : [])).join("");
-  // The schema guarantees the shape; Zod checks the rest (confidences, and
-  // that draft evidence names an article). A run that fails is reported, not saved.
-  const parsed = Output.safeParse(JSON.parse(text));
-  if (!parsed.success) {
-    return { run, servedBy, stop: "invalid", issues: parsed.error.issues, raw: JSON.parse(text), cost };
-  }
-  const { agentNote, ...output } = parsed.data;
-  const suggestion: Suggestion = {
+  const raw = JSON.parse(response.content.flatMap((b) => (b.type === "text" ? [b.text] : [])).join(""));
+  const parsed = Output.safeParse(raw);
+  if (!parsed.success) return { ...base, problem: `invalid: ${parsed.error.issues.map((i) => i.message).join("; ")}`, raw };
+  const o = parsed.data;
+  const meta = {
     ticketId: email.id,
-    source: "live",
+    source: "live" as const,
     suggestedAt: new Date().toISOString(),
-    model: servedBy,
-    ...output,
-    ...(agentNote ? { agentNote } : {}),
+    model: response.model,
+    promptVersion: PROMPT_VERSION,
+    ...(o.agentNote ? { agentNote: o.agentNote } : {}),
   };
 
-  const describe = (f: Suggestion["category"] | Suggestion["urgency"]) => {
+  // The schema allows both shapes at once; each kind must fill exactly its own fields.
+  if (o.kind === "not-a-request") {
+    if (forced) return { ...base, problem: 'invalid: "Triage anyway" still answered not-a-request', raw };
+    if (!o.notARequest || o.category || o.urgency || o.draft !== null || o.evidence.some((e) => e.supports === "draft"))
+      return { ...base, problem: "invalid: not-a-request with triage fields", raw };
+    const evidence = o.evidence.flatMap((e) => (e.supports === "draft" ? [] : [e]));
+    const suggestion: NotARequestSuggestion = { ...meta, kind: "not-a-request", ...o.notARequest, evidence };
+    return { ...base, suggestion };
+  }
+  if (!o.category || !o.urgency || o.draft === null || o.notARequest)
+    return { ...base, problem: "invalid: triage with missing or not-a-request fields", raw };
+  const suggestion: TriageSuggestion = {
+    ...meta,
+    kind: "triage",
+    category: o.category,
+    urgency: o.urgency,
+    evidence: o.evidence,
+    draft: o.draft,
+  };
+  return { ...base, suggestion };
+}
+
+/** What to check in a triage suggestion against our rules. */
+function checkTriage(email: Email, s: TriageSuggestion) {
+  const describe = (f: TriageSuggestion["category"] | TriageSuggestion["urgency"]) => {
     const reason = unsureReason(f.confidence, f.runnerUp?.confidence);
     return {
       pick: `${f.value} ${toPercent(f.confidence)}%`,
@@ -209,26 +262,48 @@ async function record(email: ReturnType<typeof emailFor>, run: number) {
             : "no",
     };
   };
-
+  const email_ = s.evidence.filter((e) => e.supports !== "draft");
   return {
-    run,
-    servedBy,
-    stop: response.stop_reason,
-    category: describe(suggestion.category),
-    urgency: describe(suggestion.urgency),
-    emailEvidence: `${matchEvidence(email.body, suggestion.evidence).length} of ${suggestion.evidence.filter((e) => e.supports !== "draft").length} email quotes match word for word`,
-    articleEvidence: suggestion.evidence.flatMap((e) =>
+    category: describe(s.category),
+    urgency: describe(s.urgency),
+    emailEvidence: `${matchEvidence(email.body, s.evidence, email.subject).length} of ${email_.length} email quotes match word for word`,
+    articleEvidence: s.evidence.flatMap((e) =>
       e.supports === "draft"
         ? [`${e.article}: ${helpArticles.find((a) => a.title === e.article)?.body.includes(e.quote) ? "matches" : "DOES NOT MATCH"} word for word`]
         : [],
     ),
-    placeholders: [...new Set(suggestion.draft.match(/\[[^\]\n]+\]/g) ?? [])],
-    placeholdersInQuestions: suggestion.draft
+    placeholders: [...new Set(s.draft.match(/\[[^\]\n]+\]/g) ?? [])],
+    placeholdersInQuestions: s.draft
       .split(/(?<=[.?!])\s+/)
-      .filter((sentence) => sentence.trim().endsWith("?") && /\[[^\]\n]+\]/.test(sentence)),
-    tokens: { input: response.usage.input_tokens, output: response.usage.output_tokens },
+      .filter((sentence: string) => sentence.trim().endsWith("?") && /\[[^\]\n]+\]/.test(sentence)),
+  };
+}
+
+async function record(email: Email, run: number) {
+  const first = await ask(email, false);
+  if (!("suggestion" in first) || !first.suggestion) return { run, ticketId: email.id, ...first };
+  if (first.suggestion.kind === "triage") {
+    return { run, ticketId: email.id, ...first, checks: checkTriage(email, first.suggestion) };
+  }
+  // Not a request: record what "Triage anyway" would show, too.
+  const anyway = await ask(email, true);
+  const cost = first.cost + anyway.cost;
+  if (!("suggestion" in anyway) || !anyway.suggestion || anyway.suggestion.kind !== "triage") {
+    return { run, ticketId: email.id, ...first, cost, problem: `"Triage anyway" ${"problem" in anyway ? anyway.problem : "failed"}` };
+  }
+  const suggestion: NotARequestSuggestion = { ...first.suggestion, triageAnyway: anyway.suggestion };
+  const matched = matchEvidence(email.body, suggestion.evidence, email.subject).length;
+  return {
+    run,
+    ticketId: email.id,
+    ...first,
     cost,
     suggestion,
+    checks: {
+      notARequest: `${suggestion.reason}: ${suggestion.explanation}`,
+      emailEvidence: `${matched} of ${suggestion.evidence.length} email quotes match word for word`,
+      triageAnyway: checkTriage(email, anyway.suggestion),
+    },
   };
 }
 
@@ -266,7 +341,11 @@ function save(file: string, batch: Awaited<ReturnType<typeof record>>[]) {
   const saved: Suggestion[] = existsSync(file) ? JSON.parse(readFileSync(file, "utf8")) : [];
   for (const result of batch) {
     if (!("suggestion" in result) || !result.suggestion) continue;
-    const recorded: Suggestion = { ...result.suggestion, source: "recorded" };
+    const s = result.suggestion as Suggestion;
+    const recorded: Suggestion =
+      s.kind === "not-a-request" && s.triageAnyway
+        ? { ...s, source: "recorded", triageAnyway: { ...s.triageAnyway, source: "recorded" } }
+        : { ...s, source: "recorded" };
     const at = saved.findIndex((s) => s.ticketId === recorded.ticketId);
     if (at >= 0) saved[at] = recorded;
     else saved.push(recorded);
@@ -288,4 +367,6 @@ for (let i = 0; i < jobs.length; i += 4) {
 }
 
 const total = results.reduce((sum, r) => sum + r.cost, 0);
-console.log(JSON.stringify({ target, runs: results.length, totalCostUsd: Number(total.toFixed(4)), savedTo: saveTo ?? null }));
+console.log(
+  JSON.stringify({ target, runs: results.length, promptVersion: PROMPT_VERSION, totalCostUsd: Number(total.toFixed(4)), savedTo: saveTo ?? null }),
+);

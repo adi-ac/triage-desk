@@ -1,5 +1,5 @@
 import type { Ticket } from "@/fixtures/tickets";
-import type { Category, Suggestion, Urgency } from "./suggestion";
+import type { Category, Suggestion, TriageSuggestion, Urgency } from "./suggestion";
 
 /** What a person has decided for a ticket's fields; null while still the model's suggestion. */
 export type FieldDecisions = { category: Category | null; urgency: Urgency | null };
@@ -15,7 +15,7 @@ const highStakesCategories: readonly Category[] = ["Billing", "Cancellation risk
  * the higher stakes, so a likely cancellation can't sink just because the
  * top guess was How-to.
  */
-export function isHighStakes(s: Suggestion, d: FieldDecisions): boolean {
+export function isHighStakes(s: TriageSuggestion, d: FieldDecisions): boolean {
   const categories = d.category ? [d.category] : [s.category.value, s.category.runnerUp?.value];
   const urgencies = d.urgency ? [d.urgency] : [s.urgency.value, s.urgency.runnerUp?.value];
   return (
@@ -25,7 +25,7 @@ export function isHighStakes(s: Suggestion, d: FieldDecisions): boolean {
 }
 
 /** The lowest confidence of any field nobody has decided; 1 when every field is decided. */
-export function leastSure(s: Suggestion, d: FieldDecisions): number {
+export function leastSure(s: TriageSuggestion, d: FieldDecisions): number {
   const open = [d.category ? null : s.category.confidence, d.urgency ? null : s.urgency.confidence].filter(
     (c): c is number => c !== null,
   );
@@ -34,27 +34,32 @@ export function leastSure(s: Suggestion, d: FieldDecisions): number {
 
 const newestFirst = (a: Ticket, b: Ticket) => b.receivedAt.localeCompare(a.receivedAt);
 
-export type Queue = { needsReview: Ticket[]; untriaged: Ticket[]; sent: Ticket[] };
+export type Queue = { needsReview: Ticket[]; noAction: Ticket[]; untriaged: Ticket[]; sent: Ticket[] };
 
 /**
- * The queue, in three groups. Needs review: triaged and not yet sent, high
- * stakes before normal, least sure first within each. Not triaged yet: no
- * model output, newest first. Sent: sent by a person or a rule, most
- * recently sent first.
+ * The queue, in four groups. Needs review: a triage suggestion not yet sent,
+ * high stakes before normal, least sure first within each. Probably no
+ * action: Claude suggests it isn't a request, and nobody has closed it or
+ * triaged it anyway; newest first. Not triaged yet: no model output, newest
+ * first. Sent: sent by a person or a rule, or closed without a reply; most
+ * recent first.
+ *
+ * suggestionFor returns the suggestion in effect: after "Triage anyway",
+ * the normal suggestion Claude gave instead.
  */
 export function orderQueue(
   tickets: readonly Ticket[],
   suggestionFor: (id: string) => Suggestion | undefined,
   decisionsFor: (id: string) => FieldDecisions,
-  sentAtFor: (id: string) => string | null,
+  doneAtFor: (id: string) => string | null,
 ): Queue {
-  const untriaged = tickets.filter((t) => !suggestionFor(t.id)).sort(newestFirst);
-  const sent = tickets
-    .filter((t) => suggestionFor(t.id) && sentAtFor(t.id))
-    .sort((a, b) => sentAtFor(b.id)!.localeCompare(sentAtFor(a.id)!));
-  const needsReview = tickets.filter((t) => suggestionFor(t.id) && !sentAtFor(t.id));
+  const open = tickets.filter((t) => !doneAtFor(t.id));
+  const untriaged = open.filter((t) => !suggestionFor(t.id)).sort(newestFirst);
+  const noAction = open.filter((t) => suggestionFor(t.id)?.kind === "not-a-request").sort(newestFirst);
+  const sent = tickets.filter((t) => doneAtFor(t.id)).sort((a, b) => doneAtFor(b.id)!.localeCompare(doneAtFor(a.id)!));
+  const needsReview = open.filter((t) => suggestionFor(t.id)?.kind === "triage");
   const key = (t: Ticket) => {
-    const s = suggestionFor(t.id)!;
+    const s = suggestionFor(t.id) as TriageSuggestion;
     const d = decisionsFor(t.id);
     return { high: isHighStakes(s, d), sure: leastSure(s, d) };
   };
@@ -65,8 +70,8 @@ export function orderQueue(
     if (ka.sure !== kb.sure) return ka.sure - kb.sure;
     return newestFirst(a, b);
   });
-  return { needsReview, untriaged, sent };
+  return { needsReview, noAction, untriaged, sent };
 }
 
 /** The queue top to bottom, for "Next ticket". */
-export const flatQueue = (q: Queue) => [...q.needsReview, ...q.untriaged, ...q.sent];
+export const flatQueue = (q: Queue) => [...q.needsReview, ...q.noAction, ...q.untriaged, ...q.sent];

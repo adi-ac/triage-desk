@@ -23,6 +23,7 @@ const handWritten: readonly Suggestion[] = [
   {
     // Sent by the "How-to questions" rule: How-to at 90% or more.
     ticketId: autoSendTicketId,
+    kind: "triage",
     source: "hand-written",
     suggestedAt: "2026-11-02T16:31:12Z",
     category: { value: "How-to", confidence: 0.94, runnerUp: { value: "Feature request", confidence: 0.04 } },

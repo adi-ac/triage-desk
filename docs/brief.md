@@ -159,6 +159,13 @@ What it can't claim is real-world use, so it gets tested with support agents and
   - Two email quotes (LL-5002, LL-5009) quote the subject line, which the prompt shows Claude but evidence matching doesn't check, so screens would drop them.
 - 26 of 40 came back unsure (14 on category, 18 on urgency). No article quote failed to match, no placeholder sat inside a question, and no draft carried advice to the agent. One first attempt cited the draft without an article and was rejected and re-run. LL-5039's recording meets its rule (How-to 96%).
 
+**Not a request** (decided 2026-11-04, after recording all 40 floated non-requests to the top of the queue)
+- Claude can return "Not a request" instead of a category, with a short reason (auto-reply, empty, misdirected, nothing to do) and no urgency or draft. My reason: forcing a category on a non-request creates fake low-confidence picks that jump to the top of the queue.
+- It's still a suggestion: pencil styling, with Keep (closes the ticket without a reply) and "Triage anyway", which asks Claude for a normal suggestion. A person always confirms. Recordings store the "Triage anyway" answer alongside, so the demo works without a live call.
+- Queue groups, top to bottom: Needs review, then "Probably no action", then Not triaged yet, then Sent. Closed tickets join Sent as "Closed". This replaces the three-group order.
+- Evidence can quote the subject line. EmailBody marks quotes in the subject the same way as in the body. (The earlier all-40 run quoted subject lines twice, and screens dropped them.)
+- Every recording carries its prompt version (a hash of the prompt and schema) and model, so a set recorded from different prompts can't pass unnoticed.
+
 **Focus ring** (decided 2026-11-03): the accent, 2px with a 2px offset, set globally on `:focus-visible` via a `--focus-ring` role. It is at least 6.59:1 on `surface` and `bg` in both themes.
 - The one documented exception to the Petrol rule (Petrol is only for decisions, high confidence, the selected queue item and Approve), confirmed 2026-11-04. My reason: keyboard focus must always be clearly visible, and it only appears while tabbing, so it never competes with Approve.
 

@@ -17,18 +17,21 @@ function previewOf(body: string) {
 
 const groups = [
   { key: "needsReview", title: "Needs review" },
+  { key: "noAction", title: "Probably no action" },
   { key: "untriaged", title: "Not triaged yet" },
   { key: "sent", title: "Sent" },
 ] as const;
 
 export function QueueList({ currentId, onOpen }: { currentId: string; onOpen: (id: string) => void }) {
-  const { queue, sentAtFor } = useInbox();
+  const { queue, stateFor, effectiveFor } = useInbox();
 
   // Tags follow the ticket's state live, even while its row holds its place.
   const meta = (t: Ticket) => {
     if (ruleSendFor(t.id)) return <Tag tone="ai">Sent by rule</Tag>;
     if (!suggestionFor(t.id)) return <Tag>Not triaged</Tag>;
-    if (sentAtFor(t.id)) return <Tag tone="success">Sent</Tag>;
+    if (stateFor(t.id).closedAt) return <Tag>Closed</Tag>;
+    if (stateFor(t.id).sentAt) return <Tag tone="success">Sent</Tag>;
+    if (effectiveFor(t.id)?.kind === "not-a-request") return <Tag tone="ai">Not a request</Tag>;
     return <Tag tone="warning">Needs review</Tag>;
   };
 

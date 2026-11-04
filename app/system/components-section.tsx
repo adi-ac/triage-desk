@@ -10,6 +10,7 @@ import {
   EvidenceItem,
   EvidenceMark,
   FieldReview,
+  NoActionReview,
   OutputSource,
   Pane,
   QueueItem,
@@ -32,7 +33,9 @@ import { ContrastTable } from "./contrast-table";
 import styles from "./system.module.css";
 
 const firstScreen = tickets.find((t) => t.id === firstScreenTicketId)!;
-const suggestion = suggestionFor(firstScreenTicketId)!;
+const firstSuggestion = suggestionFor(firstScreenTicketId);
+if (firstSuggestion?.kind !== "triage") throw new Error(`${firstScreenTicketId} should have a triage suggestion`);
+const suggestion = firstSuggestion;
 const demoBlockers = approveBlockers({
   fields: [approveField("category", suggestion.category, null), approveField("urgency", suggestion.urgency, null)],
   draft: suggestion.draft,
@@ -47,6 +50,35 @@ function SheetDemo() {
       <Sheet open={open} onClose={() => setOpen(false)} title="Queue">
         <p className="text-small">The queue goes here.</p>
       </Sheet>
+    </>
+  );
+}
+
+function NoActionDemo() {
+  const [closed, setClosed] = useState(false);
+  const [anyway, setAnyway] = useState(false);
+  if (anyway)
+    return (
+      <div className={styles.inline}>
+        <p className={`text-small ${styles.muted}`}>Triage anyway shows a normal FieldReview suggestion here.</p>
+        <Button size="small" onClick={() => setAnyway(false)}>
+          Reset demo
+        </Button>
+      </div>
+    );
+  return (
+    <>
+      <NoActionReview
+        reason="auto-reply"
+        explanation="This is an automatic notice that an earlier request was resolved; nobody is asking for anything."
+        evidence={[{ quote: "Automatic reply", supports: "category" }]}
+        closed={closed}
+        onKeep={() => setClosed(true)}
+        onTriageAnyway={() => setAnyway(true)}
+      />
+      {closed && (
+        <ApproveBar blockers={[]} targets={{}} onApprove={() => {}} sentAt="2026-11-02T16:55:00Z" outcome="closed" afterSend="next-ticket" onAfterSend={() => setClosed(false)} />
+      )}
     </>
   );
 }
@@ -226,6 +258,14 @@ export function ComponentsSection({ theme }: { theme: string }) {
       </Demo>
 
       <Demo
+        name="NoActionReview"
+        props="reason · explanation · closed · onKeep · onTriageAnyway"
+        intro="Claude's suggestion that an email isn't a request: no category, urgency or draft. Still pencil until a person acts. Keep closes the ticket without a reply (the footer then reads Closed by you); Triage anyway asks Claude for a normal suggestion."
+      >
+        <NoActionDemo />
+      </Demo>
+
+      <Demo
         name="ConfidenceMeter"
         props="value: 0–1 · runnerUp?: 0–1 · confirmed?: boolean"
         intro={
@@ -257,10 +297,12 @@ export function ComponentsSection({ theme }: { theme: string }) {
         intro="The customer's email with the model's quotes marked in place. Quotes that don't match the email word for word are dropped. A quote cited for both fields (the renewal date here) is marked once, in urgency red, and the evidence item under either field highlights it. Every screen uses this; none marks quotes itself."
       >
         <EmailBody
+          subject={firstScreen.subject}
           body={excerpt}
           evidence={[
             ...suggestion.evidence,
             { quote: "Our renewal is on 15 December", supports: "category" },
+            { quote: "Exporting all our invoices", supports: "category" },
             { quote: "a quote the email doesn't contain", supports: "category" },
           ]}
         />

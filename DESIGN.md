@@ -21,7 +21,7 @@ These hold on every screen. If a design seems to need an exception, ask; don't m
 
    Approve lives in the triage pane's pinned footer, as `ApproveBar` in Pane's `footer`. ApproveBar shows the button and a one-line summary ("3 things to resolve: Category, Urgency, Draft") whose items jump to where each is fixed. There is no separate blocker list: each reason sits where it's fixed. An unsure field shows it in its meter's hint; the draft gets the blocker's `message` as DraftEditor's `blocker`, and its unfilled placeholders are highlighted in the text. Never hide Approve until the reply is sent; never leave it enabled while a blocker is open; never pin it with negative margins or `position: sticky` of your own.
 
-   The one exception: a ticket with no model output has no Approve. Its triage pane says plainly that Claude hasn't triaged it yet, and has no footer.
+   The exceptions: a ticket with no model output has no Approve (its triage pane says plainly that Claude hasn't triaged it yet, and has no footer), and neither does a "Not a request" suggestion, which has no reply to approve: Keep closes it, and the footer then reads "Closed by you · <time>" (ApproveBar `outcome="closed"`).
 
    After sending, ApproveBar swaps the button for "Sent by you · <time>" and a secondary button: "Next ticket" in the inbox (`afterSend="next-ticket"`), "Back to inbox" for a ticket opened on its own (`afterSend="back-to-inbox"`). The draft becomes `state="approved"` (read-only), and the timeline gets a row: "approved and sent the reply". A draft written for a value a person has since overridden is a warning, not a blocker: pass it as DraftEditor's `warning`. Why: block only where a wrong send is costly; Approve must always be visible without layout hacks; and the reason should sit where you fix it, not in a list you read in one place and act on in another.
 6. **Model output is always labeled with its source: recorded, live or hand-written.** Every screen that shows model output carries exactly one `OutputSource`, which can't be dismissed. Hand-written output is allowed during the build only and must be replaced by recorded output before shipping. LL-5040 and the vague email are recorded (`fixtures/recorded-suggestions.json`, `claude-sonnet-5-5`, 4 November 2026); LL-5039 is still hand-written. Why: an unlabeled canned example undoes the honesty claim the piece rests on (brief, First screen).
@@ -56,7 +56,7 @@ const blockers = approveBlockers({ fields, draft });
 
 ## Data
 
-Model output has one shape, `Suggestion`, in `@/lib/suggestion` (including `suggestedAt`, when the model made it), alongside `SuggestedField`, `Evidence`, `OutputSourceKind`, `EvidenceSupports` and the value lists `categories` and `urgencies`. Never define your own. Example output lives in `@/fixtures/suggestions` (`suggestionFor(ticketId)`), never in `fixtures/tickets.ts`, which holds inputs only. Show the email with `EmailBody`, passing `suggestion.evidence`; for the evidence list, `matchEvidence(body, evidence)` from `@/lib/evidence` gives the quotes that match word for word. Never search or split the email yourself.
+Model output has one shape, `Suggestion`, in `@/lib/suggestion`: either a `TriageSuggestion` (`kind: "triage"`: category, urgency, evidence, draft) or a `NotARequestSuggestion` (`kind: "not-a-request"`: a reason, one sentence of explanation and evidence, and no urgency or draft; `triageAnyway` holds the normal suggestion "Triage anyway" shows). Check `kind` before reading fields. Every suggestion has `suggestedAt`, and recorded ones also carry `model` and `promptVersion` (a hash of the prompt and schema, so recordings from different prompts can't be mixed unnoticed). Alongside it alongside `SuggestedField`, `Evidence`, `OutputSourceKind`, `EvidenceSupports` and the value lists `categories` and `urgencies`. Never define your own. Example output lives in `@/fixtures/suggestions` (`suggestionFor(ticketId)`), never in `fixtures/tickets.ts`, which holds inputs only. Show the email with `EmailBody`, passing `suggestion.evidence`; for the evidence list, `matchEvidence(body, evidence)` from `@/lib/evidence` gives the quotes that match word for word. Never search or split the email yourself.
 
 **Times** are ISO 8601 strings everywhere in data and props, and always render through `Time` (TimelineRow, QueueItem and ApproveBar already use it). It shows the viewer's time zone: the time alone if it's today, the date and time if older, the full timestamp with its zone on hover. Never format a time yourself, and never show UTC. To check Approve, build each field with `approveField(name, suggestion.category, chosen)` and pass the fields to `approveBlockers` (both from `@/lib/approve`).
 
@@ -123,17 +123,18 @@ With a queue (the inbox, where a person works through tickets). The inbox is `/t
 | 768–1199px | `minmax(0, 1fr) 360px`: email, triage. The queue moves behind a secondary "Queue" Button in the header row, which opens it in a `Sheet` with the open ticket highlighted and scrolled into view; picking a ticket or Escape closes it. |
 | Below 768px | One column: email, then triage. The "Queue" Button stays in the header; the Sheet is full width. |
 
-**Queue order** comes from `orderQueue()` in `@/lib/queue`; never sort it yourself. Three groups, top to bottom, each headed in `text-overline`:
+**Queue order** comes from `orderQueue()` in `@/lib/queue`; never sort it yourself. Four groups, top to bottom, each headed in `text-overline`:
 
 1. **Needs review**: triaged and not yet sent. High stakes before normal, then the least sure first. High stakes means the category is Billing or Cancellation risk, or the urgency is Urgent, counting the runner-up as well as the top pick; once a person decides a field, only their value counts. Why: when Claude is unsure, assume the higher stakes, so a likely cancellation can't sink just because the top guess was How-to.
-2. **Not triaged yet**: no model output, newest first, each with a neutral "Not triaged" Tag.
-3. **Sent**: sent by a person or a rule, most recently sent first, each keeping its "Sent" or "Sent by rule" Tag.
+2. **Probably no action**: Claude suggests the email isn't a request, and nobody has closed it or triaged it anyway; newest first, each with a pencil "Not a request" Tag (`tone="ai"`). After "Triage anyway" the ticket moves to Needs review at the next re-sort.
+3. **Not triaged yet**: no model output, newest first, each with a neutral "Not triaged" Tag.
+4. **Sent**: sent by a person or a rule, or closed without a reply, most recent first, each keeping its "Sent", "Sent by rule" or "Closed" Tag.
 
 The order is computed when a ticket opens and held while it's open: the queue re-sorts only when a different ticket opens, or on reload. Tags still update live. Why: a row must never move out from under the person working on it.
 
 The browser tab reads "<ticket ID> · Triage Desk", set on the client because the page can't read the ID on the server: the ticket panes render a React `<title>`, and no layout or page above them sets a metadata title (Next would overwrite it on navigation).
 
-**Triage pane, top to bottom:** Category, then Urgency (each a FieldReview with its own evidence beneath it; hovering or focusing a quote marks it in the email), then Claude's note if there is one (`Banner` info titled "Claude's note", from `suggestion.agentNote`), then the draft, then the activity `Timeline` (collapsed, "Activity · 3"). Approve is in the footer. The first field still showing a meter gets `explainEstimate`, so the pane says once, under that meter, "Confidence is Claude's estimate, not a measured probability."
+**Triage pane for "Not a request":** NoActionReview, then Claude's note if there is one, then the Timeline; no footer until it's closed. **Triage pane, top to bottom:** Category, then Urgency (each a FieldReview with its own evidence beneath it; hovering or focusing a quote marks it in the email), then Claude's note if there is one (`Banner` info titled "Claude's note", from `suggestion.agentNote`), then the draft, then the activity `Timeline` (collapsed, "Activity · 3"). Approve is in the footer. The first field still showing a meter gets `explainEstimate`, so the pane says once, under that meter, "Confidence is Claude's estimate, not a measured probability."
 
 Without a queue (a single ticket opened on its own, from a link): the same shell minus the queue column. That's not an exception, so don't ask about it. After sending, ApproveBar offers "Back to inbox" instead of "Next ticket".
 
@@ -214,6 +215,18 @@ It's controlled: keep `value` (null until someone keeps or switches) on the scre
 <Button variant="primary" onClick={keep}>Keep</Button>
 ```
 
+### NoActionReview
+
+Claude's suggestion that an email isn't a request: an auto-reply, an empty message, one sent to the wrong place, or nothing to do. Use it for every `NotARequestSuggestion`; never force a FieldReview onto one. It's still a suggestion: a pencil "Not a request" chip with the reason and Claude's one-sentence explanation, its evidence, and two small secondary Buttons: "Keep" (closes the ticket without a reply; the chip turns decided, "Set by you") and "Triage anyway" (shows the normal suggestion in `triageAnyway`; leave `onTriageAnyway` out when there is none). A person always confirms. Add timeline rows: "closed the ticket without a reply", or "asked Claude to triage it anyway" followed by Claude's new suggestion.
+
+```tsx
+// Correct
+<NoActionReview reason={s.reason} explanation={s.explanation} evidence={matched} closed={closed} onKeep={keep} onTriageAnyway={s.triageAnyway ? triageAnyway : undefined} />
+
+// Incorrect: closing a non-request automatically; a person always confirms
+useEffect(() => { if (s.kind === "not-a-request") close(); }, [s]);
+```
+
 ### Chip
 
 A field's value (category, urgency) shown on its own, such as in a list or a header. A field under review is a FieldReview. A short label in a row is a Tag; a choice between views is a SegmentedControl.
@@ -252,7 +265,7 @@ The only way to show a confidence value (rule 2). The value is Claude's own esti
 
 ### EmailBody
 
-The customer's email. Pass `body` and the model's `evidence`; it splits paragraphs, keeps line breaks, marks each quote in place with EvidenceMark, and drops any quote that doesn't match the email word for word. `activeQuote` (from FieldReview's `onEvidenceActive`) turns that quote's dashed underline solid and 2px, and scrolls it into view if it's out of sight (instantly with reduced motion). A quote cited for both fields is marked once, in urgency red (red means it raises the stakes), and the evidence item under either field highlights that same mark.
+The customer's email. Pass `subject`, `body` and the model's `evidence` (and the sender block as `meta`); it renders the subject as the heading, splits paragraphs, keeps line breaks, marks each quote in place with EvidenceMark, and drops any quote that doesn't match the email word for word. Evidence may quote the subject line, which is marked the same way as the body. `activeQuote` (from FieldReview's `onEvidenceActive`) turns that quote's dashed underline solid and 2px, and scrolls it into view if it's out of sight (instantly with reduced motion). A quote cited for both fields is marked once, in urgency red (red means it raises the stakes), and the evidence item under either field highlights that same mark.
 
 ```tsx
 // Correct
@@ -388,7 +401,7 @@ Every pane on a screen (see Layout). `title` names it; `meta` takes a short fact
 
 ### ApproveBar
 
-Approve and what follows it; it only goes in the triage Pane's `footer` (rule 5). Before sending: the primary "Approve and send" button, disabled while any blocker is open, and a one-line summary whose items jump to where each is fixed (`targets` maps each blocker target to an element id). After sending (`sentAt` set): "Sent by you · <time>", or "Sent by rule · <time>" with `sentBy="rule"`, and "Next ticket" or "Back to inbox" (`afterSend`).
+Approve and what follows it; it only goes in the triage Pane's `footer` (rule 5). Before sending: the primary "Approve and send" button, disabled while any blocker is open, and a one-line summary whose items jump to where each is fixed (`targets` maps each blocker target to an element id). After sending (`sentAt` set): "Sent by you · <time>", or "Sent by rule · <time>" with `sentBy="rule"`, or "Closed by you · <time>" with `outcome="closed"` (a kept "Not a request"), and "Next ticket" or "Back to inbox" (`afterSend`).
 
 ```tsx
 // Correct: a ticket opened on its own, outside the inbox

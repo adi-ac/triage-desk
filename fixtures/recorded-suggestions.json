@@ -1,6 +1,7 @@
 [
   {
     "ticketId": "LL-5040",
+    "kind": "triage",
     "source": "recorded",
     "suggestedAt": "2026-11-04T22:45:44.344Z",
     "model": "claude-sonnet-5-5",
@@ -99,6 +100,7 @@
   },
   {
     "ticketId": "vague",
+    "kind": "triage",
     "source": "recorded",
     "suggestedAt": "2026-11-04T22:46:44.502Z",
     "model": "claude-sonnet-5-5",

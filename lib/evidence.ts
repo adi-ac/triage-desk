@@ -6,12 +6,13 @@ export const paragraphsOf = (body: string) => body.split("\n\n");
 const fromEmail = (e: Evidence): e is EmailEvidence => e.supports !== "draft";
 
 /**
- * The email quotes that appear in the email word for word, in the model's
- * order. Anything else is dropped: never show evidence the email doesn't
- * contain. Article evidence (what the draft relies on) is left out.
+ * The email quotes that appear in the email word for word, in its subject
+ * line or body, in the model's order. Anything else is dropped: never show
+ * evidence the email doesn't contain. Article evidence (what the draft
+ * relies on) is left out.
  */
-export function matchEvidence(body: string, evidence: readonly Evidence[]): EmailEvidence[] {
-  const paragraphs = paragraphsOf(body);
+export function matchEvidence(body: string, evidence: readonly Evidence[], subject = ""): EmailEvidence[] {
+  const paragraphs = [subject, ...paragraphsOf(body)].filter(Boolean);
   return evidence.filter(fromEmail).filter((e) => e.quote.trim() !== "" && paragraphs.some((p) => p.includes(e.quote)));
 }
 

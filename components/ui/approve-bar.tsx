@@ -16,6 +16,8 @@ export type ApproveBarProps = {
   sentAt: string | null;
   /** Who sent it: a person (you) or a team rule. */
   sentBy?: "you" | "rule";
+  /** closed: the ticket was closed without a reply (a kept "Not a request"); sentAt is when. */
+  outcome?: "sent" | "closed";
   /** next-ticket inside the inbox; back-to-inbox for a ticket opened on its own. */
   afterSend: "next-ticket" | "back-to-inbox";
   onAfterSend: () => void;
@@ -36,14 +38,14 @@ function jump(id: string | undefined) {
  * is fixed. Each reason is shown there, not in a list. Once sent:
  * "Sent by you · <time>" (or "Sent by rule") and the button that moves on.
  */
-export function ApproveBar({ blockers, targets, onApprove, sentAt, sentBy = "you", afterSend, onAfterSend }: ApproveBarProps) {
+export function ApproveBar({ blockers, targets, onApprove, sentAt, sentBy = "you", outcome = "sent", afterSend, onAfterSend }: ApproveBarProps) {
   const summaryId = useId();
 
   if (sentAt) {
     return (
       <div className={styles.bar}>
         <p className={`text-small ${styles.sent}`}>
-          Sent by {sentBy === "you" ? "you" : "rule"} · <Time dateTime={sentAt} />
+          {outcome === "closed" ? "Closed by you" : `Sent by ${sentBy === "you" ? "you" : "rule"}`} · <Time dateTime={sentAt} />
         </p>
         <Button onClick={onAfterSend}>{afterSend === "next-ticket" ? "Next ticket" : "Back to inbox"}</Button>
       </div>

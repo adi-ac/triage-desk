@@ -6,7 +6,7 @@ import type { EmailEvidence, SuggestedField } from "@/lib/suggestion";
 import { Button } from "./button";
 import { Chip } from "./chip";
 import { ConfidenceMeter } from "./confidence-meter";
-import { EvidenceMark } from "./evidence-mark";
+import { QuoteList } from "./quote-list";
 import styles from "./field-review.module.css";
 
 export type FieldReviewProps<T extends string> = {
@@ -173,28 +173,7 @@ export function FieldReview<T extends string>({
         </ul>
       )}
 
-      {evidence.length > 0 && (
-        <div className={styles.evidence}>
-          <p className={`text-overline ${styles.label}`}>Evidence</p>
-          <ul className={styles.quotes}>
-            {evidence.map((e) => (
-              <li
-                key={e.quote}
-                tabIndex={onEvidenceActive ? 0 : undefined}
-                className={`text-reading ${styles.quote}`}
-                onMouseEnter={() => onEvidenceActive?.(e.quote)}
-                onMouseLeave={() => onEvidenceActive?.(null)}
-                onFocus={() => onEvidenceActive?.(e.quote)}
-                onBlur={() => onEvidenceActive?.(null)}
-              >
-                <q>
-                  <EvidenceMark supports={e.supports}>{e.quote}</EvidenceMark>
-                </q>
-              </li>
-            ))}
-          </ul>
-        </div>
-      )}
+      <QuoteList evidence={evidence} onEvidenceActive={onEvidenceActive} />
     </section>
   );
 }
