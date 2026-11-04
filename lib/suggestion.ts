@@ -61,8 +61,10 @@ export type RuleSend = {
 export type Suggestion = {
   ticketId: string;
   source: OutputSourceKind;
-  /** When the model made the suggestion, ISO 8601. */
+  /** When the model made the suggestion, ISO 8601. For recorded output, the recording date. */
   suggestedAt: string;
+  /** The model that produced it, e.g. "claude-sonnet-5-5". Set on recorded and live output. */
+  model?: string;
   category: SuggestedField<Category>;
   urgency: SuggestedField<Urgency>;
   evidence: Evidence[];

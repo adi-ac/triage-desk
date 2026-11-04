@@ -7,8 +7,16 @@
  * Usage (reads ANTHROPIC_API_KEY from .env.local; the key is never printed):
  *   pnpm record LL-5040 3     # a ticket ID, then how many runs
  *   pnpm record vague 3       # the "Try a vague email" paste
+ *   pnpm record all           # every fixture ticket once, four at a time
+ *
+ * Options:
+ *   --save <file>     write each run as recorded output (source "recorded",
+ *                     with its model and date) into a JSON array, replacing
+ *                     any earlier recording for the same ticket
+ *   --except <ids>    with "all", skip these comma-separated ticket IDs
  */
 
+import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
 import { helpArticles, helpArticleTitles } from "../fixtures/help-center.ts";
@@ -45,6 +53,8 @@ Confidence: give your honest probability (0 to 1) that each pick is right, and t
 Evidence from the email: quote the exact words from the email, character for character, that support each pick. Mark each quote as supporting the category or the urgency, with article set to null. Only quote words that appear in the email.
 
 Draft: a short, friendly reply to the customer from "Ledgerline Support". It may state only facts found in the customer's email or in the help-center articles below. Anything else Ledgerline-specific that the reply needs, such as a date, an amount, a name or an account detail, is a placeholder in square brackets, for example [renewal price]. Never invent facts about Ledgerline. Each time the draft relies on an article, add an evidence item that supports "draft", gives the article's exact title, and quotes the sentence it relies on, character for character.
+
+Draft format: the greeting on its own line ("Hi Aisha,"), then short paragraphs of two or three sentences each, with a blank line between paragraphs, then the sign-off on its own lines ("Best,\nLedgerline Support"). Never one long paragraph.
 
 Questions to the customer: when the draft asks the customer for something, ask in plain words. Never put a placeholder inside a question; a placeholder is a gap for the support agent to fill, not something to ask the customer.
 
@@ -170,11 +180,18 @@ async function record(email: ReturnType<typeof emailFor>, run: number) {
   }
 
   const text = response.content.flatMap((b) => (b.type === "text" ? [b.text] : [])).join("");
-  const { agentNote, ...output } = Output.parse(JSON.parse(text));
+  // The schema guarantees the shape; Zod checks the rest (confidences, and
+  // that draft evidence names an article). A run that fails is reported, not saved.
+  const parsed = Output.safeParse(JSON.parse(text));
+  if (!parsed.success) {
+    return { run, servedBy, stop: "invalid", issues: parsed.error.issues, raw: JSON.parse(text), cost };
+  }
+  const { agentNote, ...output } = parsed.data;
   const suggestion: Suggestion = {
     ticketId: email.id,
     source: "live",
     suggestedAt: new Date().toISOString(),
+    model: servedBy,
     ...output,
     ...(agentNote ? { agentNote } : {}),
   };
@@ -217,22 +234,58 @@ async function record(email: ReturnType<typeof emailFor>, run: number) {
 
 // --- Main ------------------------------------------------------------------
 
-const [arg, runsArg] = process.argv.slice(2);
-if (!arg) throw new Error('Pass a ticket ID (e.g. LL-5040) or "vague".');
-const runs = Number(runsArg ?? 1);
-const email = emailFor(arg);
+const args = process.argv.slice(2);
+const option = (name: string) => {
+  const i = args.indexOf(name);
+  return i >= 0 ? args[i + 1] : undefined;
+};
+const positional = args.filter((a, i) => !a.startsWith("--") && !args[i - 1]?.startsWith("--"));
+const [target, runsArg] = positional;
+if (!target) throw new Error('Pass a ticket ID (e.g. LL-5040), "vague" or "all".');
+const saveTo = option("--save");
+const except = new Set((option("--except") ?? "").split(",").filter(Boolean));
 
-let total = 0;
-for (let run = 1; run <= runs; run++) {
+const jobs =
+  target === "all"
+    ? tickets.filter((t) => !except.has(t.id)).map((t) => ({ email: emailFor(t.id), run: 1 }))
+    : Array.from({ length: Number(runsArg ?? 1) }, (_, i) => ({ email: emailFor(target), run: i + 1 }));
+
+async function runJob(job: (typeof jobs)[number]) {
   try {
-    const result = await record(email, run);
-    total += result.cost;
-    console.log(JSON.stringify(result, null, 2));
+    return await record(job.email, job.run);
   } catch (error) {
     if (error instanceof Anthropic.AuthenticationError) throw new Error("The API key was rejected.");
     if (error instanceof Anthropic.RateLimitError) throw new Error("Rate limited; try again shortly.");
-    if (error instanceof Anthropic.APIError) throw new Error(`API error ${error.status}: ${error.message}`);
+    if (error instanceof Anthropic.APIError) throw new Error(`API error ${error.status} on ${job.email.id}: ${error.message}`);
     throw error;
   }
 }
-console.log(JSON.stringify({ email: email.id, runs, totalCostUsd: Number(total.toFixed(4)) }));
+
+/** Writes valid runs as recorded output, replacing earlier recordings of the same ticket. */
+function save(file: string, batch: Awaited<ReturnType<typeof record>>[]) {
+  const saved: Suggestion[] = existsSync(file) ? JSON.parse(readFileSync(file, "utf8")) : [];
+  for (const result of batch) {
+    if (!("suggestion" in result) || !result.suggestion) continue;
+    const recorded: Suggestion = { ...result.suggestion, source: "recorded" };
+    const at = saved.findIndex((s) => s.ticketId === recorded.ticketId);
+    if (at >= 0) saved[at] = recorded;
+    else saved.push(recorded);
+  }
+  saved.sort((a, b) => a.ticketId.localeCompare(b.ticketId));
+  writeFileSync(file, `${JSON.stringify(saved, null, 2)}\n`);
+}
+
+// Four at a time, so a full run of the fixtures takes minutes, not an hour.
+// Each batch is saved as it lands, so an API error late in a run loses nothing.
+const results: Awaited<ReturnType<typeof record>>[] = [];
+for (let i = 0; i < jobs.length; i += 4) {
+  const batch = await Promise.all(jobs.slice(i, i + 4).map(runJob));
+  for (const result of batch) {
+    results.push(result);
+    console.log(JSON.stringify(result, null, 2));
+  }
+  if (saveTo) save(saveTo, batch);
+}
+
+const total = results.reduce((sum, r) => sum + r.cost, 0);
+console.log(JSON.stringify({ target, runs: results.length, totalCostUsd: Number(total.toFixed(4)), savedTo: saveTo ?? null }));

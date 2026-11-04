@@ -1,0 +1,144 @@
+[
+  {
+    "ticketId": "LL-5040",
+    "source": "recorded",
+    "suggestedAt": "2026-11-04T22:45:44.344Z",
+    "model": "claude-sonnet-5-5",
+    "category": {
+      "value": "Cancellation risk",
+      "confidence": 0.5,
+      "runnerUp": {
+        "value": "How-to",
+        "confidence": 0.42
+      }
+    },
+    "urgency": {
+      "value": "High",
+      "confidence": 0.5,
+      "runnerUp": {
+        "value": "Normal",
+        "confidence": 0.38
+      }
+    },
+    "evidence": [
+      {
+        "quote": "before she decides on next year's tools",
+        "supports": "category"
+      },
+      {
+        "quote": "Could you tell me how to export everything we have in Ledgerline?",
+        "supports": "category"
+      },
+      {
+        "quote": "Our renewal is on 15 December, so it would help to know what's possible in the next couple of weeks.",
+        "supports": "urgency"
+      },
+      {
+        "quote": "You can export your invoices, clients and payments at any time, on every plan, from Settings → Data → Export.",
+        "supports": "draft",
+        "article": "Exporting your data"
+      },
+      {
+        "quote": "Choose what to include and a date range; the default is everything since your account was created.",
+        "supports": "draft",
+        "article": "Exporting your data"
+      },
+      {
+        "quote": "Each type downloads as its own CSV file.",
+        "supports": "draft",
+        "article": "Exporting your data"
+      },
+      {
+        "quote": "Tick \"Include invoice PDFs\" to add a PDF of every invoice in a zip file.",
+        "supports": "draft",
+        "article": "Exporting your data"
+      },
+      {
+        "quote": "File attachments on invoices are not included in exports; download them from each invoice.",
+        "supports": "draft",
+        "article": "Exporting your data"
+      },
+      {
+        "quote": "Exports of more than 5,000 invoices are prepared in the background and emailed to you as a download link within 24 hours.",
+        "supports": "draft",
+        "article": "Exporting your data"
+      },
+      {
+        "quote": "The API is available on the Growth and Scale plans.",
+        "supports": "draft",
+        "article": "Using the Ledgerline API"
+      },
+      {
+        "quote": "The API can read your full history of invoices, clients and payments, with no date limit.",
+        "supports": "draft",
+        "article": "Using the Ledgerline API"
+      },
+      {
+        "quote": "Each invoice's PDF is available from the invoice's pdf endpoint.",
+        "supports": "draft",
+        "article": "Using the Ledgerline API"
+      },
+      {
+        "quote": "An account owner creates API keys in Settings → Developers.",
+        "supports": "draft",
+        "article": "Using the Ledgerline API"
+      },
+      {
+        "quote": "The API reference is at developers.ledgerline.example.",
+        "supports": "draft",
+        "article": "Using the Ledgerline API"
+      },
+      {
+        "quote": "If you're reviewing your tools before a renewal, your account manager can walk you through your options.",
+        "supports": "draft",
+        "article": "Cancelling or not renewing"
+      }
+    ],
+    "draft": "Hi Aisha,\n\nYes, you can export all of it yourself at any time, on every plan, from Settings → Data → Export. Choose what to include and a date range; the default is everything since your account was created. Each type (invoices, clients and payments) downloads as its own CSV file.\n\nTick \"Include invoice PDFs\" to add a PDF of every invoice in a zip file. File attachments on invoices are not included in exports, so those need to be downloaded from each invoice. Exports of more than 5,000 invoices are prepared in the background and emailed to you as a download link within 24 hours.\n\nOn the API: it's available on the Growth plan, so you have access to it. It can read your full history of invoices, clients and payments with no date limit, and each invoice's PDF is available from the invoice's pdf endpoint. An account owner creates API keys in Settings → Developers, and the reference is at developers.ledgerline.example.\n\nSince your new finance director is reviewing tools ahead of your 15 December renewal, your account manager can also walk you through your options. Just let us know if you'd like us to set that up.\n\nBest,\nLedgerline Support",
+    "agentNote": "The renewal is 15 December and a new finance director is reviewing next year's tools, so this may be an early churn signal; consider looping in the account manager. The help center doesn't say whether client exports include contact details, so check that before confirming it."
+  },
+  {
+    "ticketId": "vague",
+    "source": "recorded",
+    "suggestedAt": "2026-11-04T22:46:44.502Z",
+    "model": "claude-sonnet-5-5",
+    "category": {
+      "value": "Billing",
+      "confidence": 0.45,
+      "runnerUp": {
+        "value": "Bug",
+        "confidence": 0.4
+      }
+    },
+    "urgency": {
+      "value": "Normal",
+      "confidence": 0.6,
+      "runnerUp": {
+        "value": "High",
+        "confidence": 0.25
+      }
+    },
+    "evidence": [
+      {
+        "quote": "The amounts on last month's invoice don't look right.",
+        "supports": "category"
+      },
+      {
+        "quote": "Can someone check?",
+        "supports": "urgency"
+      },
+      {
+        "quote": "If a charge from Ledgerline looks wrong, reply with the LB- invoice number and we'll check it within one business day.",
+        "supports": "draft",
+        "article": "Invoices and billing"
+      },
+      {
+        "quote": "The total on an invoice you create is calculated from its line items, discounts and the tax rates set in Settings → Tax.",
+        "supports": "draft",
+        "article": "Invoices and billing"
+      }
+    ],
+    "draft": "Hi Sam,\n\nThanks for flagging this, we're happy to take a look. Could you tell us whether the invoice was one Ledgerline sent to you, or one you created for your own client?\n\nIf it's from Ledgerline, please reply with the LB- invoice number and we'll check it within one business day. If it's one you created, the total is calculated from its line items, discounts and the tax rates set in Settings → Tax, so it's worth checking those. Please also tell us which amounts look wrong and what you expected to see.\n\nBest,\nLedgerline Support",
+    "agentNote": "The email doesn't say whether this is a Ledgerline charge (Billing) or an invoice Sam created in the product (possible Bug). Check Sam's account for last month's LB- invoice while waiting for a reply."
+  }
+]

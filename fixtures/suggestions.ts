@@ -3,36 +3,23 @@
  * tickets.ts so an input can't be mistaken for an answer. Every entry names
  * its source, and screens show it with OutputSource.
  *
- * LL-5040 is hand-written until the API key is added (docs/brief.md), and
- * must be replaced by a recorded run before shipping. Its numbers match the
- * early /system copy: How-to leads Cancellation risk 0.48 to 0.41.
+ * Recorded output (recorded-suggestions.json) comes from real runs of
+ * scripts/record-suggestion.ts, each with its model and date, and wins over
+ * a hand-written entry for the same ticket. Hand-written entries are for the
+ * build only and must be replaced before shipping (docs/brief.md).
  */
 
 import type { RuleSend, Suggestion } from "@/lib/suggestion";
-import { autoSendTicketId, firstScreenTicketId } from "./tickets";
+import recordedJson from "./recorded-suggestions.json";
+import { autoSendTicketId } from "./tickets";
 
-export const suggestions: readonly Suggestion[] = [
-  {
-    ticketId: firstScreenTicketId,
-    source: "hand-written",
-    suggestedAt: "2026-11-02T16:48:20Z",
-    // Unsure both ways: category under 60% and 7 points clear; urgency 6 points clear.
-    category: { value: "How-to", confidence: 0.48, runnerUp: { value: "Cancellation risk", confidence: 0.41 } },
-    urgency: { value: "Normal", confidence: 0.62, runnerUp: { value: "High", confidence: 0.56 } },
-    evidence: [
-      { quote: "how to export everything we have in Ledgerline", supports: "category" },
-      { quote: "whether the API can pull the same history", supports: "category" },
-      { quote: "Our renewal is on 15 December", supports: "urgency" },
-    ],
-    draft: `Hi Aisha,
+/** Written by the recording script, which validates every run before saving it. */
+const recorded = recordedJson as Suggestion[];
 
-Thanks for checking before your renewal. You can export invoices, clients and payments from Settings → Export. Each comes as a CSV, and invoices include their PDFs in a zip.
+/** The "Try a vague email" paste, recorded like a ticket under the ID "vague". */
+export const vagueEmailSuggestion: Suggestion | undefined = recorded.find((s) => s.ticketId === "vague");
 
-The API can pull the same history: [link to the API guide].
-
-Best,
-Ledgerline Support`,
-  },
+const handWritten: readonly Suggestion[] = [
   {
     // Sent by the "How-to questions" rule: How-to at 90% or more.
     ticketId: autoSendTicketId,
@@ -51,6 +38,11 @@ Congratulations on the new logo. You can upload it in Settings → Branding → 
 Best,
 Ledgerline Support`,
   },
+];
+
+export const suggestions: readonly Suggestion[] = [
+  ...recorded.filter((s) => s.ticketId !== "vague"),
+  ...handWritten.filter((h) => !recorded.some((r) => r.ticketId === h.ticketId)),
 ];
 
 export function suggestionFor(ticketId: string): Suggestion | undefined {
