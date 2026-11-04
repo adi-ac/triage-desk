@@ -50,6 +50,12 @@ export type Suggestion = {
   category: SuggestedField<Category>;
   urgency: SuggestedField<Urgency>;
   evidence: Evidence[];
-  /** Facts the model can't know are left as [placeholders], which block Approve. */
+  /**
+   * The reply to the customer. Facts Claude can't know (dates, amounts,
+   * names, account details) are left as [placeholders], which block Approve.
+   * Never advice to the support agent: that goes in agentNote.
+   */
   draft: string;
+  /** Something the support agent should know or do, from Claude. Shown above the draft as "Claude's note". */
+  agentNote?: string;
 };

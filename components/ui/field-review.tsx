@@ -30,6 +30,12 @@ export type FieldReviewProps<T extends string> = {
    * decision styling), the meter stays, and there are no controls.
    */
   readOnly?: boolean;
+  /**
+   * Show "Confidence is Claude's estimate, not a measured probability." under
+   * this field's meter. Once per triage pane: pass it to the first field that
+   * still shows a meter. Nothing shows while the meter is replaced by a note.
+   */
+  explainEstimate?: boolean;
   /** This field's evidence, already matched to the email (matchEvidence), shown beneath it. */
   evidence?: readonly Evidence[];
   /** A quote is hovered or focused (null when it isn't), so the screen can mark it in the email. */
@@ -55,6 +61,7 @@ export function FieldReview<T extends string>({
   approved = false,
   decidedBy = "you",
   readOnly = false,
+  explainEstimate = false,
   evidence = [],
   onEvidenceActive,
 }: FieldReviewProps<T>) {
@@ -128,7 +135,12 @@ export function FieldReview<T extends string>({
           Claude suggested {field.value} · <span className="text-mono">{toPercent(field.confidence)}%</span>
         </p>
       ) : (
-        <ConfidenceMeter value={field.confidence} runnerUp={field.runnerUp?.confidence} confirmed={approved || readOnly} />
+        <>
+          <ConfidenceMeter value={field.confidence} runnerUp={field.runnerUp?.confidence} confirmed={approved || readOnly} />
+          {explainEstimate && (
+            <p className={`text-small ${styles.note}`}>Confidence is Claude&apos;s estimate, not a measured probability.</p>
+          )}
+        </>
       )}
 
       {showControls && (

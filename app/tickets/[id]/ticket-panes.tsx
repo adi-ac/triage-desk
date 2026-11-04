@@ -177,6 +177,7 @@ function Triage({ ticketId, body, suggestion, onEvidenceActive }: TriageProps) {
           value={state.category}
           onValueChange={chooseCategory}
           approved={sent}
+          explainEstimate
           evidence={evidenceFor(body, suggestion, "category")}
           onEvidenceActive={onEvidenceActive}
         />
@@ -188,9 +189,11 @@ function Triage({ ticketId, body, suggestion, onEvidenceActive }: TriageProps) {
           value={state.urgency}
           onValueChange={chooseUrgency}
           approved={sent}
+          explainEstimate={state.category !== null}
           evidence={evidenceFor(body, suggestion, "urgency")}
           onEvidenceActive={onEvidenceActive}
         />
+        {suggestion.agentNote && <Banner title="Claude's note">{suggestion.agentNote}</Banner>}
         <DraftEditor
           key={ticketId}
           id={targets.draft}
@@ -257,6 +260,7 @@ function RuleSentTriage({ ticketId, body, suggestion, onEvidenceActive }: Triage
           value={null}
           onValueChange={() => {}}
           readOnly
+          explainEstimate
           evidence={evidenceFor(body, suggestion, "category")}
           onEvidenceActive={onEvidenceActive}
         />
@@ -270,6 +274,7 @@ function RuleSentTriage({ ticketId, body, suggestion, onEvidenceActive }: Triage
           evidence={evidenceFor(body, suggestion, "urgency")}
           onEvidenceActive={onEvidenceActive}
         />
+        {suggestion.agentNote && <Banner title="Claude's note">{suggestion.agentNote}</Banner>}
         <DraftEditor
           key={ticketId}
           label="Reply"

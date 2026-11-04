@@ -12,19 +12,29 @@ export function matchEvidence(body: string, evidence: readonly Evidence[]): Evid
   return evidence.filter((e) => e.quote.trim() !== "" && paragraphs.some((p) => p.includes(e.quote)));
 }
 
-export type Segment = { text: string; supports?: EvidenceSupports };
+/** A quote and every field it supports; one quote can back both the category and the urgency. */
+export type Segment = { text: string; supports?: EvidenceSupports[] };
 
 /**
  * One paragraph split into plain text and quotes, earliest quote first; the
- * longer quote wins when two start together. Only pass matched evidence.
+ * longer quote wins when two start together. A quote cited for several
+ * fields is one segment listing them all, so it's marked once. Only pass
+ * matched evidence.
  */
 export function segmentParagraph(paragraph: string, evidence: readonly Evidence[]): Segment[] {
+  const byQuote = new Map<string, EvidenceSupports[]>();
+  for (const e of evidence) {
+    if (e.quote === "") continue;
+    const supports = byQuote.get(e.quote) ?? [];
+    if (!supports.includes(e.supports)) supports.push(e.supports);
+    byQuote.set(e.quote, supports);
+  }
   const segments: Segment[] = [];
   let rest = paragraph;
   while (rest) {
-    const next = evidence
-      .map((e) => ({ ...e, at: rest.indexOf(e.quote) }))
-      .filter((e) => e.at >= 0 && e.quote !== "")
+    const next = [...byQuote]
+      .map(([quote, supports]) => ({ quote, supports, at: rest.indexOf(quote) }))
+      .filter((e) => e.at >= 0)
       .sort((a, b) => a.at - b.at || b.quote.length - a.quote.length)[0];
     if (!next) {
       segments.push({ text: rest });

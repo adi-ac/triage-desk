@@ -9,7 +9,7 @@ The product's one idea: the interface makes it obvious when the model shouldn't 
 These hold on every screen. If a design seems to need an exception, ask; don't make one.
 
 1. **Anything Claude produced renders as a suggestion until a person acts on it.** Suggestions are pencil: dashed `--suggested-border`, gray. Use `Chip state="suggested"`, `Tag tone="ai"`, `TimelineRow actor="ai"`, `DraftEditor state="suggested"`. It becomes decided, edited or approved only when a person sets, edits or approves it. Why: if model output looks like a decision, nobody can tell what was checked.
-2. **A confidence value always shows as `ConfidenceMeter`: a bar, a percentage and a level word. Never as a chip or a tag**, and never as a bare number. The one exception is history: once a field is kept or switched, FieldReview replaces its meter with a quiet note, "Claude suggested How-to · 48%". Why: high confidence shares Petrol with decisions, so shape and words are what keep them apart; and confidence belongs to suggestions, so a meter beside a value must never show confidence in a different value.
+2. **A confidence value always shows as `ConfidenceMeter`: a bar, a percentage and a level word.** Confidence is Claude's own estimate, not a measured probability: never word it as a measurement ("92% accurate", "92% chance"), and say "Claude's estimate" wherever the interface explains it. **Never as a chip or a tag**, and never as a bare number. The one exception is history: once a field is kept or switched, FieldReview replaces its meter with a quiet note, "Claude suggested How-to · 48%". Why: high confidence shares Petrol with decisions, so shape and words are what keep them apart; and confidence belongs to suggestions, so a meter beside a value must never show confidence in a different value.
 3. **A decided chip always says how it was decided: who set it, or "Approved as suggested".** `Chip state="decided"` requires either `decidedBy` (`"you"` or the person's name) or `asSuggested`. Why: same as rule 2. A solid petrol chip with no name could be the model.
 4. **Petrol is only for decisions, high confidence, the selected queue item and Approve.** Decisions means anything a person set: `Chip state="decided"`, `Tag tone="human"`, `TimelineRow actor="human"`. The focus ring (`--focus-ring`, the accent) is the one documented exception: keyboard focus must always be clearly visible, and it only appears while tabbing, so it never competes with Approve. Nothing else uses an `--accent*`, `--decided-*` or `--confidence-high*` token: no petrol links, info banners, headings or icons. A reply a team rule sent has no decision styling, since no person acted: no ink chips, no "Set by you" (FieldReview `readOnly`, DraftEditor `state="sent-by-rule"`, ApproveBar `sentBy="rule"`). Its high-confidence meters stay Petrol like any other: the meter describes the model's confidence, not a decision. There are no per-ticket-type exceptions to this rule. Why: Petrol means "a person did this" or "fine to go ahead". A third meaning breaks both.
 5. **Approve stays disabled while any blocker is open, and the blockers are listed next to it.** Exactly three things block, and nothing else:
@@ -59,6 +59,8 @@ const blockers = approveBlockers({ fields, draft });
 Model output has one shape, `Suggestion`, in `@/lib/suggestion` (including `suggestedAt`, when the model made it), alongside `SuggestedField`, `Evidence`, `OutputSourceKind`, `EvidenceSupports` and the value lists `categories` and `urgencies`. Never define your own. Example output lives in `@/fixtures/suggestions` (`suggestionFor(ticketId)`), never in `fixtures/tickets.ts`, which holds inputs only. Show the email with `EmailBody`, passing `suggestion.evidence`; for the evidence list, `matchEvidence(body, evidence)` from `@/lib/evidence` gives the quotes that match word for word. Never search or split the email yourself.
 
 **Times** are ISO 8601 strings everywhere in data and props, and always render through `Time` (TimelineRow, QueueItem and ApproveBar already use it). It shows the viewer's time zone: the time alone if it's today, the date and time if older, the full timestamp with its zone on hover. Never format a time yourself, and never show UTC. To check Approve, build each field with `approveField(name, suggestion.category, chosen)` and pass the fields to `approveBlockers` (both from `@/lib/approve`).
+
+The draft is only ever words to the customer. `[Placeholders]` are only for facts Claude can't know: dates, amounts, names, account details. Advice or instructions for the support agent never go in the draft, not even in brackets; they go in `agentNote`, shown above the draft as "Claude's note". Why: a placeholder blocks Approve until a person fills it, and an instruction left in a draft would be sent to the customer.
 
 ```tsx
 // Correct
@@ -131,7 +133,7 @@ The order is computed when a ticket opens and held while it's open: the queue re
 
 The browser tab reads "<ticket ID> · Triage Desk", set on the client because the page can't read the ID on the server: the ticket panes render a React `<title>`, and no layout or page above them sets a metadata title (Next would overwrite it on navigation).
 
-**Triage pane, top to bottom:** Category, then Urgency (each a FieldReview with its own evidence beneath it; hovering or focusing a quote marks it in the email), then the draft, then the activity `Timeline` (collapsed, "Activity · 3"). Approve is in the footer.
+**Triage pane, top to bottom:** Category, then Urgency (each a FieldReview with its own evidence beneath it; hovering or focusing a quote marks it in the email), then Claude's note if there is one (`Banner` info titled "Claude's note", from `suggestion.agentNote`), then the draft, then the activity `Timeline` (collapsed, "Activity · 3"). Approve is in the footer. The first field still showing a meter gets `explainEstimate`, so the pane says once, under that meter, "Confidence is Claude's estimate, not a measured probability."
 
 Without a queue (a single ticket opened on its own, from a link): the same shell minus the queue column. That's not an exception, so don't ask about it. After sending, ApproveBar offers "Back to inbox" instead of "Next ticket".
 
@@ -198,6 +200,7 @@ Reviewing one suggested field: category or urgency. Use it for every field a per
 - Once kept or switched: the solid chip ("Set by you") and a quiet "Change" link that reopens the controls. The meter gives way to a quiet note, "Claude suggested How-to · 48%" (rule 2).
 - `approved`: locks the field. An untouched field shows "Approved as suggested" (rule 7).
 - `readOnly`: a reply a team rule sent. The chip stays pencil and the meter stays (Petrol if it's high confidence); no controls, no decision styling.
+- `explainEstimate`: shows "Confidence is Claude's estimate, not a measured probability." under the meter. Pass it to the first field that still shows a meter, so it appears once per pane.
 - `evidence`: this field's quotes, from `matchEvidence()` filtered by `supports`, listed beneath it. Pass `onEvidenceActive` and keep the quote in screen state for EmailBody's `activeQuote`; the quotes then respond to hover and keyboard focus.
 
 It's controlled: keep `value` (null until someone keeps or switches) on the screen, because the Approve blockers need it. Give it an `id` and pass that in ApproveBar's `targets`, so the summary can jump to it. `options` is `categories` or `urgencies` from `@/lib/suggestion`. Its heading is an h3, so put it in a Pane. After each choice, add a timeline row: "kept the category as How-to" or "set the category to Billing".
@@ -237,7 +240,7 @@ Is it an unpicked alternative?       → state="default" (add aiPick if it's the
 
 ### ConfidenceMeter
 
-The only way to show a confidence value (rule 2). Pass `value` from 0 to 1, and `runnerUp` (the runner-up's 0–1 confidence) whenever there is one. The level comes from the rounded percentage: high from 85%, medium from 60%, low below. You can't pass a level. Low adds a fill. An unsure pick (under 60%, or within 15 points of `runnerUp`) adds "confirm before approving" until you pass `confirmed` once a person has kept or switched the field. It wraps on narrow screens; never put it in a horizontally scrolling container. It's a block element, so don't put it inside a QueueItem's `meta`; use a `Tag tone="warning"` there.
+The only way to show a confidence value (rule 2). The value is Claude's own estimate, not a measured probability; every meter's accessible name says so ("Confidence: Claude's estimate, not a measured probability"), and the triage pane says it once in words (FieldReview `explainEstimate`). There's no hover-only explanation. Pass `value` from 0 to 1, and `runnerUp` (the runner-up's 0–1 confidence) whenever there is one. The level comes from the rounded percentage: high from 85%, medium from 60%, low below. You can't pass a level. Low adds a fill. An unsure pick (under 60%, or within 15 points of `runnerUp`) adds "confirm before approving" until you pass `confirmed` once a person has kept or switched the field. It wraps on narrow screens; never put it in a horizontally scrolling container. It's a block element, so don't put it inside a QueueItem's `meta`; use a `Tag tone="warning"` there.
 
 ```tsx
 // Correct
@@ -249,7 +252,7 @@ The only way to show a confidence value (rule 2). Pass `value` from 0 to 1, and 
 
 ### EmailBody
 
-The customer's email. Pass `body` and the model's `evidence`; it splits paragraphs, keeps line breaks, marks each quote in place with EvidenceMark, and drops any quote that doesn't match the email word for word. `activeQuote` (from FieldReview's `onEvidenceActive`) turns that quote's dashed underline solid and 2px, and scrolls it into view if it's out of sight (instantly with reduced motion).
+The customer's email. Pass `body` and the model's `evidence`; it splits paragraphs, keeps line breaks, marks each quote in place with EvidenceMark, and drops any quote that doesn't match the email word for word. `activeQuote` (from FieldReview's `onEvidenceActive`) turns that quote's dashed underline solid and 2px, and scrolls it into view if it's out of sight (instantly with reduced motion). A quote cited for both fields is marked once, in urgency red (red means it raises the stakes), and the evidence item under either field highlights that same mark.
 
 ```tsx
 // Correct

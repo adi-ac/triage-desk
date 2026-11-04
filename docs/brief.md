@@ -130,6 +130,23 @@ What it can't claim is real-world use, so it gets tested with support agents and
 - Queue groups, top to bottom: Needs review (the stakes sort), Not triaged yet (newest first), Sent (sent by you or by a rule, most recently sent first). Each sent ticket keeps its "Sent" or "Sent by rule" Tag. This replaces "triaged tickets first", which mixed sent tickets in with ones still needing review.
 - The browser tab title is "<ticket ID> · Triage Desk", set on the client, because reading the ID on the server would block instant navigation.
 
+**Model output: the note, shared quotes, and what confidence means** (decided 2026-11-04, after the first recording runs)
+- Confidence is Claude's own estimate, not a measured probability. The first runs reported round numbers (40, 45, 50, 60%), and nothing yet checks them against outcomes. The interface says "Claude's estimate" once per triage pane, under the first meter ("Confidence is Claude's estimate, not a measured probability."), and every meter's accessible name says it too; there's no hover-only explanation.
+- Placeholders are only for facts Claude can't know: dates, amounts, names, account details. Advice to the support agent never goes in the draft. It goes in an optional `agentNote` on Suggestion, shown above the draft as an info Banner titled "Claude's note". The recording prompt says the same. Prompted by a run that left "[Agent: consider looping in the account manager.]" in a draft.
+- One quote can support both the category and the urgency. EmailBody marks it once, in urgency red (red already means it raises the stakes), and the evidence item under either field highlights that mark.
+- Category and urgency definitions, for review. Copied from the recording prompt (`scripts/record-suggestion.ts`), which is the source; change them there and here together.
+  - Categories:
+    - How-to: the customer wants to know how to do something Ledgerline already supports.
+    - Billing: Ledgerline's own charges to the customer: their plan, subscription, payments to Ledgerline, or invoices Ledgerline sent them.
+    - Bug: something in Ledgerline is broken or behaving wrongly.
+    - Feature request: the customer wants something Ledgerline doesn't do.
+    - Cancellation risk: signs the customer may leave or not renew: renewal doubts, reviewing tools, moving data out, comparing alternatives.
+  - Urgencies:
+    - Urgent: money, access or data is at risk right now, or a hard deadline is days away.
+    - High: a near deadline or a blocking problem for the customer's work.
+    - Normal: a real need with no pressing deadline.
+    - Low: curiosity or a nice-to-have.
+
 **Focus ring** (decided 2026-11-03): the accent, 2px with a 2px offset, set globally on `:focus-visible` via a `--focus-ring` role. It is at least 6.59:1 on `surface` and `bg` in both themes.
 - The one documented exception to the Petrol rule (Petrol is only for decisions, high confidence, the selected queue item and Approve), confirmed 2026-11-04. My reason: keyboard focus must always be clearly visible, and it only appears while tabbing, so it never competes with Approve.
 

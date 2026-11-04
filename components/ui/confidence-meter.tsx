@@ -19,7 +19,9 @@ export type ConfidenceMeterProps = Omit<ComponentProps<"div">, "className" | "st
 
 /**
  * Always a bar, a percentage and a level word, never a chip: high shares
- * its petrol with decisions, so shape and words keep them apart. An unsure
+ * its petrol with decisions, so shape and words keep them apart. The value
+ * is Claude's own estimate, not a measured probability; the accessible name
+ * says so on every meter. An unsure
  * pick adds a hint to confirm it until a person does. Wraps on narrow
  * screens; never scrolls sideways.
  */
@@ -32,7 +34,7 @@ export function ConfidenceMeter({ value, runnerUp, confirmed = false, ...props }
   return (
     <div
       role="meter"
-      aria-label="Confidence"
+      aria-label="Confidence: Claude's estimate, not a measured probability"
       aria-valuemin={0}
       aria-valuemax={100}
       aria-valuenow={percent}

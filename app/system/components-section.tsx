@@ -229,7 +229,8 @@ export function ComponentsSection({ theme }: { theme: string }) {
         props="value: 0–1 · runnerUp?: 0–1 · confirmed?: boolean"
         intro={
           <>
-            The level is derived inside, from the rounded percentage: high from{" "}
+            Confidence is Claude&apos;s estimate, not a measured probability, and every meter&apos;s
+            accessible name says so. The level is derived inside, from the rounded percentage: high from{" "}
             {confidenceThresholds.high}%, medium from {confidenceThresholds.medium}%, low below. A pick
             under {confidenceThresholds.medium}% or within {confidenceThresholds.margin} points of its
             runner-up is unsure and asks to be confirmed, until a person keeps or switches it. Always
@@ -252,9 +253,16 @@ export function ComponentsSection({ theme }: { theme: string }) {
       <Demo
         name="EmailBody"
         props="body · evidence"
-        intro="The customer's email with the model's quotes marked in place. Quotes that don't match the email word for word are dropped. Every screen uses this; none marks quotes itself."
+        intro="The customer's email with the model's quotes marked in place. Quotes that don't match the email word for word are dropped. A quote cited for both fields (the renewal date here) is marked once, in urgency red, and the evidence item under either field highlights it. Every screen uses this; none marks quotes itself."
       >
-        <EmailBody body={excerpt} evidence={[...suggestion.evidence, { quote: "a quote the email doesn't contain", supports: "category" }]} />
+        <EmailBody
+          body={excerpt}
+          evidence={[
+            ...suggestion.evidence,
+            { quote: "Our renewal is on 15 December", supports: "category" },
+            { quote: "a quote the email doesn't contain", supports: "category" },
+          ]}
+        />
       </Demo>
 
       <Demo name="EvidenceMark" props="supports: category | urgency" intro="The mark EmailBody and EvidenceItem use: a fill and a dashed underline, since the model made the mark.">

@@ -41,7 +41,9 @@ Confidence: give your honest probability (0 to 1) that each pick is right, and t
 
 Evidence: quote the exact words from the email, character for character, that support each pick. Mark each quote as supporting the category or the urgency. Only quote words that appear in the email.
 
-Draft: a short, friendly reply from "Ledgerline Support". Where it needs a fact you don't have, such as a link, a policy detail, an account-specific number or a name, write a placeholder in square brackets, like [link to the export guide]. Never invent facts about Ledgerline.`;
+Draft: a short, friendly reply to the customer from "Ledgerline Support". Use a placeholder in square brackets only for a fact you can't know, such as a date, an amount, a name, an account detail or a link, for example [invoice number]. Never invent facts about Ledgerline.
+
+Agent note: the draft is only ever words to the customer. Never put advice or instructions for the support agent in it, not even in brackets. If the agent should know or do something (check an account, loop in a colleague, watch for a risk), say it in agentNote, in one or two sentences addressed to the agent. If there's nothing to add, set agentNote to null.`;
 
 const fieldSchema = (options: readonly string[]) => ({
   type: "object",
@@ -81,8 +83,9 @@ const OUTPUT_SCHEMA = {
       },
     },
     draft: { type: "string" },
+    agentNote: { anyOf: [{ type: "string" }, { type: "null" }] },
   },
-  required: ["category", "urgency", "evidence", "draft"],
+  required: ["category", "urgency", "evidence", "draft", "agentNote"],
   additionalProperties: false,
 };
 
@@ -99,6 +102,7 @@ const Output = z.object({
   urgency: field(urgencies),
   evidence: z.array(z.object({ quote: z.string(), supports: z.enum(["category", "urgency"]) })),
   draft: z.string(),
+  agentNote: z.string().nullable(),
 });
 
 // --- The email -------------------------------------------------------------
@@ -149,12 +153,13 @@ async function record(email: ReturnType<typeof emailFor>, run: number) {
   }
 
   const text = response.content.flatMap((b) => (b.type === "text" ? [b.text] : [])).join("");
-  const output = Output.parse(JSON.parse(text));
+  const { agentNote, ...output } = Output.parse(JSON.parse(text));
   const suggestion: Suggestion = {
     ticketId: email.id,
     source: "live",
     suggestedAt: new Date().toISOString(),
     ...output,
+    ...(agentNote ? { agentNote } : {}),
   };
 
   const describe = (f: Suggestion["category"] | Suggestion["urgency"]) => {

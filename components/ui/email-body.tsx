@@ -15,7 +15,11 @@ export type EmailBodyProps = Omit<ComponentProps<"div">, "className" | "style" |
   activeQuote?: string | null;
 };
 
-/** The customer's email, with each quote the model used marked in place. */
+/**
+ * The customer's email, with each quote the model used marked in place. A
+ * quote cited for both fields is marked once, and the evidence item under
+ * either field highlights that same mark.
+ */
 export function EmailBody({ body, evidence = [], activeQuote = null, ...props }: EmailBodyProps) {
   const ref = useRef<HTMLDivElement>(null);
   const matched = matchEvidence(body, evidence);
@@ -33,7 +37,9 @@ export function EmailBody({ body, evidence = [], activeQuote = null, ...props }:
         <p key={i} className={styles.paragraph}>
           {segmentParagraph(paragraph, matched).map((s, j) =>
             s.supports ? (
-              <EvidenceMark key={j} supports={s.supports} active={s.text === activeQuote}>
+              // A quote that supports the urgency is marked red even when it
+              // also supports the category: red means it raises the stakes.
+              <EvidenceMark key={j} supports={s.supports.includes("urgency") ? "urgency" : "category"} active={s.text === activeQuote}>
                 {s.text}
               </EvidenceMark>
             ) : (
