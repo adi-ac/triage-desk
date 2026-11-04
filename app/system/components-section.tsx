@@ -6,6 +6,9 @@ import {
   ConfidenceMeter,
   DraftEditor,
   EvidenceItem,
+  EvidenceMark,
+  OutputSource,
+  Pane,
   QueueItem,
   SegmentedControl,
   Severity,
@@ -140,8 +143,8 @@ export function ComponentsSection({ theme }: { theme: string }) {
 
       <Demo
         name="Chip"
-        props="state: default | suggested | decided · aiPick: boolean"
-        intro="Default is an option nobody has picked. A decided chip has to say who set it; the types don't allow one without. AI pick is a word, not a color."
+        props="state: default | suggested | decided · decidedBy | asSuggested · aiPick: boolean"
+        intro="Default is an option nobody has picked. A decided chip has to say how it was decided: who set it, or Approved as suggested when the ticket was approved without anyone touching the field. The types don't allow one without. AI pick is a word, not a color."
       >
         <div className={styles.chipGrid}>
           <Chip>Cancellation risk</Chip>
@@ -156,17 +159,22 @@ export function ComponentsSection({ theme }: { theme: string }) {
           <Chip state="decided" decidedBy="Dana Ruiz" aiPick>
             How-to
           </Chip>
+          <Chip state="decided" asSuggested>
+            Normal
+          </Chip>
         </div>
       </Demo>
 
       <Demo
         name="ConfidenceMeter"
-        props="value: 0–1"
+        props="value: 0–1 · runnerUp?: 0–1 · confirmed?: boolean"
         intro={
           <>
             The level is derived inside, from the rounded percentage: high from{" "}
-            {confidenceThresholds.high}%, medium from {confidenceThresholds.medium}%, low below. Always
-            a bar, a figure and a word.
+            {confidenceThresholds.high}%, medium from {confidenceThresholds.medium}%, low below. A pick
+            under {confidenceThresholds.medium}% or within {confidenceThresholds.margin} points of its
+            runner-up is unsure and asks to be confirmed, until a person keeps or switches it. Always
+            a bar, a figure and a word; it wraps instead of scrolling.
           </>
         }
       >
@@ -174,10 +182,22 @@ export function ComponentsSection({ theme }: { theme: string }) {
           {[0.92, 0.85, 0.71, 0.6, 0.48].map((v) => (
             <ConfidenceMeter key={v} value={v} />
           ))}
+          <p className={`text-overline ${styles.muted}`}>Within 15 points of the runner-up</p>
+          <ConfidenceMeter value={0.71} runnerUp={0.64} />
+          <p className={`text-overline ${styles.muted}`}>Kept or switched by a person</p>
+          <ConfidenceMeter value={0.48} confirmed />
+          <ConfidenceMeter value={0.71} runnerUp={0.64} confirmed />
         </div>
       </Demo>
 
-      <Demo name="EvidenceItem" props="supports: category | urgency" intro="The quote, marked as it is in the email, under the word for what it supports.">
+      <Demo name="EvidenceMark" props="supports: category | urgency" intro="Marks a quote inside the email itself: a fill and a dashed underline, since the model made the mark.">
+        <p className="text-reading">
+          Could you tell me <EvidenceMark supports="category">how to export everything we have in Ledgerline</EvidenceMark>?{" "}
+          <EvidenceMark supports="urgency">Our renewal is on 15 December</EvidenceMark>.
+        </p>
+      </Demo>
+
+      <Demo name="EvidenceItem" props="supports: category | urgency" intro="The quote in the evidence list, marked as it is in the email, under the word for what it supports.">
         <div className={styles.stack}>
           <EvidenceItem supports="category">how to export everything we have in Ledgerline</EvidenceItem>
           <EvidenceItem supports="urgency">Our renewal is on 15 December</EvidenceItem>
@@ -187,7 +207,7 @@ export function ComponentsSection({ theme }: { theme: string }) {
       <Demo
         name="TimelineRow"
         props="actor: ai | human"
-        intro="The model and team rules get a dashed ring; a person gets a solid dot and must be named."
+        intro="The model and team rules get a dashed ring; a person gets a solid dot and must be named. A field approved untouched gets its own row, worded as approved as suggested, never as set."
       >
         <ol className={styles.timeline}>
           <TimelineRow actor="ai" time="16:48">
@@ -197,14 +217,17 @@ export function ComponentsSection({ theme }: { theme: string }) {
             held it for review: below 85% and it mentions a renewal
           </TimelineRow>
           <TimelineRow actor="human" name="Dana Ruiz" time="16:52">
-            set the category to How-to
+            set the category to Cancellation risk
+          </TimelineRow>
+          <TimelineRow actor="human" name="Dana Ruiz" time="16:55">
+            approved the urgency as suggested: Normal
           </TimelineRow>
         </ol>
       </Demo>
 
       <Demo name="Banner" props="tone: info | warning | error" intro="Info is gray, not petrol, with a hairline ring so it stands out on a white card. The title says the tone in words and the fill carries the color, so no tone has a colored edge.">
-        <div className={styles.stack}>
-          <Banner title="Recorded example">These suggestions were recorded from the model, not generated live.</Banner>
+        <div className={styles.blocks}>
+          <Banner title="Sent by rule">This reply went out without review under the how-to team rule.</Banner>
           <Banner tone="warning" title="Approve is blocked" action={<Button size="small">Use runner-up</Button>}>
             The top two categories are 0.07 apart, below the 0.15 margin.
           </Banner>
@@ -246,6 +269,32 @@ export function ComponentsSection({ theme }: { theme: string }) {
         <DraftEditor label="Draft reply" state="suggested" rows={3} note="Drafted by the model" defaultValue={draft} />
         <DraftEditor label="Draft reply" state="edited" rows={3} note="Drafted by the model, edited by you" defaultValue={draft} />
         <DraftEditor label="Reply" state="approved" rows={3} note="Drafted by the model, approved by you at 16:55" defaultValue={draft} />
+        <DraftEditor
+          label="Draft reply"
+          state="edited"
+          rows={3}
+          note="Drafted by the model, edited by you"
+          warning="The draft was written for How-to; the category is now Cancellation risk. Check it still fits."
+          defaultValue={draft}
+        />
+      </Demo>
+
+      <Demo
+        name="OutputSource"
+        props="source: recorded | live | hand-written"
+        intro="Every screen that shows model output carries exactly one, with fixed wording. Hand-written is for the build only and is a warning, so it can't ship unnoticed."
+      >
+        <div className={styles.blocks}>
+          <OutputSource source="recorded" />
+          <OutputSource source="live" />
+          <OutputSource source="hand-written" />
+        </div>
+      </Demo>
+
+      <Demo name="Pane" intro="A gray tray holding the header and wrapping a white card, with concentric corners (14px tray, 10px card). Screens never build their own.">
+        <Pane title="Email" meta={<span className="text-mono-small">LL-5040</span>}>
+          <p className="text-reading">Could you tell me how to export everything we have in Ledgerline?</p>
+        </Pane>
       </Demo>
 
       <Demo

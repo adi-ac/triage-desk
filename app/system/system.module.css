@@ -558,27 +558,6 @@
   gap: 12px;
 }
 
-.evidence {
-  color: inherit;
-  padding-inline: 1px;
-  border-radius: 2px;
-  background: var(--evidence);
-  text-decoration: underline dashed var(--evidence-line);
-  text-underline-offset: 3px;
-  text-decoration-thickness: 1px;
-  box-decoration-break: clone;
-}
-
-.evidence[data-supports="category"] {
-  --evidence: var(--evidence-category);
-  --evidence-line: var(--evidence-category-line);
-}
-
-.evidence[data-supports="urgency"] {
-  --evidence: var(--evidence-urgency);
-  --evidence-line: var(--evidence-urgency-line);
-}
-
 .legend {
   display: flex;
   gap: 16px;
@@ -609,7 +588,7 @@
 /* Each pane sets its own data-theme, so it sets its own surface and ink too. */
 .themePair {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(320px, 100%), 1fr));
   gap: 12px;
 }
 
@@ -655,10 +634,16 @@
 }
 
 .chipGrid {
-  display: grid;
-  grid-template-columns: repeat(2, max-content);
+  display: flex;
+  flex-wrap: wrap;
   gap: 10px 12px;
   align-items: center;
+}
+
+/* Full-width blocks, such as banners. */
+.blocks {
+  display: grid;
+  gap: 10px;
 }
 
 .timeline {

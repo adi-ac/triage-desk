@@ -1,12 +1,15 @@
-/* No border at any level, so it never reads as a chip. Low adds a fill. */
+/* No border at any level, so it never reads as a chip. Low adds a fill.
+   The reading (bar, figure, word) stays on one line; the hint wraps under it
+   on narrow screens, so the meter never scrolls sideways. */
 
 .meter {
   display: inline-flex;
+  flex-wrap: wrap;
   align-items: center;
-  gap: 8px;
+  gap: 2px 8px;
+  max-inline-size: 100%;
   padding-block: 4px;
   border-radius: 6px;
-  white-space: nowrap;
   color: var(--confidence-text);
 }
 
@@ -27,6 +30,13 @@
   background: var(--confidence-low-fill);
 }
 
+.reading {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
 .track {
   display: block;
   flex: none;
@@ -43,6 +53,8 @@
   background: var(--confidence);
 }
 
+/* ink-2: ink-3 falls short on the low fill. */
 .hint {
+  min-inline-size: 0;
   color: var(--ink-2);
 }

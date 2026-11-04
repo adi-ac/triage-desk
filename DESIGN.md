@@ -10,22 +10,32 @@ These hold on every screen. If a design seems to need an exception, ask; don't m
 
 1. **Anything Claude produced renders as a suggestion until a person acts on it.** Suggestions are pencil: dashed `--suggested-border`, gray. Use `Chip state="suggested"`, `Tag tone="ai"`, `TimelineRow actor="ai"`, `DraftEditor state="suggested"`. It becomes decided, edited or approved only when a person sets, edits or approves it. Why: if model output looks like a decision, nobody can tell what was checked.
 2. **A confidence value always shows as `ConfidenceMeter`: a bar, a percentage and a level word. Never as a chip or a tag**, and never as a bare number. Why: high confidence shares Petrol with decisions, so shape and words are what keep them apart.
-3. **A decided chip always says who set it.** `Chip state="decided"` requires `decidedBy`; pass `"you"` or the person's name. Why: same as rule 2. A solid petrol chip with no name could be the model.
+3. **A decided chip always says how it was decided: who set it, or "Approved as suggested".** `Chip state="decided"` requires either `decidedBy` (`"you"` or the person's name) or `asSuggested`. Why: same as rule 2. A solid petrol chip with no name could be the model.
 4. **Petrol is only for decisions, high confidence, the selected queue item and Approve.** Decisions means anything a person set: `Chip state="decided"`, `Tag tone="human"`, `TimelineRow actor="human"`. The focus ring (`--focus-ring`, the accent) is the one documented exception: keyboard focus must always be clearly visible, and it only appears while tabbing, so it never competes with Approve. Nothing else uses an `--accent*`, `--decided-*` or `--confidence-high*` token: no petrol links, info banners, headings or icons. Why: Petrol means "a person did this" or "fine to go ahead". A third meaning breaks both.
-5. **Approve stays disabled while any blocker is open, and the blockers are listed next to it.** Each blocker is a sentence with the number that tripped it ("The top two categories are 0.07 apart, below the 0.15 margin."). Use a `Banner tone="warning"` titled "Approve is blocked" beside the button, linked with `aria-describedby`. Never hide Approve; never leave it enabled with a warning. Why: the first screen's whole point is that the interface stops a send it shouldn't trust, and says why.
-6. **Recorded examples are always labeled as recorded.** Any screen showing recorded model output carries a `Banner` (info) titled "Recorded example". It can't be dismissed. Why: an unlabeled canned example undoes the honesty claim the piece rests on (brief, First screen).
+5. **Approve stays disabled while any blocker is open, and the blockers are listed next to it.** Exactly three things block, and nothing else:
+   - an unsure field that no one has kept or switched: under 60%, or within 15 points of its runner-up;
+   - any unfilled `[placeholder]` in the draft;
+   - an empty draft.
+
+   Get them from `approveBlockers()` in `@/lib/approve`; never write your own checks. It returns one sentence per blocker, with the number that tripped it. Show them in a `Banner tone="warning"` titled "Approve is blocked" beside the button, linked with `aria-describedby`. Never hide Approve; never leave it enabled while a blocker is open. A draft written for a value a person has since overridden is a warning, not a blocker: pass it as DraftEditor's `warning`. Why: block only where a wrong send is costly.
+6. **Model output is always labeled with its source: recorded, live or hand-written.** Every screen that shows model output carries exactly one `OutputSource`, which can't be dismissed. Hand-written output is allowed during the build only and must be replaced by recorded output before shipping. LL-5040 stays hand-written until the API key is added. Why: an unlabeled canned example undoes the honesty claim the piece rests on (brief, First screen).
+7. **Approving never turns an untouched field into "Set by you".** On Approve, each field a person kept or switched shows `decidedBy="you"`; each field nobody touched shows `asSuggested`, labeled "Approved as suggested". The timeline gives them separate rows (see TimelineRow). Why: the record must never claim a person chose something they didn't look at.
 
 ```tsx
 // Correct: rule 5
+const blockers = approveBlockers({ fields, draft });
+
 <Button variant="primary" disabled={blockers.length > 0} aria-describedby="approve-blockers">
   Approve and send
 </Button>
-<Banner id="approve-blockers" tone="warning" title="Approve is blocked">
-  {blockers.map((b) => <p key={b}>{b}</p>)}
-</Banner>
+{blockers.length > 0 && (
+  <Banner id="approve-blockers" tone="warning" title="Approve is blocked">
+    {blockers.map((b) => <p key={b}>{b}</p>)}
+  </Banner>
+)}
 
-// Incorrect: blocked with no reason beside it
-<Button variant="primary" disabled>Approve and send</Button>
+// Incorrect: a home-made blocker (a stale draft is a warning), and no reason beside the button
+<Button variant="primary" disabled={draftIsStale}>Approve and send</Button>
 ```
 
 ## Tokens
@@ -60,11 +70,26 @@ Never put `--ink-3` on a `*-soft` fill: it measures 4.08–4.21:1 in light and L
 
 **Elevation:** three levels and no more: `--shadow-pane`, `--shadow-popover`, `--shadow-dialog`. Suggestions and decisions are flat at every level. Raised means pressable.
 
-**Trust tokens** (`styles/trust.css`) name meanings: `--suggested-*`, `--decided-*`, `--evidence-*`, `--confidence-*`, `--severity-*`. Every meaning has a component (Chip, EvidenceItem, ConfidenceMeter, Severity, DraftEditor); use the component, not the tokens. A new meaning gets a new component in `components/ui`, never inline styles on a screen.
+**Trust tokens** (`styles/trust.css`) name meanings: `--suggested-*`, `--decided-*`, `--evidence-*`, `--confidence-*`, `--severity-*`. Every meaning has a component (Chip, EvidenceMark, EvidenceItem, ConfidenceMeter, Severity, DraftEditor, OutputSource); use the component, not the tokens. A new meaning gets a new component in `components/ui`, never inline styles on a screen.
 
 **Type:** use the role classes from `styles/type.css`: `text-title` (20), `text-heading` (16), `text-subheading` (14), `text-body` / `text-body-strong` (14), `text-reading` (the email), `text-small` (13), `text-overline` (12, uppercase labels), `text-mono` / `text-mono-small` (IDs, times, figures). Never set a one-off font size, and never go below 12px.
 
 **Themes:** dark mode follows the system unless `<html data-theme>` says otherwise. `data-theme="light"` or `"dark"` also works on any element, to show one theme inside the other. Set `background` and `color` on that element yourself.
+
+## Layout
+
+Screens are built from `Pane`s in a shell grid. Never hand-build a tray, a card or their corners.
+
+**Shell** (the screen's `<main>`; the page background is already `--page`):
+
+- Padding 16px below 768px, 24px from 768px. Gap between panes: 16px.
+- From 1200px: three columns, `320px minmax(0, 1fr) 400px`: queue, email, triage. The shell is `100dvh` tall and each pane's card scrolls on its own.
+- 768–1199px: two columns, `minmax(0, 1fr) 360px`: email, triage. The queue moves behind a "Queue" Button in the screen header.
+- Below 768px: one column, in the order email, triage. Nothing scrolls sideways.
+
+**Pane** is the only pane: a `--tray` band (14px corners, 4px padding, `--shadow-pane`) holding a header (`text-heading` title, optional meta) and a `--surface` card (10px corners, 16px padding). Corners are concentric: inner radius = outer radius − the padding between them.
+
+**Other corners:** popovers and menus 10px, dialogs 14px. Components own their corners (4–8px); never override them.
 
 ## Components
 
@@ -116,14 +141,15 @@ A short label inside a row. A field value is a Chip.
 A field's value (category, urgency). A short label in a row is a Tag; a choice between views is a SegmentedControl.
 
 - `suggested`: the model's value, not yet acted on (rule 1).
-- `decided`: a person set it. Requires `decidedBy` (rule 3).
+- `decided`: decided by a person. Requires `decidedBy="you"` (or a name) when a person kept or switched it, or `asSuggested` when it was approved untouched (rules 3 and 7).
 - `default`: an option nobody has picked, such as the runner-up.
 - `aiPick`: true on whichever chip holds the model's pick. It adds the words "AI pick", so the pick survives a person's override.
 
 ```
-Did a person set it?           → state="decided" decidedBy="you"
-Did the model propose it?      → state="suggested"
-Is it an unpicked alternative? → state="default" (add aiPick if it's the model's pick)
+Did a person keep or switch it?      → state="decided" decidedBy="you"
+Was the ticket approved untouched?   → state="decided" asSuggested
+Did the model propose it?            → state="suggested"
+Is it an unpicked alternative?       → state="default" (add aiPick if it's the model's pick)
 ```
 
 ```tsx
@@ -136,19 +162,31 @@ Is it an unpicked alternative? → state="default" (add aiPick if it's the model
 
 ### ConfidenceMeter
 
-The only way to show a confidence value (rule 2). Pass `value` from 0 to 1. The level comes from the rounded percentage: high from 85%, medium from 60%, low below. You can't pass a level. Low adds a fill and "confirm before approving". It's a block element, so don't put it inside a QueueItem's `meta`; use a `Tag tone="warning"` there.
+The only way to show a confidence value (rule 2). Pass `value` from 0 to 1, and `runnerUp` (the runner-up's 0–1 confidence) whenever there is one. The level comes from the rounded percentage: high from 85%, medium from 60%, low below. You can't pass a level. Low adds a fill. An unsure pick (under 60%, or within 15 points of `runnerUp`) adds "confirm before approving" until you pass `confirmed` once a person has kept or switched the field. It wraps on narrow screens; never put it in a horizontally scrolling container. It's a block element, so don't put it inside a QueueItem's `meta`; use a `Tag tone="warning"` there.
 
 ```tsx
 // Correct
-<ConfidenceMeter value={0.64} />
+<ConfidenceMeter value={0.71} runnerUp={0.64} confirmed={kept} />
 
 // Incorrect: a level can't be passed (type error); it would let the figure and the word disagree
 <ConfidenceMeter value={0.64} level="high" />
 ```
 
+### EvidenceMark
+
+A quote the model used, marked inside the email body: a fill and a dashed underline. `supports` is `category` (gray) or `urgency` (red). Wrap the exact words; drop any quote that doesn't match the email word for word.
+
+```tsx
+// Correct
+Our <EvidenceMark supports="urgency">renewal is on 15 December</EvidenceMark>.
+
+// Incorrect: a hand-built mark; use the component
+<mark style={{ background: "var(--evidence-urgency)" }}>renewal is on 15 December</mark>
+```
+
 ### EvidenceItem
 
-A quote the model used, shown in the evidence list beside the email. `supports` says which suggestion it backs, in words: `category` (gray) or `urgency` (red). Pass the quote, word for word, as children. Inside the email body, mark the same words with the `--evidence-*` tokens.
+The same quote in the evidence list beside the email, under the word for what it supports. Pass the quote, word for word, as children.
 
 ```tsx
 // Correct
@@ -165,6 +203,8 @@ One entry in an activity timeline. Rows go in an `<ol>` with its list styles res
 - `actor="ai"`: the model or a team rule. `name` defaults to "Model"; pass "Team rule" for rules. Dashed ring.
 - `actor="human"`: a person. `name` is required. Solid petrol dot.
 
+On Approve, a field a person kept or switched already has its own row ("set the category to Cancellation risk"). Each untouched field gets a separate row that says so: "approved the urgency as suggested: Normal". Never fold the two together (rule 7).
+
 ```tsx
 // Correct
 <TimelineRow actor="ai" name="Team rule" time="16:31">sent the reply without review</TimelineRow>
@@ -177,7 +217,7 @@ One entry in an activity timeline. Rows go in an `<ol>` with its list styles res
 
 A message about the whole view. A message about one field goes beside that field as `text-small`.
 
-- `info` (the default): neutral facts, including "Recorded example" (rule 6). Gray with a hairline ring, never petrol.
+- `info` (the default): neutral facts. Gray with a hairline ring, never petrol. Model output's source is not a Banner you write: use `OutputSource` (rule 6).
 - `warning`: a person must act before going on, including "Approve is blocked" (rule 5).
 - `error`: something failed. It announces itself (`role="alert"`).
 
@@ -213,7 +253,7 @@ The reply draft. `state` is required; the label shows it in words ("Draft reply 
 - `edited`: a person changed it, or wrote it from scratch. Solid control border.
 - `approved`: approved or sent. Read-only, in the decided style (rule 4).
 
-`note` says who drafted it, in every state ("Drafted by the model, edited by you"). Use `defaultValue` when the editor owns the text, or `value` and `onChange` when the screen does.
+`note` says who drafted it, in every state ("Drafted by the model, edited by you"). `warning` shows something to check that doesn't block Approve, such as "The draft was written for How-to; the category is now Cancellation risk." Use `defaultValue` when the editor owns the text, or `value` and `onChange` when the screen does.
 
 ```
 Has a person approved or sent it?     → state="approved"
@@ -227,6 +267,30 @@ Is it the model's draft, untouched?   → state="suggested"
 
 // Incorrect: a model draft shown as a person's edit breaks rule 1, and the note is missing
 <DraftEditor label="Draft reply" state="edited" defaultValue={draft} />
+```
+
+### OutputSource
+
+The label for model output (rule 6). `source` is `recorded`, `live` or `hand-written`; the wording is fixed. Recorded and live are info; hand-written is a warning, because it must be replaced before shipping. One per screen, near the top, never dismissible.
+
+```tsx
+// Correct
+<OutputSource source="hand-written" />
+
+// Incorrect: a hand-written label with softened wording
+<Banner title="Example">Sample suggestions for this ticket.</Banner>
+```
+
+### Pane
+
+Every pane on a screen (see Layout). `title` names it; `meta` takes a short line or a Tag, such as the ticket ID. Children go in the card.
+
+```tsx
+// Correct
+<Pane title="Triage" meta={<Severity level="high" />}>{children}</Pane>
+
+// Incorrect: a hand-built tray with its own corners
+<section className={styles.tray}><div className={styles.card}>{children}</div></section>
 ```
 
 ### Severity

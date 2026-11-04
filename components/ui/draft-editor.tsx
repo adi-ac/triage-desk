@@ -23,13 +23,20 @@ export type DraftEditorProps = Omit<ComponentProps<"textarea">, "className" | "s
   onStateChange?: (state: DraftState) => void;
   /** Who drafted it, e.g. "Drafted by the model". Keep it in every state. */
   note?: ReactNode;
+  /**
+   * Something to check that doesn't block Approve, such as a draft written
+   * for a value a person has since overridden.
+   */
+  warning?: string;
 };
 
 /** A reply draft. Controlled with value/onChange, or uncontrolled with defaultValue. */
-export function DraftEditor({ label, state, onStateChange, note, id, rows = 6, onChange, ...props }: DraftEditorProps) {
+export function DraftEditor({ label, state, onStateChange, note, warning, id, rows = 6, onChange, ...props }: DraftEditorProps) {
   const autoId = useId();
   const fieldId = id ?? autoId;
   const noteId = `${fieldId}-note`;
+  const warningId = `${fieldId}-warning`;
+  const describedBy = [note && noteId, warning && warningId].filter(Boolean).join(" ") || undefined;
   const [changed, setChanged] = useState(false);
   const shown: DraftState = state === "suggested" && changed ? "edited" : state;
 
@@ -49,7 +56,7 @@ export function DraftEditor({ label, state, onStateChange, note, id, rows = 6, o
       <textarea
         id={fieldId}
         rows={rows}
-        aria-describedby={note ? noteId : undefined}
+        aria-describedby={describedBy}
         spellCheck
         {...props}
         readOnly={shown === "approved"}
@@ -59,6 +66,11 @@ export function DraftEditor({ label, state, onStateChange, note, id, rows = 6, o
       {note && (
         <p id={noteId} className={`text-small ${styles.note}`}>
           {note}
+        </p>
+      )}
+      {warning && (
+        <p id={warningId} className={`text-small ${styles.warning}`}>
+          {warning}
         </p>
       )}
     </div>

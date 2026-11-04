@@ -4,32 +4,10 @@
   justify-items: start;
 }
 
-.item[data-supports="category"] {
-  --evidence: var(--evidence-category);
-  --evidence-line: var(--evidence-category-line);
-}
-
-.item[data-supports="urgency"] {
-  --evidence: var(--evidence-urgency);
-  --evidence-line: var(--evidence-urgency-line);
-}
-
 .label {
   color: var(--ink-3);
 }
 
 .quote {
   color: var(--ink);
-}
-
-/* A fill plus a dashed underline: the model made the mark. */
-.mark {
-  padding-inline: 1px;
-  border-radius: 2px;
-  background: var(--evidence);
-  text-decoration: underline dashed var(--evidence-line);
-  text-underline-offset: 3px;
-  text-decoration-thickness: 1px;
-  box-decoration-break: clone;
-  -webkit-box-decoration-break: clone;
 }

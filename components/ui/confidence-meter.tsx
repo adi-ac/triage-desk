@@ -1,38 +1,33 @@
 import type { ComponentProps } from "react";
+import { confidenceLevel, toPercent, unsureReason, type ConfidenceLevel } from "@/lib/confidence";
 import styles from "./confidence-meter.module.css";
 
-export type ConfidenceLevel = "high" | "medium" | "low";
-
-/** Lowest whole percentage for each level. */
-export const confidenceThresholds = { high: 85, medium: 60 } as const;
-
-const toPercent = (value: number) => Math.round(Math.min(1, Math.max(0, value)) * 100);
-
-/**
- * The level for a 0–1 value. It's read from the rounded percentage, so the
- * figure shown and the word beside it never disagree.
- */
-export function confidenceLevel(value: number): ConfidenceLevel {
-  const percent = toPercent(value);
-  if (percent >= confidenceThresholds.high) return "high";
-  if (percent >= confidenceThresholds.medium) return "medium";
-  return "low";
-}
+export { confidenceLevel, confidenceThresholds, toPercent, unsureReason, type ConfidenceLevel } from "@/lib/confidence";
 
 const words: Record<ConfidenceLevel, string> = { high: "High", medium: "Medium", low: "Low" };
+
+const hints = { low: "confirm before approving", close: "close to the runner-up, confirm before approving" };
 
 export type ConfidenceMeterProps = Omit<ComponentProps<"div">, "className" | "style" | "children"> & {
   /** 0–1. The level is derived from it, never passed. */
   value: number;
+  /** The runner-up's confidence, 0–1. Within 15 points makes the pick unsure. */
+  runnerUp?: number;
+  /** A person has kept or switched the value, so the hint to confirm is dropped. */
+  confirmed?: boolean;
 };
 
 /**
  * Always a bar, a percentage and a level word, never a chip: high shares
- * its petrol with decisions, so shape and words keep them apart.
+ * its petrol with decisions, so shape and words keep them apart. An unsure
+ * pick adds a hint to confirm it until a person does. Wraps on narrow
+ * screens; never scrolls sideways.
  */
-export function ConfidenceMeter({ value, ...props }: ConfidenceMeterProps) {
+export function ConfidenceMeter({ value, runnerUp, confirmed = false, ...props }: ConfidenceMeterProps) {
   const percent = toPercent(value);
   const level = confidenceLevel(value);
+  const reason = confirmed ? null : unsureReason(value, runnerUp);
+  const hint = reason ? hints[reason] : null;
 
   return (
     <div
@@ -41,17 +36,19 @@ export function ConfidenceMeter({ value, ...props }: ConfidenceMeterProps) {
       aria-valuemin={0}
       aria-valuemax={100}
       aria-valuenow={percent}
-      aria-valuetext={`${percent}%, ${words[level].toLowerCase()} confidence`}
+      aria-valuetext={`${percent}%, ${words[level].toLowerCase()} confidence${hint ? `, ${hint}` : ""}`}
       {...props}
       className={`text-small ${styles.meter}`}
       data-level={level}
     >
-      <span className={styles.track}>
-        <span className={styles.bar} style={{ inlineSize: `${percent}%` }} />
+      <span className={styles.reading}>
+        <span className={styles.track}>
+          <span className={styles.bar} style={{ inlineSize: `${percent}%` }} />
+        </span>
+        <span className="text-mono">{percent}%</span>
+        <span>{words[level]} confidence</span>
       </span>
-      <span className="text-mono">{percent}%</span>
-      <span>{words[level]} confidence</span>
-      {level === "low" && <span className={styles.hint}>· confirm before approving</span>}
+      {hint && <span className={styles.hint}>· {hint}</span>}
     </div>
   );
 }

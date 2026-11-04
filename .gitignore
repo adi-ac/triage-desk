@@ -42,3 +42,6 @@ next-env.d.ts
 
 # agent skills (paid course, never publish)
 .claude/skills/
+
+# agent worktrees (local only)
+.claude/worktrees/

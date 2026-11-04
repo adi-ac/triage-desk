@@ -1,4 +1,5 @@
 import type { ComponentProps } from "react";
+import { EvidenceMark } from "./evidence-mark";
 import styles from "./evidence-item.module.css";
 
 export type EvidenceSupports = "category" | "urgency";
@@ -8,13 +9,13 @@ export type EvidenceItemProps = Omit<ComponentProps<"div">, "className" | "style
   supports: EvidenceSupports;
 };
 
-/** A quote the model used, marked the way it's marked in the email. Children are the quote. */
+/** A quote in the evidence list, marked the way it's marked in the email. Children are the quote. */
 export function EvidenceItem({ supports, children, ...props }: EvidenceItemProps) {
   return (
-    <div {...props} className={styles.item} data-supports={supports}>
+    <div {...props} className={styles.item}>
       <span className={`text-overline ${styles.label}`}>{supports === "category" ? "Category" : "Urgency"}</span>
       <q className={`text-reading ${styles.quote}`}>
-        <span className={styles.mark}>{children}</span>
+        <EvidenceMark supports={supports}>{children}</EvidenceMark>
       </q>
     </div>
   );

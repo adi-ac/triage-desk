@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { Chip, ConfidenceMeter, DraftEditor, Severity } from "@/components/ui";
+import { Chip, ConfidenceMeter, DraftEditor, EvidenceMark, Severity } from "@/components/ui";
 import { firstScreenTicketId, tickets } from "@/fixtures/tickets";
 import type { Pair } from "./contrast";
 import { ContrastTable } from "./contrast-table";
@@ -55,9 +55,9 @@ function markUp(text: string) {
     }
     parts.push(rest.slice(0, next.at));
     parts.push(
-      <mark key={key++} className={styles.evidence} data-supports={next.supports}>
+      <EvidenceMark key={key++} supports={next.supports}>
         {next.quote}
-      </mark>,
+      </EvidenceMark>,
     );
     rest = rest.slice(next.at + next.quote.length);
   }
@@ -136,14 +136,10 @@ export function TrustSection({ theme }: { theme: string }) {
         </p>
         <div className={styles.legend}>
           <span className="text-small">
-            <mark className={styles.evidence} data-supports="category">
-              Category
-            </mark>
+            <EvidenceMark supports="category">Category</EvidenceMark>
           </span>
           <span className="text-small">
-            <mark className={styles.evidence} data-supports="urgency">
-              Urgency
-            </mark>
+            <EvidenceMark supports="urgency">Urgency</EvidenceMark>
           </span>
         </div>
         <div className="text-reading">

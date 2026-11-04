@@ -57,3 +57,8 @@
   margin: 0;
   color: var(--ink-3);
 }
+
+.warning {
+  margin: 0;
+  color: var(--warning);
+}
