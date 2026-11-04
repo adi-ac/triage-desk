@@ -1,0 +1,41 @@
+.email {
+  display: grid;
+  gap: 16px;
+}
+
+.subject {
+  margin: 0;
+}
+
+.sender {
+  display: grid;
+  gap: 2px;
+  padding-block-end: 14px;
+  border-block-end: var(--hairline) solid var(--line);
+}
+
+.sender p {
+  margin: 0;
+}
+
+.secondary {
+  color: var(--ink-2);
+}
+
+.muted {
+  color: var(--ink-3);
+}
+
+.triage {
+  display: grid;
+  gap: 24px;
+}
+
+.empty {
+  display: grid;
+  gap: 4px;
+}
+
+.empty p {
+  margin: 0;
+}

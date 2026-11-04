@@ -113,7 +113,7 @@ Screens are built from `Pane`s in a shell grid. Never hand-build a tray, a card 
 
 **Shell** (the screen's `<main>`; the page background is already `--page`). Padding 16px below 768px, 24px from 768px. Gap between panes: 16px. A header row (screen title, and the `OutputSource` when the screen shows model output) spans every column. Nothing ever scrolls sideways.
 
-With a queue (the inbox, where a person works through tickets). The inbox is `/tickets/[id]`, so every open ticket has its own URL; `/` redirects to the first-screen ticket. Its header row holds the screen title, the open ticket's `OutputSource` (when it has model output) and, below 1200px, the "Queue" Button.
+With a queue (the inbox, where a person works through tickets). The inbox is `/tickets/[id]`, so every open ticket has its own URL; `/` redirects to the first-screen ticket. Read the ID with `useParams()` in a client component, never by awaiting `params` in the page: with Cache Components on, server-side `params` blocks instant navigation between tickets. Its header row holds the screen title, the open ticket's `OutputSource` (when it has model output) and, below 1200px, the "Queue" Button.
 
 | Width | Columns |
 | --- | --- |

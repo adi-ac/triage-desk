@@ -1,0 +1,88 @@
+/* The inbox shell, with a queue (DESIGN.md, Layout). */
+
+.shell {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 16px;
+  padding: 16px;
+}
+
+@media (min-width: 768px) {
+  .shell {
+    grid-template-columns: minmax(0, 1fr) 360px;
+    padding: 24px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .shell {
+    grid-template-columns: 320px minmax(0, 1fr) 400px;
+    grid-template-rows: auto minmax(0, 1fr);
+    block-size: 100dvh;
+  }
+}
+
+.header {
+  grid-column: 1 / -1;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px 24px;
+}
+
+.title {
+  margin: 0;
+  margin-inline-end: auto;
+}
+
+.source {
+  flex: 1 1 320px;
+  max-inline-size: 640px;
+}
+
+/* Below 1200px the queue is behind the Queue button. */
+.queuePane {
+  display: none;
+}
+
+@media (min-width: 1200px) {
+  .queuePane {
+    display: grid;
+    min-block-size: 0;
+  }
+
+  .queueButton {
+    display: none;
+  }
+}
+
+/* The ticket page's panes take their own columns in the shell. */
+.ticket {
+  display: contents;
+}
+
+/* Queue */
+
+.queue {
+  display: grid;
+  gap: 16px;
+}
+
+.queueList {
+  display: grid;
+  gap: 2px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.queueGroup {
+  display: grid;
+  gap: 6px;
+}
+
+.groupTitle {
+  margin: 0;
+  padding-inline: 14px;
+  color: var(--ink-3);
+}
