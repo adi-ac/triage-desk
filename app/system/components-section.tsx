@@ -26,9 +26,8 @@ const pairs: Pair[] = [
   { label: "Danger button text", fg: "--critical", bg: "--button-bg", kind: "text" },
   { label: "Danger button text on hover", fg: "--critical", bg: "--button-bg-hover", kind: "text" },
   { label: "Tag and banner text on surface-2", fg: "--ink-2", bg: "--surface-2", kind: "text" },
-  { label: "Info banner edge on its fill", fg: "--line-strong", bg: "--surface-2", kind: "non-text" },
-  { label: "Warning banner edge on its fill", fg: "--warning", bg: "--warning-soft", kind: "non-text" },
-  { label: "Error banner edge on its fill", fg: "--critical", bg: "--critical-soft", kind: "non-text" },
+  { label: "Selected queue item text", fg: "--ink", bg: "--accent-soft", kind: "text" },
+  { label: "Selected queue item company, time, preview", fg: "--ink-2", bg: "--accent-soft", kind: "text" },
   { label: "Who set it, on a decided chip", fg: "--ink-2", bg: "--decided-fill", kind: "text" },
   { label: "Low confidence hint on its fill", fg: "--ink-2", bg: "--confidence-low-fill", kind: "text" },
   { label: "Draft text in the editor", fg: "--ink", bg: "--surface", kind: "text" },
@@ -197,7 +196,7 @@ export function ComponentsSection({ theme }: { theme: string }) {
         </ol>
       </Demo>
 
-      <Demo name="Banner" props="tone: info | warning | error" intro="Info is gray, not petrol. The title says the tone in words; the edge repeats it.">
+      <Demo name="Banner" props="tone: info | warning | error" intro="Info is gray, not petrol. The title says the tone in words and the fill carries the color, so there is no edge or ring.">
         <div className={styles.stack}>
           <Banner title="Recorded example">These suggestions were recorded from the model, not generated live.</Banner>
           <Banner tone="warning" title="Approve is blocked" action={<Button size="small">Use runner-up</Button>}>
@@ -209,7 +208,7 @@ export function ComponentsSection({ theme }: { theme: string }) {
         </div>
       </Demo>
 
-      <Demo name="QueueItem" intro="Content props only. The open ticket is a step darker with a gray bar, not petrol.">
+      <Demo name="QueueItem" intro="Content props only. The open ticket has a petrol tint, with its secondary text stepped up to ink-2.">
         <div className={styles.queue}>
           <QueueItem
             current

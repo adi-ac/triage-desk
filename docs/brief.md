@@ -68,7 +68,7 @@ What it can't claim is real-world use, so it gets tested with support agents and
 
 **Trust signals** (decided 2026-11-03; tokens in `styles/trust.css`, shown with live contrast checks at `/system`)
 - Every token points at an existing role, so light and dark come from `theme.css` and nothing new needs its own dark value.
-- One color family per meaning: gray and dashed for the model (suggestions and the evidence it quotes), petrol and solid for a person (decisions, the same accent as Approve), amber for uncertainty, red for urgency. Petrol also marks high confidence (see Confidence below).
+- One color family per meaning: gray and dashed for the model (suggestions and the evidence it quotes), petrol and solid for a person (decisions, the same accent as Approve), amber for uncertainty, red for urgency. Petrol also marks high confidence (see Confidence below) and the selected queue item (see Components).
 - Pencil, a suggestion not yet acted on: dashed `line-strong` border, `bg` fill, `ink` text.
 - Ink, a person's decision: solid `accent` border, `accent-soft` fill, `accent-text` text.
 - Both are flat at every level. Raised means pressable, and a decision is a record, not a button.
@@ -84,9 +84,11 @@ What it can't claim is real-world use, so it gets tested with support agents and
 - Ten base components: Button, Tag, Chip, ConfidenceMeter, EvidenceItem, TimelineRow, Banner, QueueItem, DraftEditor, SegmentedControl. Variants are TypeScript unions. No component takes `className` or `style`, and every color is a token from `styles/`, so a screen can't restyle the trust language.
 - High confidence and decisions share petrol, so the components keep them apart by shape and words. A ConfidenceMeter is always a bar, a percentage and a level word, with no border; it has no chip form. A decided Chip always has a solid border and names who set it: the types reject `state="decided"` without `decidedBy`. `/system` shows a high-confidence meter next to a decided chip in both themes so this can be checked by eye.
 - Confidence thresholds, confirmed 2026-11-04: high from 85% (the team-rule example above), medium from 60%, low below. ConfidenceMeter derives the level from the rounded percentage, so the figure and the word never disagree.
-- Not yet reviewed (my picks while building, to confirm):
-  - Button defaults to secondary. Danger is red text on secondary chrome, not a red fill, so it never outweighs Approve. Secondary and danger hover use a new `--button-bg-hover` token (`bg` in light, `ink` at 12% in dark).
-  - Banner info is gray, not petrol, and the open QueueItem is marked in gray, so petrol keeps to "a person did this" and "fine to go ahead".
+- Reviewed 2026-11-04:
+  - Button defaults to secondary. Agreed.
+  - Danger is red text on secondary chrome, not a red fill, and the info banner is gray. My reason: they shouldn't outweigh Approve. Secondary and danger hover use a new `--button-bg-hover` token (`bg` in light, `ink` at 12% in dark).
+  - The selected QueueItem is a petrol tint (`accent-soft`) with no bar on the leading edge, changed from a gray step with a gray bar. My reason: the tint makes it easier to see which ticket I'm working on, and the bar added weight without adding information. On the selected row the company name and time use `ink-2`, because `ink-3` on `accent-soft` is 4.18:1 in light and Lc 59.1 in dark, which fails; `ink-2` is 5.93:1 / Lc 71 in light and 8.88:1 / Lc 73 in dark. Petrol now marks the selected queue item as well as decisions, high confidence and Approve.
+  - Banners have no colored edge and no ring in any tone, so the 3px leading edge and the info banner's hairline ring are both gone. My reason: the title already says the tone in words and the fill carries the color, so the edge was redundant weight. Without the ring, the info banner's `surface-2` fill is only 1.04:1 against a white `surface` in light mode (1.09:1 in dark), so it reads as a faint gray patch there.
 - Themes can now be scoped to any element with `data-theme`, not just `<html>`. Derived tokens (button fills, shadows, trust tokens) are re-declared on `[data-theme]` so they follow the scope. Values are unchanged.
 - Contrast: every new pair passes in both themes. Checking them showed that `ink-3` doesn't pass on any soft fill (4.08–4.21:1 in light, Lc 59.1–59.6 in dark), although `theme.css` said it did. Text on soft fills uses `ink-2` (at least 5.80:1 / Lc 69), and the `theme.css` note is corrected. The old `/system` confidence demo had put `ink-3` on the low-confidence fill; ConfidenceMeter uses `ink-2`.
 
