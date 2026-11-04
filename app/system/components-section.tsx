@@ -196,7 +196,7 @@ export function ComponentsSection({ theme }: { theme: string }) {
         </ol>
       </Demo>
 
-      <Demo name="Banner" props="tone: info | warning | error" intro="Info is gray, not petrol. The title says the tone in words and the fill carries the color, so there is no edge or ring.">
+      <Demo name="Banner" props="tone: info | warning | error" intro="Info is gray, not petrol, with a hairline ring so it stands out on a white card. The title says the tone in words and the fill carries the color, so no tone has a colored edge.">
         <div className={styles.stack}>
           <Banner title="Recorded example">These suggestions were recorded from the model, not generated live.</Banner>
           <Banner tone="warning" title="Approve is blocked" action={<Button size="small">Use runner-up</Button>}>
