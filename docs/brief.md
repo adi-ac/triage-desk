@@ -209,6 +209,10 @@ What it can't claim is real-world use, so it gets tested with support agents and
 - Replaces, the same day, a first try that raised the dark chip fill to 13% ink: it separated the chip from the buttons by being lighter, where this separates it by sitting below them, as in light.
 - A deliberate dark-mode exception to the single pencil fill, recorded in DESIGN.md rule 1 and the Chip section.
 
+**Large-desktop layout: tried and reverted** (2026-11-05)
+- We tried a wider layout from 1536px (Queue 360px, Email 704px, Triage 360px, a 664px reading measure; then 15px text with a 600px measure and a 640px email column) and reverted it (git revert of both commits). Every desktop width is back to Queue 320px, Email 488px, Triage 400px, the 448px measure and the 1288px max width.
+- My reason: a wide email column made lines too long (about 104 characters at 664px and 14px), and the fixes traded away the width we wanted.
+
 **Focus ring** (decided 2026-11-03): the accent, 2px with a 2px offset, set globally on `:focus-visible` via a `--focus-ring` role. It is at least 6.59:1 on `surface` and `bg` in both themes.
 - The one documented exception to the Petrol rule (Petrol is only for decisions, high confidence, the selected queue item and Approve), confirmed 2026-11-04. My reason: keyboard focus must always be clearly visible, and it only appears while tabbing, so it never competes with Approve.
 
