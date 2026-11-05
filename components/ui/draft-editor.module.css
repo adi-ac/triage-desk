@@ -19,8 +19,12 @@
 .backdrop,
 .textarea {
   padding: 10px 12px;
-  /* 16px on phones, so iOS doesn't zoom on focus. */
-  font-size: var(--text-input-size);
+  /* The email's size and leading (14px / 1.6) at every width, so the draft
+     matches the email it answers. On phones that's under 16px, so iOS
+     Safari zooms in when the draft is tapped; accepted (DESIGN.md). Never
+     stop it by disabling zoom in the viewport meta tag. */
+  font-size: var(--text-reading-size);
+  line-height: var(--text-reading-leading);
   white-space: pre-wrap;
   overflow-wrap: break-word;
 }

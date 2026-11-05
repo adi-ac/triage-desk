@@ -79,8 +79,9 @@
   --text-mono-small-size: 12px;
   --text-mono-small-leading: 1.4;
 
-  /* Text inputs and textareas: 16px on phones, or iOS Safari zooms the page
-     when one is focused. Body size from tablet width up. */
+  /* Text inputs: 16px on phones, or iOS Safari zooms the page when one is
+     focused. Body size from tablet width up. The draft reply doesn't use
+     it: it matches the email at 14px and accepts the zoom (DESIGN.md). */
   --text-input-size: 16px;
 }
 

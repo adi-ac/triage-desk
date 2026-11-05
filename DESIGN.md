@@ -416,6 +416,8 @@ The reply draft. `state` is required; the label shows it in words ("Draft reply 
 - `approved`: approved or sent by a person. Read-only, in the decided style (rule 4).
 - `sent-by-rule`: sent by a team rule without review. Read-only and still pencil; no decision styling.
 
+**Text size:** the draft is 14px with 1.6 line height at every width, the same as the email body below 1200px, so the draft matches the email it answers (from 1200px the email body is 15px / 1.65; the draft stays 14px). On phones this is a deliberate trade-off: on iPhone, Safari zooms in when a text box under 16px is tapped, and we accepted that so the draft matches the email. Never prevent the zoom with `maximum-scale` or `user-scalable` in the viewport meta tag; zooming must stay available. Other text inputs keep `--text-input-size` (16px on phones).
+
 `blocker` takes the draft's blocker message from `approveBlockers()` and shows it under the draft (rule 5). Unfilled `[placeholders]` are always highlighted in the text: a `--warning-soft` fill with a dashed `--warning` underline.
 
 `note` says who drafted it, in every state ("Drafted by AI, edited by you"; never "the model", rule 8). `warning` shows something to check that doesn't block Approve, such as "The draft was written for How-to; the category is now Cancellation risk." Use `defaultValue` when the editor owns the text, or `value` and `onChange` when the screen does.

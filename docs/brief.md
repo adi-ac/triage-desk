@@ -231,6 +231,10 @@ What it can't claim is real-world use, so it gets tested with support agents and
 - My reason: on small screens the pinned bar took up too much of the view while reading.
 - The draft note says "Drafted by AI" (and "Drafted by AI, edited by you", and so on), not "Drafted by the model", following DESIGN.md rule 8. The unshown field blocker messages say "The AI is …% sure" and "or use <runner-up>", and /system's copy follows.
 
+**Draft text on phones** (decided 2026-11-05)
+- On phones (below 768px) the draft reply is 14px with 1.6 line height, down from 16px, the same as the email body, so the draft matches the email it answers. Tablets and desktops were already 14px.
+- Trade-off, accepted: on iPhone, Safari zooms in when a text box under 16px is tapped. The viewport meta tag doesn't set `maximum-scale` or `user-scalable`; zooming stays available.
+
 **Focus ring** (decided 2026-11-03): the accent, 2px with a 2px offset, set globally on `:focus-visible` via a `--focus-ring` role. It is at least 6.59:1 on `surface` and `bg` in both themes.
 - The one documented exception to the Petrol rule (Petrol is only for decisions, high confidence, the selected queue item and Approve), confirmed 2026-11-04. My reason: keyboard focus must always be clearly visible, and it only appears while tabbing, so it never competes with Approve.
 
