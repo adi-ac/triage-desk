@@ -15,8 +15,8 @@
  * Suggestions and decisions are flat at every level: no shadow, no gradient.
  * Raised means pressable (see elevation.css), and a decision is a record,
  * not a button. Color is never the only cue: a decision is a solid petrol
- * border and always says how it was decided ("Set by you", "Approved as
- * suggested", "Claude suggested … · n%"), and confidence and severity
+ * border and always says how it was decided ("Approved as suggested", or
+ * the "AI suggested … · n%" line beside it), and confidence and severity
  * always carry a word. A suggestion has no visible border, so those words
  * are what separate it from a decision besides color (see docs/brief.md).
  */
@@ -31,6 +31,9 @@
   --suggested-border-style: solid;
   --suggested-fill: color-mix(in oklch, var(--ink) 7%, transparent);
   --suggested-text: var(--ink);
+  /* Suggested chips only (Chip state="suggested"). The same as
+     --suggested-fill in light; dark mode raises it to 13% below. */
+  --suggested-chip-fill: var(--suggested-fill);
 
   /* Ink: a person's decision. */
   --decided-border: var(--accent);
@@ -66,4 +69,19 @@
   --severity-normal-fill: transparent;
   --severity-low-text: var(--ink-3);
   --severity-low-fill: transparent;
+}
+
+/* Dark mode only, a deliberate exception: suggested chips get a 13% ink fill
+   instead of the shared 7%. At 7% they were nearly the same tone as the 8%
+   secondary buttons beside them (FieldReview's Keep, Switch and Other).
+   The suggested draft box, AI tags and the AI timeline dot keep 7%. Set for
+   system dark and explicit dark; here, after the base block, so they win. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --suggested-chip-fill: color-mix(in oklch, var(--ink) 13%, transparent);
+  }
+}
+
+[data-theme="dark"] {
+  --suggested-chip-fill: color-mix(in oklch, var(--ink) 13%, transparent);
 }

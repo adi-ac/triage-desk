@@ -14,7 +14,8 @@
 
 .chip[data-state="suggested"] {
   color: var(--suggested-text);
-  background: var(--suggested-fill);
+  /* Its own token: 13% in dark mode, so it doesn't match the buttons beside it. */
+  background: var(--suggested-chip-fill);
   border: 1px var(--suggested-border-style) var(--suggested-border);
 }
 

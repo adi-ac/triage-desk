@@ -203,6 +203,11 @@ What it can't claim is real-world use, so it gets tested with support agents and
 - Unchanged on purpose: code, the recording script, model IDs (`claude-sonnet-5-5`) and the docs' technical notes, including this brief's history, which still quotes the old copy where it recorded it.
 - My reason: "the interface should describe the role, not the vendor, so it stays accurate if the model changes and reads as a product, not a demo of one provider."
 
+**Suggested chips in dark mode** (decided 2026-11-05)
+- Dark mode only: suggested chips (Chip `state="suggested"`, such as the pre-selected Category and Urgency) use a 13% ink fill, `color-mix(in oklch, var(--ink) 13%, transparent)`, instead of the shared 7%, through their own token, `--suggested-chip-fill`. It's set for system dark and explicit dark; light mode is unchanged (the token equals `--suggested-fill` there). The suggested draft box, AI tags and the AI timeline dot keep 7%.
+- My reason: at 7% they were nearly the same tone as the 8% secondary buttons beside them.
+- A deliberate dark-mode exception to the single pencil fill, recorded in DESIGN.md rule 1 and the Chip section.
+
 **Focus ring** (decided 2026-11-03): the accent, 2px with a 2px offset, set globally on `:focus-visible` via a `--focus-ring` role. It is at least 6.59:1 on `surface` and `bg` in both themes.
 - The one documented exception to the Petrol rule (Petrol is only for decisions, high confidence, the selected queue item and Approve), confirmed 2026-11-04. My reason: keyboard focus must always be clearly visible, and it only appears while tabbing, so it never competes with Approve.
 
