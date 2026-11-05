@@ -17,11 +17,41 @@ export type FabPanelProps = {
   onOpened?: (scroller: HTMLDivElement) => void;
 };
 
-const subscribeScroll = (onChange: () => void) => {
-  addEventListener("scroll", onChange, { passive: true });
-  return () => removeEventListener("scroll", onChange);
+/*
+ * Whether the page is at the very top: scrollY <= 1, so iOS's overscroll
+ * bounce (negative scrollY) still counts as the top. Read at most once a
+ * frame, and listeners hear only when the value actually changes, so the
+ * bounce at the top can't toggle the button back and forth.
+ */
+const readTop = () => window.scrollY <= 1;
+let atTopValue: boolean | undefined;
+let topFrame = 0;
+const topListeners = new Set<() => void>();
+const onScroll = () => {
+  if (topFrame) return;
+  topFrame = requestAnimationFrame(() => {
+    topFrame = 0;
+    const next = readTop();
+    if (next === atTopValue) return;
+    atTopValue = next;
+    topListeners.forEach((listener) => listener());
+  });
 };
-const atTopSnapshot = () => window.scrollY <= 0;
+const subscribeTop = (listener: () => void) => {
+  if (topListeners.size === 0) {
+    atTopValue = readTop();
+    addEventListener("scroll", onScroll, { passive: true });
+  }
+  topListeners.add(listener);
+  return () => {
+    topListeners.delete(listener);
+    if (topListeners.size > 0) return;
+    removeEventListener("scroll", onScroll);
+    cancelAnimationFrame(topFrame);
+    topFrame = 0;
+  };
+};
+const atTopSnapshot = () => (atTopValue ??= readTop());
 
 /**
  * A floating action button, fixed at the bottom right, and the panel it
@@ -44,12 +74,15 @@ export function FabPanel({ open, onOpenChange, title, icon, children, onOpened }
   const panelRef = useRef<HTMLDivElement>(null);
   const scrollerRef = useRef<HTMLDivElement>(null);
   const fabRef = useRef<HTMLButtonElement>(null);
+  const labelRef = useRef<HTMLSpanElement>(null);
   const panelId = useId();
   const name = title.toLowerCase();
 
   // At the top on the server and during hydration, so the button is
   // extended in the HTML; collapsed from the first scroll down.
-  const atTop = useSyncExternalStore(subscribeScroll, atTopSnapshot, () => true);
+  // It never changes while the panel is open (the page can't scroll then,
+  // and the button stays collapsed as the close control).
+  const atTop = useSyncExternalStore(subscribeTop, atTopSnapshot, () => true);
   const extended = atTop && !open;
 
   // No motion until after the first paint: a page that loads scrolled
@@ -59,6 +92,50 @@ export function FabPanel({ open, onOpenChange, title, icon, children, onOpened }
     const frame = requestAnimationFrame(() => setMotion(true));
     return () => cancelAnimationFrame(frame);
   }, []);
+
+  // The extended width is the label's own width plus the icon, gap and
+  // padding (fab-panel.module.css), so the button's width can transition
+  // between 44px and it. Measured once, and again when the font loads.
+  useLayoutEffect(() => {
+    const fab = fabRef.current;
+    const label = labelRef.current;
+    if (!fab || !label) return;
+    const measure = () => {
+      // Undo the press scale, in case it's measured mid-press.
+      const scale = parseFloat(getComputedStyle(fab).scale) || 1;
+      fab.style.setProperty("--fab-label-width", `${label.getBoundingClientRect().width / scale}px`);
+    };
+    measure();
+    let live = true;
+    document.fonts.ready.then(() => live && measure());
+    document.fonts.addEventListener("loadingdone", measure);
+    return () => {
+      live = false;
+      document.fonts.removeEventListener("loadingdone", measure);
+    };
+  }, []);
+
+  // Every extend fades the label in from opacity 0, even one that
+  // interrupts a collapse (back up within its 0.3s): cancel whatever the
+  // label is doing, set it to 0 with no mask and no transition, and start
+  // the fade on the next frame. Not on page load (the button starts
+  // extended) and not under reduced motion, where the label just appears.
+  const wasExtended = useRef(extended);
+  useLayoutEffect(() => {
+    const label = labelRef.current;
+    const was = wasExtended.current;
+    wasExtended.current = extended;
+    if (!label || !extended || was || !motion) return;
+    if (matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    label.dataset.fade = "start";
+    // Apply it now. With transitions off, this also cancels any running.
+    void getComputedStyle(label).opacity;
+    const frame = requestAnimationFrame(() => delete label.dataset.fade);
+    return () => {
+      cancelAnimationFrame(frame);
+      delete label.dataset.fade;
+    };
+  }, [extended, motion]);
 
   // Whether the last input was a pointer (tap or click) or a key, so focus
   // moves without a ring after a tap even if the keyboard was used before.
@@ -168,9 +245,9 @@ export function FabPanel({ open, onOpenChange, title, icon, children, onOpened }
             <Icon name="close" size={20} />
           </span>
         </span>
-        <span className={styles.labelClip} aria-hidden>
-          <span className={styles.labelTrack}>
-            <span className={styles.label}>{title}</span>
+        <span className={styles.labelTrack} aria-hidden>
+          <span ref={labelRef} className={styles.label}>
+            {title}
           </span>
         </span>
       </button>
