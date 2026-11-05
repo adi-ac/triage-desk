@@ -84,6 +84,16 @@
   }
 }
 
+/* Large desktop: the email's measure widens to 664px, so the inbox's email
+   column (measure + 40px of pane padding) is 704px, the width of the
+   original artifact's email column, which read better on big screens. In
+   px here, because the shell's column widths at this size are fixed px. */
+@media (min-width: 1536px) {
+  :root {
+    --text-reading-measure: 664px;
+  }
+}
+
 .text-title,
 .text-heading,
 .text-subheading {

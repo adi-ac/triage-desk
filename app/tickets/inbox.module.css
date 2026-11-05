@@ -3,7 +3,9 @@
 /* The email column is exactly the reading measure plus the pane's padding
    (4px tray + 16px card on each side), so there's no dead space to the
    right of the email. 32em at the 14px reading size is 448px; the column is
-   488px. The shell is centered: 320 + 16 + 488 + 16 + 400 + 2 × 24 = 1288. */
+   488px. The shell is centered: 320 + 16 + 488 + 16 + 400 + 2 × 24 = 1288.
+   From 1536px the measure is 664px (type.css), so the column is 704px, and
+   queue and triage are both 360px: 360 + 16 + 704 + 16 + 360 + 48 = 1504. */
 .shell {
   --email-column: calc(var(--text-reading-measure) + 2 * (4px + 16px));
 
@@ -28,6 +30,15 @@
     grid-template-rows: auto minmax(0, 1fr);
     max-inline-size: 1288px;
     block-size: 100dvh;
+  }
+}
+
+/* Large desktop: queue and triage the same width, the email at the
+   original artifact's width. */
+@media (min-width: 1536px) {
+  .shell {
+    grid-template-columns: 360px minmax(0, var(--email-column)) 360px;
+    max-inline-size: 1504px;
   }
 }
 

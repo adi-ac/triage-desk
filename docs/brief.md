@@ -209,9 +209,16 @@ What it can't claim is real-world use, so it gets tested with support agents and
 - Replaces, the same day, a first try that raised the dark chip fill to 13% ink: it separated the chip from the buttons by being lighter, where this separates it by sitting below them, as in light.
 - A deliberate dark-mode exception to the single pencil fill, recorded in DESIGN.md rule 1 and the Chip section.
 
-**Large-desktop layout: tried and reverted** (2026-11-05)
+**Large-desktop layout** (decided 2026-11-05)
+- From 1536px only: Queue 360px, Email 704px, Triage 360px, so queue and triage are the same width; the shell is centered with a max width of 1504px. The email's reading measure widens to 664px there, so the email column is still exactly measure + pane padding (664 + 40), with no dead space to its right. Below 1536px nothing changes (checked at 1535px and 1300px: 320 / 488 / 400, measure 448px).
+- My reason: the email column matches the original artifact's width, which read better on big screens.
+- Checked at 1536, 1728 and 1920px: the columns are 360 / 704 / 360 and centered; the triage pane's Keep / Switch / Other rows fit on one line and the meters stay one line (27px). At 360px the footer puts the blocker summary on its own line under Approve, and the estimate note wraps to two lines, the same as on tablets, which also have a 360px triage pane.
+- Line length, measured on LL-5040: at 664px a full line runs about 100–108 characters, not the ~72 the request assumed; at 448px it's 63–73. Geist at 14px fits about 6.3px a character, so ~72 characters would need a measure of about 450px. Kept at 664px as decided; flagged in case the character count was the goal rather than the width.
+
+**Large-desktop layout: tried, reverted, re-applied** (2026-11-05)
 - We tried a wider layout from 1536px (Queue 360px, Email 704px, Triage 360px, a 664px reading measure; then 15px text with a 600px measure and a 640px email column) and reverted it (git revert of both commits). Every desktop width is back to Queue 320px, Email 488px, Triage 400px, the 448px measure and the 1288px max width.
-- My reason: a wide email column made lines too long (about 104 characters at 664px and 14px), and the fixes traded away the width we wanted.
+- My reason for reverting: a wide email column made lines too long (about 104 characters at 664px and 14px), and the fixes traded away the width we wanted.
+- Re-applied the same day (a revert of the revert): the 1536px layout above is current again, at the 664px measure and 14px text. The 15px / 600px follow-up stays reverted, so lines run about 100–108 characters there.
 
 **Focus ring** (decided 2026-11-03): the accent, 2px with a 2px offset, set globally on `:focus-visible` via a `--focus-ring` role. It is at least 6.59:1 on `surface` and `bg` in both themes.
 - The one documented exception to the Petrol rule (Petrol is only for decisions, high confidence, the selected queue item and Approve), confirmed 2026-11-04. My reason: keyboard focus must always be clearly visible, and it only appears while tabbing, so it never competes with Approve.
