@@ -43,9 +43,10 @@ export function TrustSection({ theme }: { theme: string }) {
         <p className={`text-body ${styles.muted} ${styles.cardIntro}`}>
           Anything the model proposes is pencil: a soft gray fill with no visible border. Anything a
           person sets or approves is ink: a petrol tint with a solid petrol border, and it always
-          says how it was decided (Set by you, Approved as suggested, Claude suggested … · n%).
-          Pencil and ink differ by color plus those words, so the words are never left off. Both
-          are flat, because neither is a button.
+          says how it was decided: Approved as suggested on the chip, or, for a field a person kept
+          or switched, the Claude suggested … · n% line under it (who set it is in the chip&apos;s
+          accessible name). Pencil and ink differ by color plus those words, so the words are
+          never left off. Both are flat, because neither is a button.
         </p>
         <div className={styles.pencilInk}>
           <div className={styles.field}>
@@ -75,7 +76,9 @@ export function TrustSection({ theme }: { theme: string }) {
               </Chip>
             </div>
             <p className={`text-small ${styles.muted}`}>
-              Decided at <span className="text-mono-small">16:52</span>
+              Claude suggested How-to · <span className="text-mono-small">64%</span> and Normal ·{" "}
+              <span className="text-mono-small">70%</span>; set by you at{" "}
+              <span className="text-mono-small">16:52</span>
             </p>
           </div>
         </div>

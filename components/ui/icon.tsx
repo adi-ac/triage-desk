@@ -6,7 +6,7 @@
 
 import type { ReactNode } from "react";
 
-export type IconName = "monitor" | "sun" | "moon" | "inbox" | "close";
+export type IconName = "monitor" | "sun" | "moon" | "inbox" | "close" | "pencil";
 
 const paths: Record<IconName, ReactNode> = {
   monitor: (
@@ -29,6 +29,12 @@ const paths: Record<IconName, ReactNode> = {
     </>
   ),
   close: <path d="M6.5 6.5l11 11M17.5 6.5l-11 11" />,
+  pencil: (
+    <>
+      <path d="M15.5 4.5a2.1 2.1 0 0 1 3 3L8 18l-4 1 1-4Z" />
+      <path d="M13.5 6.5l3 3" />
+    </>
+  ),
 };
 
 export function Icon({ name, size = 18 }: { name: IconName; size?: number }) {

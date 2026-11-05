@@ -193,7 +193,12 @@ What it can't claim is real-world use, so it gets tested with support agents and
 - Supersedes the same day's "medium uses the same Petrol tokens as high" (the `--confidence-medium*` tokens are gone) and its "amber is only for low".
 - Checked against the recordings: no recorded field at 60% or above is a close call. The smallest lead at 60%+ is 25 points (LL-5037's urgency, Urgent 60% vs High 35%), and every close call in the 40 recordings is also under 60%. So today every amber meter in the inbox reads "Low confidence", and "Close call" shows only on `/system` until a recording produces one.
 
-: the accent, 2px with a 2px offset, set globally on `:focus-visible` via a `--focus-ring` role. It is at least 6.59:1 on `surface` and `bg` in both themes.
+**Decided fields: the line, not the label** (decided 2026-11-05)
+- Decided chips no longer show "· Set by you" or "· AI pick". Who set it stays in the chip's accessible name, visually hidden ("set by you", or "kept Claude's pick"). "Approved as suggested" still shows.
+- "Change" is a round 28px pencil IconButton (the inbox button's secondary styling, 14px icon, ink-2 to ink on hover), named "Change <field>", with a tooltip of the same words.
+- Rule: a field a person kept or switched always shows "Claude suggested <pick> · <n>%" under its chip. With the soft-fill suggested style and no "Set by you" on the chip, that line is what states in words who decided, so it's never hidden. The timeline keeps the full record ("set the category to …", "approved … as suggested").
+
+**Focus ring** (decided 2026-11-03): the accent, 2px with a 2px offset, set globally on `:focus-visible` via a `--focus-ring` role. It is at least 6.59:1 on `surface` and `bg` in both themes.
 - The one documented exception to the Petrol rule (Petrol is only for decisions, high confidence, the selected queue item and Approve), confirmed 2026-11-04. My reason: keyboard focus must always be clearly visible, and it only appears while tabbing, so it never competes with Approve.
 
 ## Chain of must-be-trues

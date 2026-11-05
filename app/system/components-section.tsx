@@ -170,8 +170,8 @@ export function ComponentsSection({ theme }: { theme: string }) {
         intro={
           <>
             Both are petrol. They should still read as different things: the meter is a bar, a
-            figure and a level word with no border; the decision is a solid-bordered chip that
-            names who set it.
+            figure and a level word with no border; the decision is a solid-bordered chip, and in
+            FieldReview the line under it says in words that a person decided.
           </>
         }
       >
@@ -218,13 +218,14 @@ export function ComponentsSection({ theme }: { theme: string }) {
 
       <Demo
         name="IconButton"
-        props="icon: inbox | close · aria-label"
-        intro="A round secondary button holding one icon, with Button's chrome. The name is required, since the icon has no words. Below 1200px the inbox header has Open queue to the right of the theme toggle; the queue sheet closes with Close queue in the same style."
+        props="icon: inbox | close | pencil · aria-label · size: default | small · tooltip"
+        intro="A round secondary button holding one icon, with Button's chrome. The name is required, since the icon has no words. Default is 32px (Open queue, Close queue); small is 28px with a 14px icon (FieldReview's Change, last here). tooltip shows the name to its right on hover and keyboard focus: hover or tab to the pencil."
       >
         <div className={styles.inline}>
           <IconButton icon="inbox" aria-label="Open queue" />
           <IconButton icon="close" aria-label="Close queue" />
           <IconButton icon="inbox" aria-label="Open queue" disabled />
+          <IconButton icon="pencil" size="small" tooltip aria-label="Change category" />
         </div>
       </Demo>
 
@@ -268,7 +269,7 @@ export function ComponentsSection({ theme }: { theme: string }) {
       <Demo
         name="Chip"
         props="state: default | suggested | decided · decidedBy | asSuggested · aiPick: boolean"
-        intro="Default is an option nobody has picked. A decided chip has to say how it was decided: who set it, or Approved as suggested when the ticket was approved without anyone touching the field. The types don't allow one without. AI pick is a word, not a color."
+        intro="Default is an option nobody has picked. A decided chip has to say how it was decided, and the types don't allow one without: Approved as suggested shows on the chip; who set it (set by you, or kept Claude's pick) is in its accessible name only, because FieldReview's Claude suggested … · n% line under it says it visibly. AI pick shows as a word on default and suggested chips, never on decided ones."
       >
         <div className={styles.chipGrid}>
           <Chip>Cancellation risk</Chip>
@@ -292,7 +293,7 @@ export function ComponentsSection({ theme }: { theme: string }) {
       <Demo
         name="FieldReview"
         props="field · options · value · onValueChange · approved"
-        intro="Reviewing one suggested field. While suggested: small secondary Keep, Switch to the runner-up, and an Other menu for the rest of the list, so the override is one click and never competes with Approve. Once decided: the solid chip and a quiet Change link that reopens it. Try it; the data is LL-5040's hand-written suggestion."
+        intro="Reviewing one suggested field. While suggested: small secondary Keep, Switch to the runner-up, and an Other menu for the rest of the list, so the override is one click and never competes with Approve. Once decided: the solid chip, a round pencil Change button (with a tooltip) that reopens it, and the Claude suggested … · n% line, which always shows: it's the words that say a person decided. Try it; the data is LL-5040's hand-written suggestion."
       >
         <FieldReviewDemo />
       </Demo>

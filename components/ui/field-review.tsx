@@ -5,6 +5,7 @@ import { toPercent } from "@/lib/confidence";
 import type { EmailEvidence, SuggestedField } from "@/lib/suggestion";
 import { Button } from "./button";
 import { Chip } from "./chip";
+import { IconButton } from "./icon-button";
 import { ConfidenceMeter } from "./confidence-meter";
 import { Menu } from "./menu";
 import { QuoteList } from "./quote-list";
@@ -47,10 +48,11 @@ export type FieldReviewProps<T extends string> = {
  * Reviewing one suggested field. While suggested: the dashed chip, its
  * confidence, and small secondary "Keep", "Switch to <runner-up>" and
  * an "Other" menu (the rest of the list), so the override is one click and never competes
- * with Approve. Once kept or switched: the solid chip and a quiet "Change"
- * link that reopens the controls, and the meter gives way to a note of what
- * Claude suggested, since a meter beside a value must never show confidence
- * in a different value. Put it in a Pane; its heading is an h3.
+ * with Approve. Once kept or switched: the solid chip, a round pencil
+ * "Change <field>" button that reopens the controls, and, in place of the
+ * meter, the "Claude suggested <pick> · n%" line. That line is the field's
+ * visible words for who decided (the chip says it only to screen readers),
+ * so it always shows on a decided field. Put it in a Pane; its heading is an h3.
  */
 export function FieldReview<T extends string>({
   id,
@@ -116,15 +118,14 @@ export function FieldReview<T extends string>({
           <Chip state="suggested">{field.value}</Chip>
         )}
         {decided && !approved && !readOnly && !reopened && (
-          <button
+          <IconButton
             ref={changeRef}
-            type="button"
-            className={`text-small ${styles.change}`}
+            icon="pencil"
+            size="small"
+            tooltip
             aria-label={`Change ${label.toLowerCase()}`}
             onClick={reopen}
-          >
-            Change
-          </button>
+          />
         )}
       </div>
 

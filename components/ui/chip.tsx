@@ -9,11 +9,13 @@ type ChipBase = Omit<ComponentProps<"span">, "className" | "style"> & {
 };
 
 /**
- * A field value. suggested is the model's pencil (dashed); decided is a
- * person's ink (solid), and always says how it was decided, since high
- * confidence shares its petrol: who set it, or "Approved as suggested" when
- * the ticket was approved without anyone touching the field. default is an
- * option nobody has picked.
+ * A field value. suggested is the model's pencil (soft gray fill); decided
+ * is a person's ink (petrol tint, solid petrol border), and always says how
+ * it was decided. "Approved as suggested" is shown. Who set it ("set by
+ * you", or "kept Claude's pick" when the person kept the model's value) is
+ * in the accessible name only: FieldReview's "Claude suggested <pick> · n%"
+ * line under the chip says it visibly. default is an option nobody has
+ * picked; on it, aiPick shows "AI pick".
  */
 export type ChipProps = ChipBase &
   (
@@ -28,11 +30,18 @@ export type ChipProps = ChipBase &
   );
 
 export function Chip({ state = "default", aiPick = false, decidedBy, asSuggested, children, ...props }: ChipProps) {
+  const decided = state === "decided";
+  const spoken = aiPick
+    ? decidedBy === "you"
+      ? "kept Claude's pick"
+      : `${decidedBy} kept Claude's pick`
+    : `set by ${decidedBy}`;
   return (
     <span {...props} className={`text-body-strong ${styles.chip}`} data-state={state}>
       <span>{children}</span>
-      {aiPick && <Meta>AI pick</Meta>}
-      {state === "decided" && <Meta>{asSuggested ? "Approved as suggested" : `Set by ${decidedBy}`}</Meta>}
+      {aiPick && !decided && <Meta>AI pick</Meta>}
+      {decided && asSuggested && <Meta>Approved as suggested</Meta>}
+      {decided && !asSuggested && <span className="visually-hidden">, {spoken}</span>}
     </span>
   );
 }

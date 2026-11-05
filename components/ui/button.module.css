@@ -32,9 +32,62 @@
   color: var(--ink-2);
 }
 
+.button[data-shape="icon"][data-size="small"] {
+  inline-size: 28px;
+  block-size: 28px;
+  padding: 0;
+}
+
 @media (hover: hover) {
   .button[data-shape="icon"]:hover:not(:disabled) {
     color: var(--ink);
+  }
+}
+
+/* IconButton's tooltip: its name, to its right (inline end), on hover
+   (after a short wait) and on keyboard focus. Beside, not below, so it never
+   covers the line under a value, such as FieldReview's "Claude suggested"
+   line. Inverted (ink fill, surface text) so it reads as transient. */
+.button[data-shape="icon"] {
+  position: relative;
+}
+
+.tooltip {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-start: calc(100% + 6px);
+  z-index: 1;
+  padding: 2px 8px;
+  border-radius: 6px;
+  white-space: nowrap;
+  font-weight: var(--text-body-weight);
+  color: var(--surface);
+  background: var(--ink);
+  box-shadow: var(--shadow-popover);
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(-50%) translateX(-2px);
+  transition:
+    opacity 120ms ease-out,
+    transform 120ms ease-out;
+}
+
+@media (hover: hover) {
+  .button:hover .tooltip {
+    opacity: 1;
+    transform: translateY(-50%);
+    transition-delay: 400ms;
+  }
+}
+
+.button:focus-visible .tooltip {
+  opacity: 1;
+  transform: translateY(-50%);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .tooltip {
+    transition: none;
   }
 }
 

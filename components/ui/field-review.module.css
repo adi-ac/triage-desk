@@ -27,31 +27,12 @@
   border-radius: 4px;
 }
 
+/* Centered, so the round 28px Change button sits level with the chip. */
 .row {
   display: flex;
   flex-wrap: wrap;
-  align-items: baseline;
-  gap: 4px 12px;
-}
-
-/* Quiet on purpose: a text link in ink-2, never petrol, so it can't compete with Approve. */
-.change {
-  appearance: none;
-  border: 0;
-  padding: 0;
-  background: none;
-  color: var(--ink-2);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  text-decoration-thickness: 1px;
-  cursor: pointer;
-  transition: color 150ms ease-out;
-}
-
-@media (hover: hover) {
-  .change:hover {
-    color: var(--ink);
-  }
+  align-items: center;
+  gap: 4px 8px;
 }
 
 .controls {
