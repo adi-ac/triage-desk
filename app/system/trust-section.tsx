@@ -44,7 +44,7 @@ export function TrustSection({ theme }: { theme: string }) {
           Anything the model proposes is pencil: a soft gray fill with no visible border. Anything a
           person sets or approves is ink: a petrol tint with a solid petrol border, and it always
           says how it was decided: Approved as suggested on the chip, or, for a field a person kept
-          or switched, the Claude suggested … · n% line under it (who set it is in the chip&apos;s
+          or switched, the AI suggested … · n% line under it (who set it is in the chip&apos;s
           accessible name). Pencil and ink differ by color plus those words, so the words are
           never left off. Both are flat, because neither is a button.
         </p>
@@ -76,7 +76,7 @@ export function TrustSection({ theme }: { theme: string }) {
               </Chip>
             </div>
             <p className={`text-small ${styles.muted}`}>
-              Claude suggested How-to · <span className="text-mono-small">64%</span> and Normal ·{" "}
+              AI suggested How-to · <span className="text-mono-small">64%</span> and Normal ·{" "}
               <span className="text-mono-small">70%</span>; set by you at{" "}
               <span className="text-mono-small">16:52</span>
             </p>
@@ -128,7 +128,7 @@ export function TrustSection({ theme }: { theme: string }) {
       <section className={styles.card}>
         <h3 className={`text-heading ${styles.cardTitle}`}>Confidence</h3>
         <p className={`text-body ${styles.muted} ${styles.cardIntro}`}>
-          Confidence is Claude&apos;s estimate, not a measured probability. The color says whether
+          Confidence is the AI&apos;s estimate, not a measured probability. The color says whether
           the field needs a person before Approve, not how high the figure is. Amber: it blocks
           Approve, because it&apos;s under 60% or a close call within 15 points of its runner-up
           (then the word reads Close call). Petrol: it doesn&apos;t block. No fill, no hint text.

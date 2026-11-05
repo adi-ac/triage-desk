@@ -33,7 +33,7 @@ export type FieldReviewProps<T extends string> = {
    */
   readOnly?: boolean;
   /**
-   * Show "Confidence is Claude's estimate, not a measured probability." under
+   * Show "Confidence is the AI's estimate, not a measured probability." under
    * this field's meter. Once per triage pane: pass it to the first field that
    * still shows a meter. Nothing shows while the meter is replaced by a note.
    */
@@ -50,7 +50,7 @@ export type FieldReviewProps<T extends string> = {
  * an "Other" menu (the rest of the list), so the override is one click and never competes
  * with Approve. Once kept or switched: the solid chip, a round pencil
  * "Change <field>" button that reopens the controls, and, in place of the
- * meter, the "Claude suggested <pick> · n%" line. That line is the field's
+ * meter, the "AI suggested <pick> · n%" line. That line is the field's
  * visible words for who decided (the chip says it only to screen readers),
  * so it always shows on a decided field. Put it in a Pane; its heading is an h3.
  */
@@ -131,7 +131,7 @@ export function FieldReview<T extends string>({
 
       {decided ? (
         <p className={`text-small ${styles.note}`}>
-          Claude suggested {field.value} · <span className="text-mono">{toPercent(field.confidence)}%</span>
+          AI suggested {field.value} · <span className="text-mono">{toPercent(field.confidence)}%</span>
         </p>
       ) : (
         <>
@@ -142,7 +142,7 @@ export function FieldReview<T extends string>({
             confirmed={approved || readOnly}
           />
           {explainEstimate && (
-            <p className={`text-small ${styles.note}`}>Confidence is Claude&apos;s estimate, not a measured probability.</p>
+            <p className={`text-small ${styles.note}`}>Confidence is the AI&apos;s estimate, not a measured probability.</p>
           )}
         </>
       )}

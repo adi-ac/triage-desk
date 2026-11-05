@@ -46,7 +46,7 @@
 
 /* IconButton's tooltip: its name, to its right (inline end), on hover
    (after a short wait) and on keyboard focus. Beside, not below, so it never
-   covers the line under a value, such as FieldReview's "Claude suggested"
+   covers the line under a value, such as FieldReview's "AI suggested"
    line. Inverted (ink fill, surface text) so it reads as transient. */
 .button[data-shape="icon"] {
   position: relative;

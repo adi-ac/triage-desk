@@ -41,7 +41,7 @@ export function ConfidenceMeter({ value, runnerUp, runnerUpLabel, confirmed = fa
   return (
     <div
       role="meter"
-      aria-label="Confidence: Claude's estimate, not a measured probability"
+      aria-label="Confidence: the AI's estimate, not a measured probability"
       aria-valuemin={0}
       aria-valuemax={100}
       aria-valuenow={percent}

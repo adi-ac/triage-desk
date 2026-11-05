@@ -71,7 +71,7 @@ type SuggestionBase = {
   model?: string;
   /** Which version of the prompt produced it (a hash of the prompt and schema). Set on recorded output. */
   promptVersion?: string;
-  /** Something the support agent should know or do, from Claude. Shown as "Claude's note". */
+  /** Something the support agent should know or do, from Claude. Shown as "AI note" (the interface never names the model). */
   agentNote?: string;
 };
 

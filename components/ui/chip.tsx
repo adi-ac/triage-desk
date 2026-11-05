@@ -12,8 +12,8 @@ type ChipBase = Omit<ComponentProps<"span">, "className" | "style"> & {
  * A field value. suggested is the model's pencil (soft gray fill); decided
  * is a person's ink (petrol tint, solid petrol border), and always says how
  * it was decided. "Approved as suggested" is shown. Who set it ("set by
- * you", or "kept Claude's pick" when the person kept the model's value) is
- * in the accessible name only: FieldReview's "Claude suggested <pick> · n%"
+ * you", or "kept the AI's pick" when the person kept the model's value) is
+ * in the accessible name only: FieldReview's "AI suggested <pick> · n%"
  * line under the chip says it visibly. default is an option nobody has
  * picked; on it, aiPick shows "AI pick".
  */
@@ -33,8 +33,8 @@ export function Chip({ state = "default", aiPick = false, decidedBy, asSuggested
   const decided = state === "decided";
   const spoken = aiPick
     ? decidedBy === "you"
-      ? "kept Claude's pick"
-      : `${decidedBy} kept Claude's pick`
+      ? "kept the AI's pick"
+      : `${decidedBy} kept the AI's pick`
     : `set by ${decidedBy}`;
   return (
     <span {...props} className={`text-body-strong ${styles.chip}`} data-state={state}>

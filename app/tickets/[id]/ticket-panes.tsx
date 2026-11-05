@@ -75,7 +75,7 @@ export function TicketPanes() {
       {!suggestion ? (
         <Pane title="Triage">
           <div className={styles.empty}>
-            <p className="text-body-strong">Claude hasn&apos;t triaged this ticket yet.</p>
+            <p className="text-body-strong">The AI hasn&apos;t triaged this ticket yet.</p>
             <p className={`text-small ${styles.secondary}`}>
               There&apos;s no suggested category, urgency or draft, so there&apos;s nothing to approve.
             </p>
@@ -229,7 +229,7 @@ function Triage({ ticketId, email, suggestion, prior, onEvidenceActive }: Triage
           evidence={evidenceFor(email, suggestion, "urgency")}
           onEvidenceActive={onEvidenceActive}
         />
-        {suggestion.agentNote && <Banner title="Claude's note">{suggestion.agentNote}</Banner>}
+        {suggestion.agentNote && <Banner title="AI note">{suggestion.agentNote}</Banner>}
         <DraftEditor
           key={ticketId}
           id={targets.draft}
@@ -305,7 +305,7 @@ function RuleSentTriage({ ticketId, email, suggestion, onEvidenceActive }: Triag
           evidence={evidenceFor(email, suggestion, "urgency")}
           onEvidenceActive={onEvidenceActive}
         />
-        {suggestion.agentNote && <Banner title="Claude's note">{suggestion.agentNote}</Banner>}
+        {suggestion.agentNote && <Banner title="AI note">{suggestion.agentNote}</Banner>}
         <DraftEditor
           key={ticketId}
           label="Reply"
@@ -357,7 +357,7 @@ function NoActionTriage({ ticketId, email, suggestion, onEvidenceActive }: NoAct
           ...s,
           triagedAnyway: true,
           draft: anyway.draft,
-          activity: [...s.activity, personRow("asked Claude to triage it anyway"), modelRow(modelRowText(anyway))],
+          activity: [...s.activity, personRow("asked the AI to triage it anyway"), modelRow(modelRowText(anyway))],
         }))
     : undefined;
 
@@ -388,7 +388,7 @@ function NoActionTriage({ ticketId, email, suggestion, onEvidenceActive }: NoAct
           onKeep={keep}
           onTriageAnyway={triageAnyway}
         />
-        {suggestion.agentNote && <Banner title="Claude's note">{suggestion.agentNote}</Banner>}
+        {suggestion.agentNote && <Banner title="AI note">{suggestion.agentNote}</Banner>}
         <Timeline>
           <TimelineRow actor="ai" at={suggestion.suggestedAt}>
             {reasonText(suggestion)}

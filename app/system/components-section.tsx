@@ -269,7 +269,7 @@ export function ComponentsSection({ theme }: { theme: string }) {
       <Demo
         name="Chip"
         props="state: default | suggested | decided · decidedBy | asSuggested · aiPick: boolean"
-        intro="Default is an option nobody has picked. A decided chip has to say how it was decided, and the types don't allow one without: Approved as suggested shows on the chip; who set it (set by you, or kept Claude's pick) is in its accessible name only, because FieldReview's Claude suggested … · n% line under it says it visibly. AI pick shows as a word on default and suggested chips, never on decided ones."
+        intro="Default is an option nobody has picked. A decided chip has to say how it was decided, and the types don't allow one without: Approved as suggested shows on the chip; who set it (set by you, or kept the AI's pick) is in its accessible name only, because FieldReview's AI suggested … · n% line under it says it visibly. AI pick shows as a word on default and suggested chips, never on decided ones."
       >
         <div className={styles.chipGrid}>
           <Chip>Cancellation risk</Chip>
@@ -293,7 +293,7 @@ export function ComponentsSection({ theme }: { theme: string }) {
       <Demo
         name="FieldReview"
         props="field · options · value · onValueChange · approved"
-        intro="Reviewing one suggested field. While suggested: small secondary Keep, Switch to the runner-up, and an Other menu for the rest of the list, so the override is one click and never competes with Approve. Once decided: the solid chip, a round pencil Change button (with a tooltip) that reopens it, and the Claude suggested … · n% line, which always shows: it's the words that say a person decided. Try it; the data is LL-5040's hand-written suggestion."
+        intro="Reviewing one suggested field. While suggested: small secondary Keep, Switch to the runner-up, and an Other menu for the rest of the list, so the override is one click and never competes with Approve. Once decided: the solid chip, a round pencil Change button (with a tooltip) that reopens it, and the AI suggested … · n% line, which always shows: it's the words that say a person decided. Try it; the data is LL-5040's hand-written suggestion."
       >
         <FieldReviewDemo />
       </Demo>
@@ -312,7 +312,7 @@ export function ComponentsSection({ theme }: { theme: string }) {
       <Demo
         name="NoActionReview"
         props="reason · explanation · closed · onKeep · onTriageAnyway"
-        intro="Claude's suggestion that an email isn't a request: no category, urgency or draft. Still pencil until a person acts. Keep closes the ticket without a reply (the footer then reads Closed by you); Triage anyway asks Claude for a normal suggestion."
+        intro="The AI's suggestion that an email isn't a request: no category, urgency or draft. Still pencil until a person acts. Keep closes the ticket without a reply (the footer then reads Closed by you); Triage anyway asks the AI for a normal suggestion."
       >
         <NoActionDemo />
       </Demo>
@@ -322,7 +322,7 @@ export function ComponentsSection({ theme }: { theme: string }) {
         props="value: 0–1 · runnerUp?: 0–1 · confirmed?: boolean"
         intro={
           <>
-            Confidence is Claude&apos;s estimate, not a measured probability, and every meter&apos;s
+            Confidence is the AI&apos;s estimate, not a measured probability, and every meter&apos;s
             accessible name says so. The level is derived inside, from the rounded percentage: high from{" "}
             {confidenceThresholds.high}%, medium from {confidenceThresholds.medium}%, low below. A pick
             under {confidenceThresholds.medium}% or within {confidenceThresholds.margin} points of its
