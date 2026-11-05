@@ -6,7 +6,7 @@
   min-block-size: 32px;
 }
 
-/* The mark at 20px, then the wordmark at 16px semibold (text-heading). */
+/* The mark at 22px, then the wordmark at 16px semibold (text-heading). */
 .brand {
   display: flex;
   align-items: center;

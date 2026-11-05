@@ -17,8 +17,9 @@ const sections = [
 ] as const;
 
 export function SystemPage() {
-  // The page theme: the header's toggle, the same one the inbox has. It
-  // follows the OS until a person picks, and the pick is shared with the inbox.
+  // The page theme: the header's toggle, the same one the inbox has. System
+  // (the default) follows the OS live; a Light or Dark pick is remembered and
+  // shared with the inbox.
   const resolved = useTheme();
 
   return (

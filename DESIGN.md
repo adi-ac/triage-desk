@@ -107,7 +107,7 @@ Never put `--ink-3` on a `*-soft` fill: it measures 4.08–4.21:1 in light and L
 
 **Type:** use the role classes from `styles/type.css`: `text-title` (20), `text-heading` (16), `text-subheading` (14), `text-body` / `text-body-strong` (14), `text-reading` (the email), `text-small` (13), `text-overline` (12, uppercase labels), `text-mono` / `text-mono-small` (IDs, times, figures). Never set a one-off font size, and never go below 12px.
 
-**Themes:** dark mode follows the system until a person picks light or dark in the header's `ThemeToggle`; the pick is kept in `localStorage` (`lib/theme.ts`) and set as `<html data-theme>`, by an inline script in the root layout before the first paint. Read the theme on screen with `useTheme()` from `@/components/ui`; never write `data-theme` on `<html>` yourself. `data-theme="light"` or `"dark"` also works on any element, to show one theme inside the other. Set `background` and `color` on that element yourself.
+**Themes:** the header's `ThemeToggle` offers System, Light and Dark. System is the default and follows the OS live, including when the OS setting changes while the page is open. Choosing Light or Dark overrides it and is remembered in `localStorage` (`lib/theme.ts`) and set as `<html data-theme>`, by an inline script in the root layout before the first paint; choosing System clears the stored choice. Read the theme on screen with `useTheme()` from `@/components/ui`; never write `data-theme` on `<html>` yourself. `data-theme="light"` or `"dark"` also works on any element, to show one theme inside the other. Set `background` and `color` on that element yourself.
 
 **Visually hidden text:** `visually-hidden` (in `app/globals.css`) names something for screen readers without showing it, such as the inbox's `h1`, whose header row shows the product name instead.
 
@@ -185,7 +185,7 @@ Default                              → variant="secondary"
 
 ### IconButton
 
-A round secondary button holding one icon, with Button's chrome (raised, neutral, `--button-radius`). `icon` is one of `inbox`, `close` (the set in `components/ui/icon.tsx`; `sun` and `moon` are ThemeToggle's), and `aria-label` is required. For header actions and a Sheet's close; anything that approves or sends is a labelled Button.
+A round secondary button holding one icon, with Button's chrome (raised, neutral, `--button-radius`). `icon` is one of `inbox`, `close` (the set in `components/ui/icon.tsx`; `monitor`, `sun` and `moon` are ThemeToggle's), and `aria-label` is required. For header actions and a Sheet's close; anything that approves or sends is a labelled Button.
 
 ```tsx
 // Correct
@@ -197,7 +197,11 @@ A round secondary button holding one icon, with Button's chrome (raised, neutral
 
 ### AppHeader, Logo and ThemeToggle
 
-`AppHeader` is the header row on every screen: `Logo` (20px) and "TriageDesk" (16px semibold, `text-heading`) on the left; `ThemeToggle` and then `actions` (IconButtons only) on the right. Never a Banner or anything else there (rule 6). `Logo` is the brand exception to rule 4: `currentColor`, colored `--accent`. `ThemeToggle` is two round icon options, sun and moon, with a neutral selected state (never Petrol); it follows the OS until a person picks one, and remembers the pick. Use it only through AppHeader.
+`AppHeader` is the header row on every screen: `Logo` (22px) and "TriageDesk" (16px semibold, `text-heading`) on the left; `ThemeToggle` and then `actions` (IconButtons only) on the right. Never a Banner or anything else there (rule 6).
+
+`Logo` is the brand exception to rule 4: `currentColor`, colored `--accent`. Its viewBox is the artwork's bounds, `110 110 804 804`, not the source file's `0 0 1024 1024`, so the mark fills its box; it renders at 22px. Why: the padded file made the mark look about 16px next to 16px semibold text.
+
+`ThemeToggle` is a SegmentedControl of three round icon options: System (monitor), Light (sun), Dark (moon), each named by its `aria-label`. It's a radiogroup, so arrow keys move and select. The selected option is neutral (never Petrol). System is the default and follows the OS live; Light or Dark overrides it and is remembered; System clears the stored choice. Use it only through AppHeader.
 
 ```tsx
 // Correct: the inbox below 1200px
@@ -485,7 +489,7 @@ How urgent a ticket is: `urgent`, `high`, `normal`, `low`. Only urgent is a soli
 
 ### SegmentedControl
 
-Choosing one of two to five views or filters, where every option fits on one line. More options, or options that need a search, go in a menu. It's a radio group, so `aria-label` is required. Use `defaultValue` for uncontrolled, or `value` with `onValueChange`. Fully rounded (`--button-radius`); the selected option is neutral (raised like a secondary button), never Petrol. An option may take an `icon` (`IconName`): only the icon shows and `label` becomes its accessible name. ThemeToggle is this, with sun and moon.
+Choosing one of two to five views or filters, where every option fits on one line. More options, or options that need a search, go in a menu. It's a radio group, so `aria-label` is required. Use `defaultValue` for uncontrolled, or `value` with `onValueChange`. Fully rounded (`--button-radius`); the selected option is neutral (raised like a secondary button), never Petrol. An option may take an `icon` (`IconName`): only the icon shows and `label` becomes its accessible name. ThemeToggle is this, with a monitor, a sun and a moon.
 
 ```tsx
 // Correct

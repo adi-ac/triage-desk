@@ -232,11 +232,12 @@ export function ComponentsSection({ theme }: { theme: string }) {
         props="AppHeader: actions?"
         intro={
           <>
-            The mark at 20px, then TriageDesk at 16px semibold. The mark is drawn in currentColor and
-            colored with the accent, so it follows light and dark: the one brand exception to the
-            Petrol rule. AppHeader is the header row on every screen: this brand on the left, the
-            theme toggle (sun, moon) and any IconButtons on the right, and never a Banner. The live
-            one is at the top of this page.
+            The mark at 22px, then TriageDesk at 16px semibold. Its viewBox is the artwork&apos;s
+            bounds, not the source file&apos;s padding, so the mark fills its box and matches the
+            text. It&apos;s drawn in currentColor and colored with the accent, so it follows light
+            and dark: the one brand exception to the Petrol rule. AppHeader is the header row on
+            every screen: this brand on the left, the theme toggle (System, Light, Dark) and any
+            IconButtons on the right, and never a Banner. The live one is at the top of this page.
           </>
         }
       >
@@ -515,7 +516,7 @@ export function ComponentsSection({ theme }: { theme: string }) {
       <Demo
         name="SegmentedControl"
         props="options: { value, label, icon? }"
-        intro="Arrow keys move and select, like native radios. Fully rounded; the selected option is neutral (raised like a secondary button), never petrol. With icons, each label becomes the option's name and only the icon shows: ThemeToggle, at the top of this page, is this with sun and moon."
+        intro="Arrow keys move and select, like native radios. Fully rounded; the selected option is neutral (raised like a secondary button), never petrol. With icons, each label becomes the option's name and only the icon shows: ThemeToggle, at the top of this page, is this with a monitor, a sun and a moon."
       >
         <div className={styles.inline}>
           <SegmentedControl
@@ -529,6 +530,7 @@ export function ComponentsSection({ theme }: { theme: string }) {
           <SegmentedControl
             aria-label="Theme (demo)"
             options={[
+              { value: "system", label: "System", icon: "monitor" },
               { value: "light", label: "Light", icon: "sun" },
               { value: "dark", label: "Dark", icon: "moon" },
             ]}

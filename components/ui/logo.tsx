@@ -2,15 +2,17 @@ import styles from "./logo.module.css";
 
 /**
  * The TriageDesk mark: four petals. Decorative, since the wordmark beside it
- * names the product. Drawn in currentColor and colored --accent.
+ * names the product. Drawn in currentColor and colored --accent. The viewBox
+ * is the artwork's bounds (110–914), not the source file's padded 0–1024, so
+ * the mark fills its box: at 22px it reads at its full size beside 16px text.
  */
-export function Logo({ size = 20 }: { size?: number }) {
+export function Logo({ size = 22 }: { size?: number }) {
   return (
     <svg
       className={styles.logo}
       width={size}
       height={size}
-      viewBox="0 0 1024 1024"
+      viewBox="110 110 804 804"
       fill="currentColor"
       aria-hidden
       focusable="false"

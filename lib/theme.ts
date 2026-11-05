@@ -1,10 +1,13 @@
 /**
- * Light and dark. The interface follows the OS until a person picks one in
- * ThemeToggle; the pick is kept in localStorage and set as <html data-theme>.
- * No React here, so the root layout (a server component) can use the script.
+ * Light, dark, or the OS's. "system" is the default and follows the OS live;
+ * picking light or dark overrides it and is kept in localStorage, and picking
+ * system clears it. The pick is set as <html data-theme>; with none, the CSS
+ * follows prefers-color-scheme. No React here, so the root layout (a server
+ * component) can use the script.
  */
 
 export type Theme = "light" | "dark";
+export type ThemeChoice = "system" | Theme;
 
 export const themeStorageKey = "theme";
 

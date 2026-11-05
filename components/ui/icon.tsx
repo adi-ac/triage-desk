@@ -6,9 +6,15 @@
 
 import type { ReactNode } from "react";
 
-export type IconName = "sun" | "moon" | "inbox" | "close";
+export type IconName = "monitor" | "sun" | "moon" | "inbox" | "close";
 
 const paths: Record<IconName, ReactNode> = {
+  monitor: (
+    <>
+      <rect x="3" y="4" width="18" height="12" rx="1.5" />
+      <path d="M12 16v4M8 20h8" />
+    </>
+  ),
   sun: (
     <>
       <circle cx="12" cy="12" r="4" />
