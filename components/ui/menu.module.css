@@ -6,7 +6,8 @@
 .caret {
   flex: none;
   color: var(--ink-2);
-  transition: transform 160ms ease-out;
+  /* Turns with the menu's entrance, on the same timing. */
+  transition: transform var(--duration-menu) var(--ease-out-quart);
 }
 
 .trigger[aria-expanded="true"] .caret {
@@ -27,7 +28,7 @@
   color: var(--ink);
   background: var(--surface-raised);
   box-shadow: var(--shadow-popover);
-  animation: menu-in 150ms ease-out;
+  animation: menu-in var(--duration-menu) var(--ease-out-quart);
 }
 
 @keyframes menu-in {

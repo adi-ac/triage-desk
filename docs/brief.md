@@ -246,6 +246,15 @@ What it can't claim is real-world use, so it gets tested with support agents and
 - One continuous connector from the centre of each row's dot to the centre of the next (10px into the row to 10px past its bottom), 1px, centred on the dots, `--ink` at 28%; none after the last row. Dots sit above the line and are opaque.
 - The AI dot is a hollow ring: a surface fill with a 1.5px `ink-3` ring inside its edge. Person dots stay solid Petrol. (Before, the AI dot used the 7% pencil fill, which the line showed through.)
 
+**Motion, and a bottom sheet on phones** (decided 2026-11-05)
+- A small set of animations, each explaining a change the person caused; frequent actions get little motion, nothing animates on page load, and everything turns off under reduced motion. All numbers and reasons are in DESIGN.md, Motion.
+  - A field turning decided: the chip's colors only, 120ms, ease-out-quart. It happens about 100 times a day, often from the keyboard, so nothing moves.
+  - Approve becoming the sent line: the line fades in over 150ms (the draft's color changes on the same timing), only when the send happens on screen.
+  - The Other menu: its existing 150ms entrance and the caret's turn now share the same ease-out-quart timing.
+  - The queue sheet: on tablets it slides in from the right (260ms in, 200ms out); the backdrop fades with it.
+- Phones (below 768px): the queue sheet is a bottom sheet instead of a side sheet. It slides up from the bottom edge (300ms in, 220ms out, ease-drawer), is 90dvh tall so the page stays visible above it, has rounded top corners and a grab handle, and can be swiped down on the handle or header: it follows the finger, closes past 160px (or a quarter of its height) or a 0.5px/ms flick, and otherwise springs back. The backdrop, the ×, and Escape also close it; focus handling is unchanged. With reduced motion it simply appears and disappears, and dragging still works.
+- Switching theme no longer animates every color on the page.
+
 **Focus ring** (decided 2026-11-03): the accent, 2px with a 2px offset, set globally on `:focus-visible` via a `--focus-ring` role. It is at least 6.59:1 on `surface` and `bg` in both themes.
 - The one documented exception to the Petrol rule (Petrol is only for decisions, high confidence, the selected queue item and Approve), confirmed 2026-11-04. My reason: keyboard focus must always be clearly visible, and it only appears while tabbing, so it never competes with Approve.
 

@@ -1,18 +1,50 @@
-/* Phones (below 768px): full width, no corner radius. */
+/*
+ * Phones (below 768px): a bottom sheet, 90dvh tall so the page stays visible
+ * above it, with rounded top corners and a grab handle. It slides up from
+ * the bottom edge (300ms in, 220ms out) and can be swiped down to dismiss.
+ * Tablets (768px and up): 380px from the right edge, sliding in from it
+ * (260ms in, 200ms out). The backdrop fades on the same timing.
+ *
+ * Native <dialog>: [open] is the shown state, @starting-style is where it
+ * enters from, and the closed state is where it exits to; display and
+ * overlay transition discretely so the exit can play before it's hidden.
+ * Transitions, not keyframes, so closing mid-entrance reverses smoothly.
+ */
 .sheet {
-  inset-block: 0;
-  inset-inline: 0;
+  inset: auto 0 0 0;
   margin: 0;
   padding: 0;
   inline-size: 100vw;
   max-inline-size: 100vw;
-  block-size: 100dvh;
-  max-block-size: 100dvh;
+  block-size: 90dvh;
+  max-block-size: 90dvh;
   border: 0;
-  border-radius: 0;
+  border-start-start-radius: 14px;
+  border-start-end-radius: 14px;
   color: var(--ink);
   background: var(--surface-raised);
   box-shadow: var(--shadow-dialog);
+  transform: translateY(100%);
+  transition:
+    transform var(--duration-bottom-sheet-out) var(--ease-drawer),
+    overlay var(--duration-bottom-sheet-out) allow-discrete,
+    display var(--duration-bottom-sheet-out) allow-discrete;
+}
+
+.sheet[open] {
+  transform: none;
+  transition-duration: var(--duration-bottom-sheet-in);
+}
+
+@starting-style {
+  .sheet[open] {
+    transform: translateY(100%);
+  }
+}
+
+/* While a finger drags it, it follows the finger with no transition. */
+.sheet[data-dragging] {
+  transition: none;
 }
 
 /* The sheet itself takes focus on open (so a tap shows no ring); it's a
@@ -25,17 +57,68 @@
 
 .sheet::backdrop {
   background: var(--scrim);
+  opacity: 0;
+  transition:
+    opacity var(--duration-bottom-sheet-out) var(--ease-drawer),
+    overlay var(--duration-bottom-sheet-out) allow-discrete,
+    display var(--duration-bottom-sheet-out) allow-discrete;
 }
 
-/* Tablets (768px and up; the inbox only opens it below 1200px): 380px from
-   the right edge, with 14px corners on its open, left side. */
+.sheet[open]::backdrop {
+  opacity: 1;
+  transition-duration: var(--duration-bottom-sheet-in);
+}
+
+@starting-style {
+  .sheet[open]::backdrop {
+    opacity: 0;
+  }
+}
+
+/* Tablets (768px and up; the inbox only opens it below 1200px). */
 @media (min-width: 768px) {
   .sheet {
-    inset-inline-start: auto;
-    inset-inline-end: 0;
+    inset: 0 0 0 auto;
     inline-size: 380px;
+    block-size: 100dvh;
+    max-block-size: 100dvh;
+    border-radius: 0;
     border-start-start-radius: 14px;
     border-end-start-radius: 14px;
+    transform: translateX(100%);
+    transition-duration: var(--duration-sheet-out);
+  }
+
+  .sheet[open] {
+    transform: none;
+    transition-duration: var(--duration-sheet-in);
+  }
+
+  @starting-style {
+    .sheet[open] {
+      transform: translateX(100%);
+    }
+  }
+
+  .sheet::backdrop {
+    transition-duration: var(--duration-sheet-out);
+  }
+
+  .sheet[open]::backdrop {
+    transition-duration: var(--duration-sheet-in);
+  }
+
+  .handle {
+    display: none;
+  }
+}
+
+/* Reduced motion: no slide and no fade; it appears and disappears. Dragging
+   still follows the finger. */
+@media (prefers-reduced-motion: reduce) {
+  .sheet,
+  .sheet::backdrop {
+    transition: none;
   }
 }
 
@@ -45,14 +128,33 @@
   block-size: 100%;
 }
 
+/* The handle and header are where a swipe down starts (phones). */
+.dragArea {
+  position: relative;
+  touch-action: none;
+}
+
+/* Phones only: a small pill at the top, centred, over the header's top
+   padding, so the header (and the close button's position) is unchanged. */
+.handle {
+  position: absolute;
+  inset-block-start: 6px;
+  inset-inline-start: 50%;
+  inline-size: 36px;
+  block-size: 4px;
+  margin-inline-start: -18px;
+  border-radius: 2px;
+  background: var(--line-strong);
+}
+
 .header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
-  /* The close button sits 16px from the top and right, like the inbox's
-     "Open queue" button on a phone. The title starts at 16px, where the list's
-     rows start their text (4px inset + 12px row padding). */
+  /* The close button sits 16px from the sheet's top and right edges. The
+     title starts at 16px, where the list's rows start their text (4px inset
+     + 12px row padding). */
   padding: 16px 16px 10px;
   border-block-end: var(--hairline) solid var(--line);
 }

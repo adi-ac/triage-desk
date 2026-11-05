@@ -1,6 +1,6 @@
 "use client";
 
-import { useId } from "react";
+import { useId, useState } from "react";
 import type { Blocker } from "@/lib/approve";
 import { Button } from "./button";
 import { Time } from "./time";
@@ -42,10 +42,13 @@ function jump(id: string | undefined) {
  */
 export function ApproveBar({ blockers, targets, onApprove, sentAt, sentBy = "you", outcome = "sent", afterSend, onAfterSend }: ApproveBarProps) {
   const summaryId = useId();
+  // The sent line fades in only when the send happens on screen; a ticket
+  // that loads already sent (a team rule's, or one sent earlier) just shows it.
+  const [loadedSent] = useState(() => sentAt !== null);
 
   if (sentAt) {
     return (
-      <div className={styles.bar}>
+      <div key="sent" className={styles.bar} data-enter={loadedSent ? undefined : ""}>
         <p className={`text-small ${styles.sent}`}>
           {outcome === "closed" ? "Closed by you" : `Sent by ${sentBy === "you" ? "you" : "rule"}`} · <Time dateTime={sentAt} />
         </p>
@@ -56,7 +59,7 @@ export function ApproveBar({ blockers, targets, onApprove, sentAt, sentBy = "you
 
   const blocked = blockers.length > 0;
   return (
-    <div className={styles.bar}>
+    <div key="unsent" className={styles.bar}>
       <Button variant="primary" disabled={blocked} aria-describedby={blocked ? summaryId : undefined} onClick={onApprove}>
         Approve and send
       </Button>

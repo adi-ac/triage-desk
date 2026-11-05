@@ -5,6 +5,24 @@
   gap: 8px 16px;
 }
 
+/* Approve becoming "Sent by you · <time>": the new line fades in where the
+   button was (Approve itself goes at once). Opacity only. */
+.bar[data-enter] {
+  transition: opacity var(--duration-sent) var(--ease-out-quart);
+}
+
+@starting-style {
+  .bar[data-enter] {
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .bar[data-enter] {
+    transition: none;
+  }
+}
+
 .summary,
 .sent {
   margin: 0;

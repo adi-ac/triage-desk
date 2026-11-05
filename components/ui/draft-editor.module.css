@@ -14,6 +14,17 @@
   border: 1px solid var(--line-strong);
   border-radius: 8px;
   background: var(--surface);
+  /* Turning approved when the reply is sent: the same 150ms color change as
+     the sent line that replaces Approve. */
+  transition:
+    background-color var(--duration-sent) var(--ease-out-quart),
+    border-color var(--duration-sent) var(--ease-out-quart);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .box {
+    transition: none;
+  }
 }
 
 .backdrop,

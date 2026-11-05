@@ -8,12 +8,28 @@ const darkQuery = "(prefers-color-scheme: dark)";
 const listeners = new Set<() => void>();
 const notify = () => listeners.forEach((l) => l());
 
+/**
+ * Applies a theme change with transitions off, so switching theme doesn't
+ * animate every color on the page: the attribute is set, the new theme is
+ * applied and styles are recalculated, then the attribute goes.
+ */
+function withoutTransitions(change: () => void) {
+  const root = document.documentElement;
+  root.dataset.themeSwitching = "";
+  change();
+  // Force a full style and layout pass while transitions are off.
+  void document.body.offsetHeight;
+  delete root.dataset.themeSwitching;
+}
+
 /** Puts the stored pick (or none, to follow the OS) on <html> and tells every subscriber. */
 function applyStoredTheme() {
   const root = document.documentElement;
   const t = storedTheme();
-  if (t) root.dataset.theme = t;
-  else delete root.dataset.theme;
+  withoutTransitions(() => {
+    if (t) root.dataset.theme = t;
+    else delete root.dataset.theme;
+  });
   notify();
 }
 
@@ -26,8 +42,10 @@ function choose(choice: ThemeChoice) {
   } catch {
     // Storage blocked: the choice still applies to this page.
   }
-  if (choice === "system") delete root.dataset.theme;
-  else root.dataset.theme = choice;
+  withoutTransitions(() => {
+    if (choice === "system") delete root.dataset.theme;
+    else root.dataset.theme = choice;
+  });
   notify();
 }
 

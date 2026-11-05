@@ -10,6 +10,19 @@
   white-space: nowrap;
   color: var(--ink);
   background: var(--surface);
+  /* Suggested to decided (Keep, Use, a menu pick, Approve), and back on
+     Change: color only, nothing moves. This happens many times a day, so
+     it's short. */
+  transition:
+    background-color var(--duration-decide) var(--ease-out-quart),
+    border-color var(--duration-decide) var(--ease-out-quart),
+    color var(--duration-decide) var(--ease-out-quart);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .chip {
+    transition: none;
+  }
 }
 
 /* Its own tokens: in dark mode it's recessed (bg fill, a 1px line edge),

@@ -6,6 +6,7 @@ import "@/styles/theme.css";
 import "@/styles/elevation.css";
 import "@/styles/type.css";
 import "@/styles/trust.css";
+import "@/styles/motion.css";
 import "./globals.css";
 
 const heading = Schibsted_Grotesk({ subsets: ["latin"], variable: "--font-schibsted" });

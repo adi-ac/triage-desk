@@ -1,0 +1,35 @@
+/*
+ * Motion: a few purposeful animations, each explaining a change the person
+ * caused (DESIGN.md, Motion). This is a tool used all day, so frequent
+ * actions get little or no motion, and nothing animates on page load. Only
+ * transform, opacity and colors animate. Every animation turns off under
+ * prefers-reduced-motion, in its own component's CSS.
+ */
+
+:root {
+  /* Small enters and color changes. */
+  --ease-out-quart: cubic-bezier(0.165, 0.84, 0.44, 1);
+  /* Sheets: a fast start that settles softly. */
+  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+
+  /* A field turning decided (Keep, Use, a menu pick): color only. */
+  --duration-decide: 120ms;
+  /* Approve becoming the sent line; the draft turning approved. */
+  --duration-sent: 150ms;
+  /* The Other menu's entrance and its caret. */
+  --duration-menu: 150ms;
+  /* The queue sheet on tablets (from the right) and phones (from the bottom).
+     Exits are faster than entrances. */
+  --duration-sheet-in: 260ms;
+  --duration-sheet-out: 200ms;
+  --duration-bottom-sheet-in: 300ms;
+  --duration-bottom-sheet-out: 220ms;
+}
+
+/* Switching theme shouldn't animate every color on the page: ThemeToggle
+   sets this for the one style recalculation that applies the new theme. */
+[data-theme-switching] *,
+[data-theme-switching] *::before,
+[data-theme-switching] *::after {
+  transition: none !important;
+}
