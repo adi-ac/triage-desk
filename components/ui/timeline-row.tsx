@@ -11,8 +11,8 @@ type TimelineRowBase = Omit<ComponentProps<"li">, "className" | "style"> & {
 
 /**
  * One entry in an activity timeline; put rows in an <ol>. Children describe
- * what happened ("drafted a reply"). ai is pencil (a dashed ring) and is
- * named "Model" unless you say otherwise (a team rule, say); human is ink (a
+ * what happened ("drafted a reply"). ai is pencil (a soft gray dot) and is
+ * named "AI" unless you say otherwise (a team rule, say); human is ink (a
  * solid petrol dot) and must be named.
  */
 export type TimelineRowProps = TimelineRowBase &
@@ -23,7 +23,7 @@ export function TimelineRow({ actor, name, at, children, ...props }: TimelineRow
     <li {...props} className={`text-small ${styles.row}`} data-actor={actor}>
       <span className={styles.marker} aria-hidden />
       <p className={styles.text}>
-        <span className={styles.name}>{name ?? "Model"}</span> {children}
+        <span className={styles.name}>{name ?? "AI"}</span> {children}
       </p>
       <span className={styles.time}>
         <Time dateTime={at} />
