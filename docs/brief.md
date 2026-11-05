@@ -265,6 +265,9 @@ What it can't claim is real-world use, so it gets tested with support agents and
 - The drag handle, the swipe-to-dismiss and the panel's own × are gone with the sheet. IconButton loses its primary variant, and AppHeader its `actions`, since nothing uses them.
 - The label's sweep in uses a gentler ease-out than its sweep out. Measured on the button: with the strong ease-out both ways, the word swept in faster than the edge made room and the last letter was clipped at up to 73% opacity; with a gentle ease-out in, nothing is clipped either way.
 
+**The queue panel closes with a fade** (decided 2026-11-05)
+- Closing no longer shrinks the panel back into its corner (220ms). The whole panel, content still visible, fades out in place over 180ms, `cubic-bezier(0.2, 0, 0, 1)`, with no clip, movement or scaling; the content no longer fades out first, and the scrim fades out over the same 180ms. Opening is unchanged: it grows from the bottom-right corner over 340ms and its content fades in. Reduced motion is still instant. Reason (to confirm): once the person has picked a ticket or dismissed the queue, its origin no longer matters, so a short, quiet fade is enough and gets out of the way faster.
+
 **Focus ring** (decided 2026-11-03): the accent, 2px with a 2px offset, set globally on `:focus-visible` via a `--focus-ring` role. It is at least 6.59:1 on `surface` and `bg` in both themes.
 - The one documented exception to the Petrol rule (Petrol is only for decisions, high confidence, the selected queue item and Approve), confirmed 2026-11-04. My reason: keyboard focus must always be clearly visible, and it only appears while tabbing, so it never competes with Approve.
 

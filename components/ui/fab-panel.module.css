@@ -164,13 +164,17 @@
   background: var(--scrim);
   opacity: 0;
   transition:
-    opacity var(--duration-scrim) ease-out,
-    display var(--duration-scrim) allow-discrete,
-    overlay var(--duration-scrim) allow-discrete;
+    opacity var(--duration-scrim-out) var(--ease-panel-out),
+    display var(--duration-scrim-out) allow-discrete,
+    overlay var(--duration-scrim-out) allow-discrete;
 }
 
 .scrim:popover-open {
   opacity: 1;
+  transition:
+    opacity var(--duration-scrim-in) ease-out,
+    display var(--duration-scrim-in) allow-discrete,
+    overlay var(--duration-scrim-in) allow-discrete;
 }
 
 @starting-style {
@@ -190,10 +194,13 @@
  * It grows diagonally from its bottom-right corner, the corner nearest the
  * button: a clip-path from a point at that corner to the whole panel. The
  * open clip reaches past the panel's edges so its shadow isn't cut off.
- * Its content fades in a fifth of the way in, and fades out first on close.
- * Transitions, not keyframes, so closing mid-entrance reverses smoothly;
- * display and overlay transition discretely so the exit plays before it's
- * hidden.
+ * Its content fades in a fifth of the way in.
+ *
+ * Closing isn't the opening in reverse: the whole panel, content still
+ * visible, fades out in place (opacity only, no clip, no movement), and
+ * display and overlay transition discretely over the same time so it stays
+ * rendered until the fade ends. The closed state keeps the open clip, so
+ * only the entrance (from @starting-style) animates it.
  */
 .panel {
   position: fixed;
@@ -209,16 +216,17 @@
   color: var(--ink);
   background: var(--surface-raised);
   box-shadow: var(--shadow-dialog);
-  clip-path: inset(100% 0 0 100% round 20px);
+  clip-path: inset(-40px -40px -64px -40px round 20px);
+  opacity: 0;
   transition:
-    clip-path var(--duration-panel-out) var(--ease-panel-out),
+    opacity var(--duration-panel-out) var(--ease-panel-out),
     display var(--duration-panel-out) allow-discrete,
     overlay var(--duration-panel-out) allow-discrete;
 }
 
 .panel:popover-open {
   display: flex;
-  clip-path: inset(-40px -40px -64px -40px round 20px);
+  opacity: 1;
   transition:
     clip-path var(--duration-panel-in) var(--ease-panel-in),
     display var(--duration-panel-in) allow-discrete,
@@ -231,13 +239,7 @@
   }
 }
 
-.panel > * {
-  opacity: 0;
-  transition: opacity var(--duration-panel-content-out) var(--ease-out-quart);
-}
-
 .panel:popover-open > * {
-  opacity: 1;
   transition: opacity var(--duration-panel-content-in) var(--ease-out-quart) var(--delay-panel-content-in);
 }
 

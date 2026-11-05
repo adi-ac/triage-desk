@@ -36,18 +36,20 @@
   /* The FAB's press. */
   --duration-press: 150ms;
 
-  /* The panel the FAB opens: it grows from its bottom-right corner and
-     shrinks back into it. Exits are faster than entrances. */
+  /* The panel the FAB opens: it grows from its bottom-right corner, and
+     closes with a plain fade (no movement, no clip). Exits are faster than
+     entrances. */
   --ease-panel-in: cubic-bezier(0.05, 0.7, 0.1, 1);
-  --ease-panel-out: cubic-bezier(0.3, 0, 0.8, 0.15);
+  --ease-panel-out: cubic-bezier(0.2, 0, 0, 1);
   --duration-panel-in: 340ms;
-  --duration-panel-out: 220ms;
-  /* Its content fades in after about a fifth of the entrance, and out first on exit. */
+  --duration-panel-out: 180ms;
+  /* Its content fades in after about a fifth of the entrance. On close it
+     fades with the panel, not separately. */
   --delay-panel-content-in: 68ms;
   --duration-panel-content-in: 200ms;
-  --duration-panel-content-out: 90ms;
-  /* The scrim behind it, both ways. */
-  --duration-scrim: 220ms;
+  /* The scrim behind it: in with the panel's entrance, out with its fade. */
+  --duration-scrim-in: 220ms;
+  --duration-scrim-out: var(--duration-panel-out);
 }
 
 /* Switching theme shouldn't animate every color on the page: ThemeToggle
