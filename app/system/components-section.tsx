@@ -511,7 +511,7 @@ export function ComponentsSection({ theme }: { theme: string }) {
       <Demo
         name="Sheet"
         props="open · onClose · title"
-        intro="A dialog-level panel from the left: surface-raised, the dialog shadow and the scrim; full width on phones. Focus moves in on open and back to the button on close. Escape, a click outside or the round × (Close queue) closes it. The inbox's Open queue button opens the queue in one."
+        intro="A dialog-level panel from the right, 380px with rounded corners on its left side from 768px: surface-raised, the dialog shadow and the scrim; full width with no corners on phones. Focus moves in on open and back to the button on close. Escape, a click outside or the round × (Close queue) closes it. The inbox's Open queue button opens the queue in one."
       >
         <SheetDemo />
       </Demo>

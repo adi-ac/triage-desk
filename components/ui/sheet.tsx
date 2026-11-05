@@ -14,7 +14,7 @@ export type SheetProps = {
 };
 
 /**
- * A dialog-level panel from the left edge: surface-raised, the dialog shadow
+ * A dialog-level panel from the right edge (380px, full width on phones): surface-raised, the dialog shadow
  * and the scrim; full width on phones. Focus moves into it on open and back
  * to whatever opened it on close (native <dialog>). It closes on Escape and
  * on a click outside; the screen closes it when a choice is made inside.
