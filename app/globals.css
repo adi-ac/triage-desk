@@ -27,3 +27,17 @@ h2,
 h3 {
   font-family: var(--font-heading);
 }
+
+/* Named for screen readers, not shown: the inbox's h1, whose header row
+   shows the product name instead. */
+.visually-hidden {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

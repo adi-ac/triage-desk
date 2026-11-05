@@ -1,9 +1,11 @@
 "use client";
 
 import { useRef, useState, type ComponentProps, type KeyboardEvent } from "react";
+import { Icon, type IconName } from "./icon";
 import styles from "./segmented-control.module.css";
 
-export type SegmentedOption<T extends string> = { value: T; label: string };
+/** With an icon, the label becomes the option's accessible name and only the icon shows. */
+export type SegmentedOption<T extends string> = { value: T; label: string; icon?: IconName };
 
 export type SegmentedControlProps<T extends string> = Omit<
   ComponentProps<"div">,
@@ -65,11 +67,13 @@ export function SegmentedControl<T extends string>({
             role="radio"
             aria-checked={checked}
             tabIndex={checked ? 0 : -1}
+            aria-label={option.icon ? option.label : undefined}
             className={`text-body ${styles.segment}`}
+            data-icon={option.icon}
             onClick={() => select(option.value)}
             onKeyDown={(e) => onKeyDown(e, i)}
           >
-            {option.label}
+            {option.icon ? <Icon name={option.icon} size={16} /> : option.label}
           </button>
         );
       })}

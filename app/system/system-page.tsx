@@ -1,29 +1,12 @@
 "use client";
 
-import { useEffect, useState, useSyncExternalStore } from "react";
-import { SegmentedControl } from "@/components/ui";
+import { AppHeader, useTheme } from "@/components/ui";
 import { ColorSection } from "./color-section";
 import { ComponentsSection } from "./components-section";
 import { SurfacesSection } from "./surfaces-section";
 import { TrustSection } from "./trust-section";
 import { TypeSection } from "./type-section";
 import styles from "./system.module.css";
-
-type Theme = "system" | "light" | "dark";
-
-const themeOptions = [
-  { value: "system", label: "System" },
-  { value: "light", label: "Light" },
-  { value: "dark", label: "Dark" },
-] as const;
-
-const darkQuery = "(prefers-color-scheme: dark)";
-
-function subscribe(onChange: () => void) {
-  const mq = matchMedia(darkQuery);
-  mq.addEventListener("change", onChange);
-  return () => mq.removeEventListener("change", onChange);
-}
 
 const sections = [
   { id: "type", title: "Type", files: "styles/type.css" },
@@ -34,41 +17,21 @@ const sections = [
 ] as const;
 
 export function SystemPage() {
-  const [theme, setTheme] = useState<Theme>("system");
-  const prefersDark = useSyncExternalStore(
-    subscribe,
-    () => matchMedia(darkQuery).matches,
-    () => false,
-  );
-  const resolved = theme === "system" ? (prefersDark ? "dark" : "light") : theme;
-
-  useEffect(() => {
-    const root = document.documentElement;
-    if (theme === "system") delete root.dataset.theme;
-    else root.dataset.theme = theme;
-    return () => {
-      delete root.dataset.theme;
-    };
-  }, [theme]);
+  // The page theme: the header's toggle, the same one the inbox has. It
+  // follows the OS until a person picks, and the pick is shared with the inbox.
+  const resolved = useTheme();
 
   return (
     <main className={styles.page}>
-      <header className={styles.header}>
-        <div>
-          <p className={`text-overline ${styles.muted}`}>Triage Desk</p>
-          <h1 className="text-title">Design system</h1>
-          <p className={`text-small ${styles.muted}`}>
-            Every token in use, in both themes. Decisions and their reasons are in{" "}
-            <code className="text-mono">docs/brief.md</code>.
-          </p>
-        </div>
-        <SegmentedControl
-          aria-label="Theme"
-          options={themeOptions}
-          value={theme}
-          onValueChange={setTheme}
-        />
-      </header>
+      <AppHeader />
+      <div className={styles.header}>
+        <h1 className="text-title">Design system</h1>
+        <p className={`text-small ${styles.muted}`}>
+          Every token in use, in both themes. The theme toggle in the header sets the page theme;
+          each demo below also shows both side by side. Decisions and their reasons are in{" "}
+          <code className="text-mono">docs/brief.md</code>.
+        </p>
+      </div>
 
       <nav className={styles.nav} aria-label="Sections">
         {sections.map((s) => (

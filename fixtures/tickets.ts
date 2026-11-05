@@ -1,6 +1,6 @@
 /**
  * Example support emails sent to Ledgerline, the fictional B2B invoicing
- * product Triage Desk demos against. Every company, person and address is
+ * product TriageDesk demos against. Every company, person and address is
  * invented; domains use .example.
  *
  * These are inputs only. Categories, urgencies, drafts and recorded model

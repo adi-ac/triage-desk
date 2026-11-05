@@ -5,7 +5,8 @@
  * re-checks each pair live in both themes.
  *
  * One color family per meaning, so they never blur together:
- *   gray, dashed   the model: suggestions and the evidence it quotes
+ *   gray fill      the model: suggestions (no border); the evidence it
+ *                  quotes is a fill plus a dashed underline
  *   petrol, solid  a person: decisions (the same accent as Approve)
  *   petrol         high confidence: fine to go ahead (shares the accent)
  *   amber          uncertainty: medium and low confidence
@@ -13,17 +14,22 @@
  *
  * Suggestions and decisions are flat at every level: no shadow, no gradient.
  * Raised means pressable (see elevation.css), and a decision is a record,
- * not a button. Color is never the only cue: suggestions are dashed and
- * decisions solid, and confidence and severity always carry a word.
+ * not a button. Color is never the only cue: a decision is a solid petrol
+ * border and always says how it was decided ("Set by you", "Approved as
+ * suggested", "Claude suggested … · n%"), and confidence and severity
+ * always carry a word. A suggestion has no visible border, so those words
+ * are what separate it from a decision besides color (see docs/brief.md).
  */
 
 /* [data-theme] re-derives these inside a themed element (see elevation.css). */
 :root,
 [data-theme] {
-  /* Pencil: the model's suggestion, not yet acted on. Text stays ink. */
-  --suggested-border: var(--line-strong);
-  --suggested-border-style: dashed;
-  --suggested-fill: var(--bg);
+  /* Pencil: the model's suggestion, not yet acted on. A soft gray fill and
+     no visible border (the border stays 1px, transparent, so a value doesn't
+     shift when it turns decided). Text stays ink. */
+  --suggested-border: transparent;
+  --suggested-border-style: solid;
+  --suggested-fill: color-mix(in oklch, var(--ink) 7%, transparent);
   --suggested-text: var(--ink);
 
   /* Ink: a person's decision. */
@@ -41,7 +47,8 @@
   --evidence-urgency-line: var(--critical);
 
   /* Confidence: high is petrol, "fine to go ahead", like Approve; medium
-     and low are amber, "check this". Low gets a fill as well. */
+     and low are amber, "check this". No level has a fill: low and medium
+     differ by their word, the bar's length and the hint to confirm. */
   --confidence-track: var(--line);
   --confidence-high: var(--accent);
   --confidence-high-text: var(--accent-text);
@@ -49,7 +56,6 @@
   --confidence-medium-text: var(--ink-2);
   --confidence-low: var(--warning);
   --confidence-low-text: var(--warning);
-  --confidence-low-fill: var(--warning-soft);
 
   /* Severity: only urgent is solid. Normal and low have no fill. */
   --severity-urgent-text: var(--surface);

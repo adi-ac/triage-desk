@@ -46,7 +46,7 @@ export function TicketPanes() {
     <>
       {/* The page can't read the ID on the server (it would block instant
           navigation), so the tab title comes from here; React puts it in <head>. */}
-      <title>{`${ticketId} · Triage Desk`}</title>
+      <title>{`${ticketId} · TriageDesk`}</title>
       <Pane title="Email" meta={<span className="text-mono-small">{ticket.id}</span>}>
         <article>
           <EmailBody

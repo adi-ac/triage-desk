@@ -1,4 +1,4 @@
-# Triage Desk design system
+# TriageDesk design system
 
 Read this and `docs/brief.md` before building any UI. The brief says why; this file says what to use. Tokens are in `styles/`, components in `components/ui`, and `/system` shows every token and component in both themes.
 
@@ -8,10 +8,10 @@ The product's one idea: the interface makes it obvious when the model shouldn't 
 
 These hold on every screen. If a design seems to need an exception, ask; don't make one.
 
-1. **Anything Claude produced renders as a suggestion until a person acts on it.** Suggestions are pencil: dashed `--suggested-border`, gray. Use `Chip state="suggested"`, `Tag tone="ai"`, `TimelineRow actor="ai"`, `DraftEditor state="suggested"`. It becomes decided, edited or approved only when a person sets, edits or approves it. Why: if model output looks like a decision, nobody can tell what was checked.
+1. **Anything Claude produced renders as a suggestion until a person acts on it.** Suggestions are pencil: a soft gray fill (`--suggested-fill`, ink at 7%) with no visible border. Use `Chip state="suggested"`, `Tag tone="ai"`, `TimelineRow actor="ai"`, `DraftEditor state="suggested"`. It becomes decided, edited or approved only when a person sets, edits or approves it. A suggestion and a decision differ by color plus words, so every decided field always shows its words: "Set by you" (or the person's name), "Approved as suggested", and the "Claude suggested … · n%" note. Never render a decided field without them. Why: if model output looks like a decision, nobody can tell what was checked; and with no border on a suggestion, the words are the cue that doesn't depend on color.
 2. **A confidence value always shows as `ConfidenceMeter`: a bar, a percentage and a level word.** Confidence is Claude's own estimate, not a measured probability: never word it as a measurement ("92% accurate", "92% chance"), and say "Claude's estimate" wherever the interface explains it. **Never as a chip or a tag**, and never as a bare number. The one exception is history: once a field is kept or switched, FieldReview replaces its meter with a quiet note, "Claude suggested Cancellation risk · 50%". Why: high confidence shares Petrol with decisions, so shape and words are what keep them apart; and confidence belongs to suggestions, so a meter beside a value must never show confidence in a different value.
 3. **A decided chip always says how it was decided: who set it, or "Approved as suggested".** `Chip state="decided"` requires either `decidedBy` (`"you"` or the person's name) or `asSuggested`. Why: same as rule 2. A solid petrol chip with no name could be the model.
-4. **Petrol is only for decisions, high confidence, the selected queue item and Approve.** Decisions means anything a person set: `Chip state="decided"`, `Tag tone="human"`, `TimelineRow actor="human"`. The focus ring (`--focus-ring`, the accent) is the one documented exception: keyboard focus must always be clearly visible, and it only appears while tabbing, so it never competes with Approve. Nothing else uses an `--accent*`, `--decided-*` or `--confidence-high*` token: no petrol links, info banners, headings or icons. A reply a team rule sent has no decision styling, since no person acted: no ink chips, no "Set by you" (FieldReview `readOnly`, DraftEditor `state="sent-by-rule"`, ApproveBar `sentBy="rule"`). Its high-confidence meters stay Petrol like any other: the meter describes the model's confidence, not a decision. There are no per-ticket-type exceptions to this rule. Why: Petrol means "a person did this" or "fine to go ahead". A third meaning breaks both.
+4. **Petrol is only for decisions, high confidence, the selected queue item and Approve.** Decisions means anything a person set: `Chip state="decided"`, `Tag tone="human"`, `TimelineRow actor="human"`. The focus ring (`--focus-ring`, the accent) is the one documented exception: keyboard focus must always be clearly visible, and it only appears while tabbing, so it never competes with Approve. The `Logo` is the other documented exception, a brand one: the mark is drawn in `currentColor` and colored `--accent`, so it follows light and dark; it's not a control, sits only in the header, and never appears beside Approve. Nothing else uses an `--accent*`, `--decided-*` or `--confidence-high*` token: no petrol links, info banners, headings or icons. A reply a team rule sent has no decision styling, since no person acted: no ink chips, no "Set by you" (FieldReview `readOnly`, DraftEditor `state="sent-by-rule"`, ApproveBar `sentBy="rule"`). Its high-confidence meters stay Petrol like any other: the meter describes the model's confidence, not a decision. There are no per-ticket-type exceptions to this rule. Why: Petrol means "a person did this" or "fine to go ahead". A third meaning breaks both.
 5. **Approve stays disabled while any blocker is open, and the blockers are listed next to it.** Exactly three things block, and nothing else:
    - an unsure field that no one has kept or switched: under 60%, or within 15 points of its runner-up;
    - any unfilled `[placeholder]` in the draft;
@@ -24,7 +24,7 @@ These hold on every screen. If a design seems to need an exception, ask; don't m
    The exceptions: a ticket with no model output has no Approve (its triage pane says plainly that Claude hasn't triaged it yet, and has no footer), and neither does a "Not a request" suggestion, which has no reply to approve: Keep closes it, and the footer then reads "Closed by you · <time>" (ApproveBar `outcome="closed"`).
 
    After sending, ApproveBar swaps the button for "Sent by you · <time>" and a secondary button: "Next ticket" in the inbox (`afterSend="next-ticket"`), "Back to inbox" for a ticket opened on its own (`afterSend="back-to-inbox"`). The draft becomes `state="approved"` (read-only), and the timeline gets a row: "approved and sent the reply". A draft written for a value a person has since overridden is a warning, not a blocker: pass it as DraftEditor's `warning`. Why: block only where a wrong send is costly; Approve must always be visible without layout hacks; and the reason should sit where you fix it, not in a list you read in one place and act on in another.
-6. **Model output is always labeled with its source: recorded, live or hand-written.** Every screen that shows model output carries exactly one `OutputSource`, which can't be dismissed. Hand-written output is allowed during the build only and must be replaced by recorded output before shipping. All 40 tickets and the vague email are recorded (`fixtures/recorded-suggestions.json`, `claude-sonnet-5-5`, 4 November 2026, prompt version `p-48be27bc`); nothing is hand-written. Why: an unlabeled canned example undoes the honesty claim the piece rests on (brief, First screen).
+6. **Model output is real, and its source lives in the data, not the interface.** Every suggestion is recorded or live, never hand-written, and carries `source` (plus `model` and `promptVersion` when recorded). The interface doesn't label it: there is no "Recorded example" banner or label anywhere, and no Banner ever appears in the header area. All 40 tickets and the vague email are recorded (`fixtures/recorded-suggestions.json`, `claude-sonnet-5-5`, 4 November 2026, prompt version `p-48be27bc`). Why: decided 5 November 2026, reversing the earlier label; the reasons are in the brief ("Header, theme and pencil"). The recordings are real model output, and the data keeps the provenance.
 7. **Approving never turns an untouched field into "Set by you".** On Approve, each field a person kept or switched shows `decidedBy="you"`; each field nobody touched shows `asSuggested`, labeled "Approved as suggested". `FieldReview` does this when you pass `approved`. The timeline gives them separate rows (see TimelineRow). Why: the record must never claim a person chose something they didn't look at.
 
 ```tsx
@@ -103,50 +103,56 @@ Never put `--ink-3` on a `*-soft` fill: it measures 4.08–4.21:1 in light and L
 
 **Elevation:** three levels and no more: `--shadow-pane`, `--shadow-popover`, `--shadow-dialog`. Suggestions and decisions are flat at every level. Raised means pressable.
 
-**Trust tokens** (`styles/trust.css`) name meanings: `--suggested-*`, `--decided-*`, `--evidence-*`, `--confidence-*`, `--severity-*`. Every meaning has a component (Chip, FieldReview, EmailBody, EvidenceMark, EvidenceItem, ConfidenceMeter, Severity, DraftEditor, OutputSource, ApproveBar); use the component, not the tokens. A new meaning gets a new component in `components/ui`, never inline styles on a screen.
+**Trust tokens** (`styles/trust.css`) name meanings: `--suggested-*`, `--decided-*`, `--evidence-*`, `--confidence-*`, `--severity-*`. Every meaning has a component (Chip, FieldReview, EmailBody, EvidenceMark, EvidenceItem, ConfidenceMeter, Severity, DraftEditor, ApproveBar); use the component, not the tokens. A new meaning gets a new component in `components/ui`, never inline styles on a screen.
 
 **Type:** use the role classes from `styles/type.css`: `text-title` (20), `text-heading` (16), `text-subheading` (14), `text-body` / `text-body-strong` (14), `text-reading` (the email), `text-small` (13), `text-overline` (12, uppercase labels), `text-mono` / `text-mono-small` (IDs, times, figures). Never set a one-off font size, and never go below 12px.
 
-**Themes:** dark mode follows the system unless `<html data-theme>` says otherwise. `data-theme="light"` or `"dark"` also works on any element, to show one theme inside the other. Set `background` and `color` on that element yourself.
+**Themes:** dark mode follows the system until a person picks light or dark in the header's `ThemeToggle`; the pick is kept in `localStorage` (`lib/theme.ts`) and set as `<html data-theme>`, by an inline script in the root layout before the first paint. Read the theme on screen with `useTheme()` from `@/components/ui`; never write `data-theme` on `<html>` yourself. `data-theme="light"` or `"dark"` also works on any element, to show one theme inside the other. Set `background` and `color` on that element yourself.
+
+**Visually hidden text:** `visually-hidden` (in `app/globals.css`) names something for screen readers without showing it, such as the inbox's `h1`, whose header row shows the product name instead.
 
 ## Layout
 
 Screens are built from `Pane`s in a shell grid. Never hand-build a tray, a card or their corners.
 
-**Shell** (the screen's `<main>`; the page background is already `--page`). Padding 16px below 768px, 24px from 768px. Gap between panes: 16px. A header row (screen title, and the `OutputSource` when the screen shows model output) spans every column. Nothing ever scrolls sideways.
+**Shell** (the screen's `<main>`; the page background is already `--page`). Padding 16px below 768px, 24px from 768px. Gap between panes: 16px. The header row is `AppHeader` and spans every column: the logo and "TriageDesk" on the left, the theme toggle and any IconButtons on the right. Nothing else goes in it, and never a Banner. Nothing ever scrolls sideways.
 
-With a queue (the inbox, where a person works through tickets). The inbox is `/tickets/[id]`, so every open ticket has its own URL; `/` redirects to the first-screen ticket. Read the ID with `useParams()` in a client component, never by awaiting `params` in the page: with Cache Components on, server-side `params` blocks instant navigation between tickets. Its header row holds the screen title, the open ticket's `OutputSource` (when it has model output) and, below 1200px, the "Queue" Button.
+**The email column** is exactly the email's reading measure plus the pane's padding: `--text-reading-measure` (32em, 448px at the 14px reading size) + 2 × (4px tray + 16px card) = 488px, so there's no dead space to the right of the email. From 768px the columns are centered; from 1200px the shell is centered with a max width of 1288px (320 + 16 + 488 + 16 + 400 + 2 × 24).
+
+With a queue (the inbox, where a person works through tickets). The inbox is `/tickets/[id]`, so every open ticket has its own URL; `/` redirects to the first-screen ticket. Read the ID with `useParams()` in a client component, never by awaiting `params` in the page: with Cache Components on, server-side `params` blocks instant navigation between tickets. Its header row is `AppHeader`, with, below 1200px, a round inbox `IconButton` (`aria-label="Open queue"`) to the right of the theme toggle. The screen's `h1` ("Inbox") is `visually-hidden`.
 
 | Width | Columns |
 | --- | --- |
-| 1200px and up | `320px minmax(0, 1fr) 400px`: queue, email, triage. The shell is `100dvh` tall and each pane's card scrolls on its own. |
-| 768–1199px | `minmax(0, 1fr) 360px`: email, triage. The queue moves behind a secondary "Queue" Button in the header row, which opens it in a `Sheet` with the open ticket highlighted and scrolled into view; picking a ticket or Escape closes it. |
-| Below 768px | One column: email, then triage. The "Queue" Button stays in the header; the Sheet is full width. |
+| 1200px and up | `320px minmax(0, 488px) 400px`: queue, email, triage, centered, max 1288px. The shell is `100dvh` tall and each pane's card scrolls on its own. |
+| 768–1199px | `minmax(0, 488px) 360px`: email, triage, centered. The queue moves behind the "Open queue" IconButton in the header row, which opens it in a `Sheet` with the open ticket highlighted and scrolled into view; picking a ticket, Escape, or the Sheet's round × ("Close queue") closes it. |
+| Below 768px | One column: email, then triage. "Open queue" stays in the header; the Sheet is full width. |
 
 **Queue order** comes from `orderQueue()` in `@/lib/queue`; never sort it yourself. Four groups, top to bottom, each headed in `text-overline`:
 
+A QueueItem's Tag never repeats its group's heading: no "Needs review" under Needs review, no "Not a request" under Probably no action, no "Not triaged" under Not triaged yet, no "Sent" under Sent. "Sent by rule" and "Closed" always stay, and so does a tag whose state no longer matches the group (a ticket sent while it holds its place in Needs review shows "Sent"). `queue-list.tsx` does this; a new list follows the same rule.
+
 1. **Needs review**: triaged and not yet sent. High stakes before normal, then the least sure first. High stakes means the category is Billing or Cancellation risk, or the urgency is Urgent, counting the runner-up as well as the top pick only when it's within the 15-point margin (the same test as "unsure"); once a person decides a field, only their value counts. Why: when Claude is unsure between two values, assume the higher stakes, so a likely cancellation can't sink just because the top guess was How-to; but a far-behind runner-up (Cancellation risk at 10% behind Bug at 70%) isn't doubt, and counting it floated ordinary tickets to the top.
-2. **Probably no action**: Claude suggests the email isn't a request, and nobody has closed it or triaged it anyway; newest first, each with a pencil "Not a request" Tag (`tone="ai"`). After "Triage anyway" the ticket moves to Needs review at the next re-sort.
-3. **Not triaged yet**: no model output, newest first, each with a neutral "Not triaged" Tag.
-4. **Sent**: sent by a person or a rule, or closed without a reply, most recent first, each keeping its "Sent", "Sent by rule" or "Closed" Tag.
+2. **Probably no action**: Claude suggests the email isn't a request, and nobody has closed it or triaged it anyway; newest first. After "Triage anyway" the ticket moves to Needs review at the next re-sort.
+3. **Not triaged yet**: no model output, newest first.
+4. **Sent**: sent by a person or a rule, or closed without a reply, most recent first. Rule sends keep "Sent by rule" and closed tickets keep "Closed".
 
 The order is computed when a ticket opens and held while it's open: the queue re-sorts only when a different ticket opens, or on reload. Tags still update live. Why: a row must never move out from under the person working on it.
 
-The browser tab reads "<ticket ID> · Triage Desk", set on the client because the page can't read the ID on the server: the ticket panes render a React `<title>`, and no layout or page above them sets a metadata title (Next would overwrite it on navigation).
+The browser tab reads "<ticket ID> · TriageDesk" (and /system "Design system · TriageDesk"; the product name is always one word, "TriageDesk"), set on the client because the page can't read the ID on the server: the ticket panes render a React `<title>`, and no layout or page above them sets a metadata title (Next would overwrite it on navigation).
 
 **Triage pane for "Not a request":** NoActionReview, then Claude's note if there is one, then the Timeline; no footer until it's closed. **Triage pane, top to bottom:** Category, then Urgency (each a FieldReview with its own evidence beneath it; hovering or focusing a quote marks it in the email), then Claude's note if there is one (`Banner` info titled "Claude's note", from `suggestion.agentNote`), then the draft, then the activity `Timeline` (collapsed, "Activity · 3"). Approve is in the footer. The first field still showing a meter gets `explainEstimate`, so the pane says once, under that meter, "Confidence is Claude's estimate, not a measured probability."
 
-Without a queue (a single ticket opened on its own, from a link): the same shell minus the queue column. That's not an exception, so don't ask about it. After sending, ApproveBar offers "Back to inbox" instead of "Next ticket".
+Without a queue (a single ticket opened on its own, from a link): the same shell minus the queue column, and no "Open queue" button. That's not an exception, so don't ask about it. After sending, ApproveBar offers "Back to inbox" instead of "Next ticket".
 
 | Width | Columns |
 | --- | --- |
-| 1200px and up | `minmax(0, 1fr) 400px`: email, triage, `100dvh` tall, each card scrolling on its own. |
-| 768–1199px | `minmax(0, 1fr) 360px`: email, triage. |
+| 1200px and up | `minmax(0, 488px) 400px`: email, triage, centered, `100dvh` tall, each card scrolling on its own. |
+| 768–1199px | `minmax(0, 488px) 360px`: email, triage, centered. |
 | Below 768px | One column: email, then triage. |
 
 **Pane** is the only pane: a `--tray` band (14px corners, 4px padding, `--shadow-pane`) holding a header (`text-heading` title, optional meta) and a `--surface` card (10px corners, 16px padding). Corners are concentric: inner radius = outer radius − the padding between them.
 
-**Other corners:** popovers and menus 10px, dialogs 14px. Components own their corners (4–8px); never override them.
+**Other corners:** popovers and menus 10px, dialogs 14px. Every button is fully rounded (`--button-radius: 999px` in `styles/elevation.css`): Button, IconButton and SegmentedControl all use it, so change the token, never a screen. Components own their corners (4–8px for everything else); never override them.
 
 ## Components
 
@@ -160,6 +166,8 @@ Use for actions. Navigation is a link, not a Button.
 - `danger`: discarding or undoing something a person made. Red text on secondary chrome, so it never outweighs Approve.
 - `secondary`: everything else. This is the default.
 - `size="small"`: inside a Banner, a table row or a toolbar. Otherwise `default`.
+
+Every Button is fully rounded, from `--button-radius`. An action with an icon and no words is an `IconButton`.
 
 ```
 Does it approve and send?            → variant="primary"
@@ -175,6 +183,30 @@ Default                              → variant="secondary"
 <Button variant="primary">Edit draft</Button>
 ```
 
+### IconButton
+
+A round secondary button holding one icon, with Button's chrome (raised, neutral, `--button-radius`). `icon` is one of `inbox`, `close` (the set in `components/ui/icon.tsx`; `sun` and `moon` are ThemeToggle's), and `aria-label` is required. For header actions and a Sheet's close; anything that approves or sends is a labelled Button.
+
+```tsx
+// Correct
+<IconButton icon="inbox" aria-label="Open queue" onClick={openQueue} />
+
+// Incorrect: an icon with no name; screen readers announce "button"
+<IconButton icon="inbox" aria-label="" onClick={openQueue} />
+```
+
+### AppHeader, Logo and ThemeToggle
+
+`AppHeader` is the header row on every screen: `Logo` (20px) and "TriageDesk" (16px semibold, `text-heading`) on the left; `ThemeToggle` and then `actions` (IconButtons only) on the right. Never a Banner or anything else there (rule 6). `Logo` is the brand exception to rule 4: `currentColor`, colored `--accent`. `ThemeToggle` is two round icon options, sun and moon, with a neutral selected state (never Petrol); it follows the OS until a person picks one, and remembers the pick. Use it only through AppHeader.
+
+```tsx
+// Correct: the inbox below 1200px
+<AppHeader actions={<IconButton icon="inbox" aria-label="Open queue" onClick={openQueue} />} />
+
+// Incorrect: a label in the header area, and a hand-built brand
+<header><h1>Triage Desk</h1><Banner title="Recorded example">…</Banner></header>
+```
+
 ### Tag
 
 A short label inside a row. A field value is a Chip.
@@ -182,7 +214,7 @@ A short label inside a row. A field value is a Chip.
 - `neutral` (the default): categories and plain facts ("Billing").
 - `warning`: needs a person ("Needs review").
 - `success`: done ("Sent").
-- `ai`: the model or a team rule acted ("Sent by rule"). Pencil.
+- `ai`: the model or a team rule acted ("Sent by rule"). Pencil: the soft gray fill, no border.
 - `human`: a person acted ("Edited"). Petrol, so only under rule 4.
 
 ```tsx
@@ -197,7 +229,7 @@ A short label inside a row. A field value is a Chip.
 
 Reviewing one suggested field: category or urgency. Use it for every field a person reviews; never assemble chips, meters and buttons yourself.
 
-- While suggested: the dashed chip, the ConfidenceMeter, and three small secondary Buttons: "Keep", "Switch to <runner-up>" and "Other…", which opens the full list. The override is one click, and none of these competes with Approve.
+- While suggested: the pencil chip, the ConfidenceMeter, and three small secondary Buttons: "Keep", "Switch to <runner-up>" and "Other…", which opens the full list. The override is one click, and none of these competes with Approve.
 - Once kept or switched: the solid chip ("Set by you") and a quiet "Change" link that reopens the controls. The meter gives way to a quiet note, "Claude suggested Cancellation risk · 50%" (rule 2).
 - `approved`: locks the field. An untouched field shows "Approved as suggested" (rule 7).
 - `readOnly`: a reply a team rule sent. The chip stays pencil and the meter stays (Petrol if it's high confidence); no controls, no decision styling.
@@ -253,7 +285,7 @@ Is it an unpicked alternative?       → state="default" (add aiPick if it's the
 
 ### ConfidenceMeter
 
-The only way to show a confidence value (rule 2). The value is Claude's own estimate, not a measured probability; every meter's accessible name says so ("Confidence: Claude's estimate, not a measured probability"), and the triage pane says it once in words (FieldReview `explainEstimate`). There's no hover-only explanation. Pass `value` from 0 to 1, and `runnerUp` (the runner-up's 0–1 confidence) whenever there is one. The level comes from the rounded percentage: high from 85%, medium from 60%, low below. You can't pass a level. Low adds a fill. An unsure pick (under 60%, or within 15 points of `runnerUp`) adds "confirm before approving" until you pass `confirmed` once a person has kept or switched the field. It wraps on narrow screens; never put it in a horizontally scrolling container. It's a block element, so don't put it inside a QueueItem's `meta`; use a `Tag tone="warning"` there.
+The only way to show a confidence value (rule 2). The value is Claude's own estimate, not a measured probability; every meter's accessible name says so ("Confidence: Claude's estimate, not a measured probability"), and the triage pane says it once in words (FieldReview `explainEstimate`). There's no hover-only explanation. Pass `value` from 0 to 1, and `runnerUp` (the runner-up's 0–1 confidence) whenever there is one. The level comes from the rounded percentage: high from 85%, medium from 60%, low below. You can't pass a level. No level has a fill or padding: low and medium differ by their word, the bar's length and the hint. An unsure pick (under 60%, or within 15 points of `runnerUp`) adds "· confirm first" until you pass `confirmed` once a person has kept or switched the field; screen readers hear the full reason ("close to the runner-up, confirm before approving"). It's always one line: in a narrow column the hint truncates with an ellipsis, and the bar, figure and word never shrink. Never put it in a horizontally scrolling container. Don't put it inside a QueueItem's `meta`; use a `Tag tone="warning"` there.
 
 ```tsx
 // Correct
@@ -303,7 +335,7 @@ The same quote in the evidence list beside the email, under the word for what it
 
 One entry in the activity timeline. Rows go in a `Timeline`, which is collapsed by default behind "Activity · <count>".
 
-- `actor="ai"`: the model or a team rule. `name` defaults to "Model"; pass "Team rule" for rules. Dashed ring.
+- `actor="ai"`: the model or a team rule. `name` defaults to "Model"; pass "Team rule" for rules. A soft gray dot (the pencil fill).
 - `actor="human"`: a person. `name` is required. Solid petrol dot.
 
 On Approve, a field a person kept or switched already has its own row ("set the category to Cancellation risk"). Each untouched field gets a separate row that says so: "approved the urgency as suggested: Normal". Never fold the two together (rule 7).
@@ -318,9 +350,9 @@ On Approve, a field a person kept or switched already has its own row ("set the 
 
 ### Banner
 
-A message about the whole view. A message about one field goes beside that field as `text-small`.
+A message about the whole view, inside a pane. Never in the header area (rule 6). A message about one field goes beside that field as `text-small`.
 
-- `info` (the default): neutral facts. Gray with a hairline ring, never petrol. Model output's source is not a Banner you write: use `OutputSource` (rule 6).
+- `info` (the default): neutral facts, such as "Claude's note". Gray with a hairline ring, never petrol. Never a label for where model output came from (rule 6).
 - `warning`: a person must act before going on, including "Approve is blocked" (rule 5).
 - `error`: something failed. It announces itself (`role="alert"`).
 
@@ -338,13 +370,15 @@ A message about the whole view. A message about one field goes beside that field
 
 ### QueueItem
 
-One ticket in the inbox list. `current` marks the ticket open beside the queue with a petrol tint (rule 4); only one item is `current`. `meta` takes Tags only.
+One ticket in the inbox list. `current` marks the ticket open beside the queue with a petrol tint (rule 4); only one item is `current`. `meta` takes Tags only, and only one that doesn't repeat its group's heading (see Queue order); leave it out otherwise.
 
 ```tsx
 // Correct
-<QueueItem current sender="Aisha Kamara" subject="Exporting all our invoices" preview="Could you tell me…" receivedAt={ticket.receivedAt} meta={<Tag tone="warning">Needs review</Tag>} />
+<QueueItem current sender="Aisha Kamara" subject="Exporting all our invoices" preview="Could you tell me…" receivedAt={ticket.receivedAt} />
+<QueueItem sender="Jonah Reyes" subject="How do I add a user?" preview="Hi, quick one…" receivedAt={rule.sentAt} meta={<Tag tone="ai">Sent by rule</Tag>} />
 
-// Incorrect: a confidence value as a tag (rule 2), and a meter here would be a block inside a button
+// Incorrect: a confidence value as a tag (rule 2), and a meter here would be a block inside a button.
+// (Also incorrect: <Tag tone="warning">Needs review</Tag> under the Needs review heading; it repeats it.)
 <QueueItem sender="Aisha Kamara" subject="Exporting all our invoices" preview="Could you tell me…" receivedAt={ticket.receivedAt} meta={<Tag>92%</Tag>} />
 ```
 
@@ -352,7 +386,7 @@ One ticket in the inbox list. `current` marks the ticket open beside the queue w
 
 The reply draft. `state` is required; the label shows it in words ("Draft reply · Suggested").
 
-- `suggested`: the model's draft, untouched. Pencil: dashed border (rule 1). The first change a person types shows it as `edited` and calls `onStateChange("edited")`. Give each new draft its own `key`, so it starts suggested again.
+- `suggested`: the model's draft, untouched. Pencil: the soft gray fill, no visible border (rule 1). The first change a person types shows it as `edited` and calls `onStateChange("edited")`. Give each new draft its own `key`, so it starts suggested again.
 - `edited`: a person changed it, or wrote it from scratch. Solid control border.
 - `approved`: approved or sent by a person. Read-only, in the decided style (rule 4).
 - `sent-by-rule`: sent by a team rule without review. Read-only and still pencil; no decision styling.
@@ -373,18 +407,6 @@ Is it the model's draft, untouched?   → state="suggested"
 
 // Incorrect: a model draft shown as a person's edit breaks rule 1, and the note is missing
 <DraftEditor label="Draft reply" state="edited" defaultValue={draft} />
-```
-
-### OutputSource
-
-The label for model output (rule 6). `source` is `recorded`, `live` or `hand-written`; the wording is fixed. Recorded and live are info; hand-written is a warning, because it must be replaced before shipping. One per screen, near the top, never dismissible.
-
-```tsx
-// Correct
-<OutputSource source="hand-written" />
-
-// Incorrect: a hand-written label with softened wording
-<Banner title="Example">Sample suggestions for this ticket.</Banner>
 ```
 
 ### Pane
@@ -425,7 +447,7 @@ Every time on screen (see Data, Times). Pass `dateTime` as ISO 8601.
 
 ### Sheet
 
-A dialog-level panel from the left: `--surface-raised`, `--shadow-dialog` and the `--scrim`; full width on phones. Focus moves in on open and back to the opener on close; Escape or a click outside closes it. The inbox's Queue button is its one use: close it when a ticket is picked.
+A dialog-level panel from the left: `--surface-raised`, `--shadow-dialog` and the `--scrim`; full width on phones. Its header has the title and, at its right, a round × IconButton named "Close <title>" ("Close queue"), styled like the "Open queue" button. Focus moves in on open and back to the opener on close; Escape, a click outside or the × closes it. The inbox's "Open queue" button is its one use: close it when a ticket is picked.
 
 ```tsx
 // Correct
@@ -463,7 +485,7 @@ How urgent a ticket is: `urgent`, `high`, `normal`, `low`. Only urgent is a soli
 
 ### SegmentedControl
 
-Choosing one of two to five views or filters, where every option fits on one line. More options, or options that need a search, go in a menu. It's a radio group, so `aria-label` is required. Use `defaultValue` for uncontrolled, or `value` with `onValueChange`.
+Choosing one of two to five views or filters, where every option fits on one line. More options, or options that need a search, go in a menu. It's a radio group, so `aria-label` is required. Use `defaultValue` for uncontrolled, or `value` with `onValueChange`. Fully rounded (`--button-radius`); the selected option is neutral (raised like a secondary button), never Petrol. An option may take an `icon` (`IconName`): only the icon shows and `label` becomes its accessible name. ThemeToggle is this, with sun and moon.
 
 ```tsx
 // Correct

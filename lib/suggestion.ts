@@ -11,7 +11,7 @@ export type Category = (typeof categories)[number];
 export const urgencies = ["Urgent", "High", "Normal", "Low"] as const;
 export type Urgency = (typeof urgencies)[number];
 
-/** Where model output came from. Shown with OutputSource (DESIGN.md, rule 6). */
+/** Where model output came from. Kept in the data, not shown in the interface (DESIGN.md, rule 6). */
 export type OutputSourceKind = "recorded" | "live" | "hand-written";
 
 /** Which suggestion a quote backs. */

@@ -6,7 +6,9 @@ export { confidenceLevel, confidenceThresholds, toPercent, unsureReason, type Co
 
 const words: Record<ConfidenceLevel, string> = { high: "High", medium: "Medium", low: "Low" };
 
-const hints = { low: "confirm before approving", close: "close to the runner-up, confirm before approving" };
+/** Shown: always "confirm first", on one line. Read out: the full reason. */
+const hint = "confirm first";
+const spoken = { low: "confirm before approving", close: "close to the runner-up, confirm before approving" };
 
 export type ConfidenceMeterProps = Omit<ComponentProps<"div">, "className" | "style" | "children"> & {
   /** 0–1. The level is derived from it, never passed. */
@@ -21,15 +23,14 @@ export type ConfidenceMeterProps = Omit<ComponentProps<"div">, "className" | "st
  * Always a bar, a percentage and a level word, never a chip: high shares
  * its petrol with decisions, so shape and words keep them apart. The value
  * is Claude's own estimate, not a measured probability; the accessible name
- * says so on every meter. An unsure
- * pick adds a hint to confirm it until a person does. Wraps on narrow
- * screens; never scrolls sideways.
+ * says so on every meter. An unsure pick adds "confirm first" until a person
+ * keeps or switches it. Always one line: the hint truncates with an ellipsis
+ * when there's no room, and the meter never wraps or scrolls sideways.
  */
 export function ConfidenceMeter({ value, runnerUp, confirmed = false, ...props }: ConfidenceMeterProps) {
   const percent = toPercent(value);
   const level = confidenceLevel(value);
   const reason = confirmed ? null : unsureReason(value, runnerUp);
-  const hint = reason ? hints[reason] : null;
 
   return (
     <div
@@ -38,7 +39,7 @@ export function ConfidenceMeter({ value, runnerUp, confirmed = false, ...props }
       aria-valuemin={0}
       aria-valuemax={100}
       aria-valuenow={percent}
-      aria-valuetext={`${percent}%, ${words[level].toLowerCase()} confidence${hint ? `, ${hint}` : ""}`}
+      aria-valuetext={`${percent}%, ${words[level].toLowerCase()} confidence${reason ? `, ${spoken[reason]}` : ""}`}
       {...props}
       className={`text-small ${styles.meter}`}
       data-level={level}
@@ -50,7 +51,11 @@ export function ConfidenceMeter({ value, runnerUp, confirmed = false, ...props }
         <span className="text-mono">{percent}%</span>
         <span>{words[level]} confidence</span>
       </span>
-      {hint && <span className={styles.hint}>· {hint}</span>}
+      {reason && (
+        <span className={styles.hint} aria-hidden>
+          · {hint}
+        </span>
+      )}
     </div>
   );
 }

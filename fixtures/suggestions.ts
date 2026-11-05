@@ -1,7 +1,8 @@
 /**
  * Model output for the example tickets, kept apart from the emails in
  * tickets.ts so an input can't be mistaken for an answer. Every entry names
- * its source, and screens show it with OutputSource.
+ * its source in the data; the interface doesn't label it (docs/brief.md,
+ * 5 November 2026).
  *
  * All of it is recorded output (recorded-suggestions.json): real runs of
  * scripts/record-suggestion.ts, each with its model, date and prompt

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { themeScript } from "@/lib/theme";
 import { Geist, Geist_Mono, Schibsted_Grotesk } from "next/font/google";
 import "@/styles/tokens.css";
 import "@/styles/theme.css";
@@ -19,7 +20,12 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={`${heading.variable} ${body.variable} ${mono.variable}`}>
+    // suppressHydrationWarning: the script below may set data-theme on <html>
+    // before React hydrates (ThemeToggle, lib/theme.ts).
+    <html lang="en" className={`${heading.variable} ${body.variable} ${mono.variable}`} suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+      </head>
       <body>{children}</body>
     </html>
   );

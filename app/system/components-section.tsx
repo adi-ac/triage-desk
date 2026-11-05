@@ -10,8 +10,9 @@ import {
   EvidenceItem,
   EvidenceMark,
   FieldReview,
+  IconButton,
+  Logo,
   NoActionReview,
-  OutputSource,
   Pane,
   QueueItem,
   SegmentedControl,
@@ -46,7 +47,7 @@ function SheetDemo() {
   const [open, setOpen] = useState(false);
   return (
     <>
-      <Button onClick={() => setOpen(true)}>Queue</Button>
+      <IconButton icon="inbox" aria-label="Open queue" onClick={() => setOpen(true)} />
       <Sheet open={open} onClose={() => setOpen(false)} title="Queue">
         <p className="text-small">The queue goes here.</p>
       </Sheet>
@@ -118,7 +119,10 @@ const pairs: Pair[] = [
   { label: "Selected queue item text", fg: "--ink", bg: "--accent-soft", kind: "text" },
   { label: "Selected queue item company, time, preview", fg: "--ink-2", bg: "--accent-soft", kind: "text" },
   { label: "Who set it, on a decided chip", fg: "--ink-2", bg: "--decided-fill", kind: "text" },
-  { label: "Low confidence hint on its fill", fg: "--ink-2", bg: "--confidence-low-fill", kind: "text" },
+  { label: "Icon button icon", fg: "--ink-2", bg: "--button-bg", kind: "non-text" },
+  { label: "Theme toggle, selected icon", fg: "--ink", bg: "--button-bg", kind: "non-text" },
+  { label: "Theme toggle, unselected icon on the track", fg: "--ink-2", bg: "--tray", kind: "non-text" },
+  { label: "Logo on the page", fg: "--accent", bg: "--page", kind: "non-text" },
   { label: "Draft text in the editor", fg: "--ink", bg: "--surface", kind: "text" },
   { label: "Suggested draft text", fg: "--suggested-text", bg: "--suggested-fill", kind: "text" },
   { label: "Approved reply text", fg: "--ink", bg: "--decided-fill", kind: "text" },
@@ -193,7 +197,7 @@ export function ComponentsSection({ theme }: { theme: string }) {
       <Demo
         name="Button"
         props="variant: primary | secondary | danger · size: default | small"
-        intro="Secondary is the default. Danger keeps the secondary chrome with red text, so it never outweighs Approve. Disabled is flat in every variant."
+        intro="Secondary is the default. Danger keeps the secondary chrome with red text, so it never outweighs Approve. Disabled is flat in every variant. Every button is fully rounded, from one token (--button-radius: 999px), as are IconButton and SegmentedControl."
       >
         {(["default", "small"] as const).map((size) => (
           <div key={size} className={styles.inline}>
@@ -212,9 +216,43 @@ export function ComponentsSection({ theme }: { theme: string }) {
       </Demo>
 
       <Demo
+        name="IconButton"
+        props="icon: inbox | close · aria-label"
+        intro="A round secondary button holding one icon, with Button's chrome. The name is required, since the icon has no words. Below 1200px the inbox header has Open queue to the right of the theme toggle; the queue sheet closes with Close queue in the same style."
+      >
+        <div className={styles.inline}>
+          <IconButton icon="inbox" aria-label="Open queue" />
+          <IconButton icon="close" aria-label="Close queue" />
+          <IconButton icon="inbox" aria-label="Open queue" disabled />
+        </div>
+      </Demo>
+
+      <Demo
+        name="Logo and AppHeader"
+        props="AppHeader: actions?"
+        intro={
+          <>
+            The mark at 20px, then TriageDesk at 16px semibold. The mark is drawn in currentColor and
+            colored with the accent, so it follows light and dark: the one brand exception to the
+            Petrol rule. AppHeader is the header row on every screen: this brand on the left, the
+            theme toggle (sun, moon) and any IconButtons on the right, and never a Banner. The live
+            one is at the top of this page.
+          </>
+        }
+      >
+        <div className={styles.brandRow}>
+          <p className={`text-heading ${styles.brand}`}>
+            <Logo />
+            TriageDesk
+          </p>
+          <Logo size={40} />
+        </div>
+      </Demo>
+
+      <Demo
         name="Tag"
         props="tone: neutral | warning | success | ai | human"
-        intro="ai is pencil (dashed, gray); human is ink (solid, petrol)."
+        intro="ai is pencil (a soft gray fill, no border); human is ink (solid, petrol)."
       >
         <div className={styles.inline}>
           <Tag>Billing</Tag>
@@ -274,8 +312,9 @@ export function ComponentsSection({ theme }: { theme: string }) {
             accessible name says so. The level is derived inside, from the rounded percentage: high from{" "}
             {confidenceThresholds.high}%, medium from {confidenceThresholds.medium}%, low below. A pick
             under {confidenceThresholds.medium}% or within {confidenceThresholds.margin} points of its
-            runner-up is unsure and asks to be confirmed, until a person keeps or switches it. Always
-            a bar, a figure and a word; it wraps instead of scrolling.
+            runner-up is unsure and adds confirm first, until a person keeps or switches it. Always
+            a bar, a figure and a word, on one line: in a narrow column the hint truncates with an
+            ellipsis (screen readers still hear the full reason). No level has a fill.
           </>
         }
       >
@@ -288,6 +327,10 @@ export function ComponentsSection({ theme }: { theme: string }) {
           <p className={`text-overline ${styles.muted}`}>Kept or switched by a person</p>
           <ConfidenceMeter value={0.48} confirmed />
           <ConfidenceMeter value={0.71} runnerUp={0.64} confirmed />
+          <p className={`text-overline ${styles.muted}`}>In a narrow column</p>
+          <div className={styles.narrow}>
+            <ConfidenceMeter value={0.48} />
+          </div>
         </div>
       </Demo>
 
@@ -325,7 +368,7 @@ export function ComponentsSection({ theme }: { theme: string }) {
       <Demo
         name="TimelineRow"
         props="actor: ai | human"
-        intro="Rows go in a Timeline, which is collapsed by default behind Activity · count (open here). The model and team rules get a dashed ring; a person gets a solid dot and must be named. A field approved untouched gets its own row, worded as approved as suggested, never as set."
+        intro="Rows go in a Timeline, which is collapsed by default behind Activity · count (open here). The model and team rules get a soft gray dot; a person gets a solid petrol dot and must be named. A field approved untouched gets its own row, worded as approved as suggested, never as set."
       >
         <Timeline defaultOpen>
           <TimelineRow actor="ai" at="2026-11-02T16:48:00Z">
@@ -355,8 +398,12 @@ export function ComponentsSection({ theme }: { theme: string }) {
         </div>
       </Demo>
 
-      <Demo name="QueueItem" intro="Content props only. The open ticket has a petrol tint, with its secondary text stepped up to ink-2.">
+      <Demo
+        name="QueueItem"
+        intro="Content props only. The open ticket has a petrol tint, with its secondary text stepped up to ink-2. A tag that repeats its group's heading is left out (no Needs review under Needs review); Sent by rule and Closed always stay."
+      >
         <div className={styles.queue}>
+          <p className={`text-overline ${styles.muted}`}>Needs review</p>
           <QueueItem
             current
             sender={firstScreen.from.name}
@@ -364,8 +411,8 @@ export function ComponentsSection({ theme }: { theme: string }) {
             subject={firstScreen.subject}
             preview={preview(firstScreen)}
             receivedAt={firstScreen.receivedAt}
-            meta={<Tag tone="warning">Needs review</Tag>}
           />
+          <p className={`text-overline ${styles.muted}`}>Sent</p>
           <QueueItem
             sender={autoSent.from.name}
             company={autoSent.account?.company}
@@ -380,7 +427,7 @@ export function ComponentsSection({ theme }: { theme: string }) {
       <Demo
         name="DraftEditor"
         props="state: suggested | edited | approved | sent-by-rule · blocker · warning"
-        intro="Suggested is the model's untouched draft, dashed like any suggestion. Type in it and it turns edited, with a solid border. Approved is read-only in the decided style. The note keeps saying who drafted it."
+        intro="Suggested is the model's untouched draft: a soft gray fill with no border, like any suggestion. Type in it and it turns edited, with a solid border. Approved is read-only in the decided style. The note keeps saying who drafted it."
       >
         <DraftEditor label="Draft reply" state="suggested" rows={3} note="Drafted by the model" defaultValue={draft} />
         <DraftEditor label="Draft reply" state="edited" rows={3} note="Drafted by the model, edited by you" defaultValue={draft} />
@@ -402,18 +449,6 @@ export function ComponentsSection({ theme }: { theme: string }) {
           defaultValue={suggestion.draft}
         />
         <DraftEditor label="Reply" state="sent-by-rule" rows={3} note="Drafted by the model, sent by rule without review" defaultValue={draft} />
-      </Demo>
-
-      <Demo
-        name="OutputSource"
-        props="source: recorded | live | hand-written"
-        intro="Every screen that shows model output carries exactly one, with fixed wording. Hand-written is for the build only and is a warning, so it can't ship unnoticed."
-      >
-        <div className={styles.blocks}>
-          <OutputSource source="recorded" />
-          <OutputSource source="live" />
-          <OutputSource source="hand-written" />
-        </div>
       </Demo>
 
       <Demo
@@ -460,7 +495,7 @@ export function ComponentsSection({ theme }: { theme: string }) {
       <Demo
         name="Sheet"
         props="open · onClose · title"
-        intro="A dialog-level panel from the left: surface-raised, the dialog shadow and the scrim; full width on phones. Focus moves in on open and back to the button on close. Escape or a click outside closes it. The inbox's Queue button opens the queue in one."
+        intro="A dialog-level panel from the left: surface-raised, the dialog shadow and the scrim; full width on phones. Focus moves in on open and back to the button on close. Escape, a click outside or the round × (Close queue) closes it. The inbox's Open queue button opens the queue in one."
       >
         <SheetDemo />
       </Demo>
@@ -477,15 +512,28 @@ export function ComponentsSection({ theme }: { theme: string }) {
         </div>
       </Demo>
 
-      <Demo name="SegmentedControl" intro="Content props only. Arrow keys move and select, like native radios. The theme switch at the top of this page uses it.">
-        <SegmentedControl
-          aria-label="Inbox filter"
-          options={[
-            { value: "review", label: "Needs review" },
-            { value: "rule", label: "Sent by rule" },
-            { value: "all", label: "All" },
-          ]}
-        />
+      <Demo
+        name="SegmentedControl"
+        props="options: { value, label, icon? }"
+        intro="Arrow keys move and select, like native radios. Fully rounded; the selected option is neutral (raised like a secondary button), never petrol. With icons, each label becomes the option's name and only the icon shows: ThemeToggle, at the top of this page, is this with sun and moon."
+      >
+        <div className={styles.inline}>
+          <SegmentedControl
+            aria-label="Inbox filter"
+            options={[
+              { value: "review", label: "Needs review" },
+              { value: "rule", label: "Sent by rule" },
+              { value: "all", label: "All" },
+            ]}
+          />
+          <SegmentedControl
+            aria-label="Theme (demo)"
+            options={[
+              { value: "light", label: "Light", icon: "sun" },
+              { value: "dark", label: "Dark", icon: "moon" },
+            ]}
+          />
+        </div>
       </Demo>
 
       <section className={styles.card}>

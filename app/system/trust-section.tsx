@@ -11,8 +11,7 @@ const draftText = "Hi Aisha, thanks for checking before your renewal. Here's wha
 
 const pairs: Pair[] = [
   { label: "Suggestion text on its fill", fg: "--suggested-text", bg: "--suggested-fill", kind: "text" },
-  { label: "Suggestion border on surface", fg: "--suggested-border", bg: "--surface", kind: "non-text" },
-  { label: "Suggestion border on its fill", fg: "--suggested-border", bg: "--suggested-fill", kind: "non-text" },
+  { label: "AI tag text on the suggestion fill", fg: "--ink-2", bg: "--suggested-fill", kind: "text" },
   { label: "Decision text on its fill", fg: "--decided-text", bg: "--decided-fill", kind: "text" },
   { label: "Decision border on surface", fg: "--decided-border", bg: "--surface", kind: "non-text" },
   { label: "Text on category evidence", fg: "--ink", bg: "--evidence-category", kind: "text" },
@@ -23,7 +22,8 @@ const pairs: Pair[] = [
   { label: "High confidence meter", fg: "--confidence-high", bg: "--confidence-track", kind: "non-text" },
   { label: "Medium confidence text", fg: "--confidence-medium-text", bg: "--surface", kind: "text" },
   { label: "Medium confidence meter", fg: "--confidence-medium", bg: "--confidence-track", kind: "non-text" },
-  { label: "Low confidence text on its fill", fg: "--confidence-low-text", bg: "--confidence-low-fill", kind: "text" },
+  { label: "Low confidence text", fg: "--confidence-low-text", bg: "--surface", kind: "text" },
+  { label: "Confirm first hint", fg: "--ink-2", bg: "--surface", kind: "text" },
   { label: "Low confidence meter", fg: "--confidence-low", bg: "--confidence-track", kind: "non-text" },
   { label: "Urgent", fg: "--severity-urgent-text", bg: "--severity-urgent-fill", kind: "text" },
   { label: "High severity", fg: "--severity-high-text", bg: "--severity-high-fill", kind: "text" },
@@ -44,8 +44,11 @@ export function TrustSection({ theme }: { theme: string }) {
       <section className={styles.card}>
         <h3 className={`text-heading ${styles.cardTitle}`}>Pencil and ink</h3>
         <p className={`text-body ${styles.muted} ${styles.cardIntro}`}>
-          Anything the model proposes is pencil: dashed and gray. Anything a person sets or approves
-          is ink: solid and petrol. Both are flat, because neither is a button.
+          Anything the model proposes is pencil: a soft gray fill with no visible border. Anything a
+          person sets or approves is ink: a petrol tint with a solid petrol border, and it always
+          says how it was decided (Set by you, Approved as suggested, Claude suggested … · n%).
+          Pencil and ink differ by color plus those words, so the words are never left off. Both
+          are flat, because neither is a button.
         </p>
         <div className={styles.pencilInk}>
           <div className={styles.field}>
@@ -95,6 +98,11 @@ export function TrustSection({ theme }: { theme: string }) {
             defaultValue={draftText}
           />
         </div>
+        <p className={`text-small ${styles.muted}`}>
+          The suggestion fill is not a contrast boundary: against the card it measures 1.14:1 in
+          light and 1.18:1 in dark, so a suggested chip or draft is told from a decided one by the
+          decided style&apos;s solid border and its words, not by the fill&apos;s edge.
+        </p>
       </section>
 
       <section className={styles.card}>
@@ -121,7 +129,9 @@ export function TrustSection({ theme }: { theme: string }) {
         <h3 className={`text-heading ${styles.cardTitle}`}>Confidence</h3>
         <p className={`text-body ${styles.muted} ${styles.cardIntro}`}>
           Confidence is Claude&apos;s estimate, not a measured probability. High is petrol, like
-          Approve: fine to go ahead. Medium turns the meter amber; low adds a fill and blocks Approve.
+          Approve: fine to go ahead. Medium and low are amber, with no fill: they differ by the
+          word, the bar&apos;s length and the hint. Low always asks to confirm first and blocks
+          Approve.
         </p>
         <div className={styles.stack}>
           <ConfidenceMeter value={0.92} />

@@ -36,26 +36,15 @@
 
 .header {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
-  padding: 14px 16px 10px;
+  padding: 12px 12px 10px 16px;
   border-block-end: var(--hairline) solid var(--line);
 }
 
 .title {
   margin: 0;
-}
-
-.close {
-  appearance: none;
-  border: 0;
-  padding: 0;
-  background: none;
-  color: var(--ink-2);
-  text-decoration: underline;
-  text-underline-offset: 3px;
-  cursor: pointer;
 }
 
 .content {

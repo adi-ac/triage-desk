@@ -2,8 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useRef, useState, type ReactNode } from "react";
-import { Button, OutputSource, Pane, Sheet } from "@/components/ui";
-import { suggestionFor } from "@/fixtures/suggestions";
+import { AppHeader, IconButton, Pane, Sheet } from "@/components/ui";
 import { tickets } from "@/fixtures/tickets";
 import { InboxProvider } from "./inbox-state";
 import { QueueList } from "./queue-list";
@@ -11,8 +10,8 @@ import styles from "./inbox.module.css";
 
 /**
  * The inbox shell (DESIGN.md, Layout, with a queue): the header row, the
- * queue pane from 1200px or the Queue sheet below, and the open ticket's
- * email and triage panes.
+ * queue pane from 1200px or the queue sheet (behind "Open queue") below,
+ * and the open ticket's email and triage panes.
  */
 export function InboxShell({ children }: { children: ReactNode }) {
   const { id } = useParams<{ id: string }>();
@@ -27,7 +26,6 @@ function Shell({ id, children }: { id: string; children: ReactNode }) {
   const router = useRouter();
   const [queueOpen, setQueueOpen] = useState(false);
   const sheetList = useRef<HTMLDivElement>(null);
-  const suggestion = suggestionFor(id);
 
   const open = (ticketId: string) => {
     setQueueOpen(false);
@@ -41,17 +39,16 @@ function Shell({ id, children }: { id: string; children: ReactNode }) {
 
   return (
     <main className={styles.shell}>
-      <header className={styles.header}>
-        <h1 className={`text-title ${styles.title}`}>Inbox</h1>
-        {suggestion && (
-          <div className={styles.source}>
-            <OutputSource source={suggestion.source} />
-          </div>
-        )}
-        <div className={styles.queueButton}>
-          <Button onClick={() => setQueueOpen(true)}>Queue</Button>
-        </div>
-      </header>
+      <div className={styles.header}>
+        <AppHeader
+          actions={
+            <span className={styles.queueButton}>
+              <IconButton icon="inbox" aria-label="Open queue" onClick={() => setQueueOpen(true)} />
+            </span>
+          }
+        />
+      </div>
+      <h1 className="visually-hidden">Inbox</h1>
 
       <div className={styles.queuePane}>
         <Pane title="Queue" meta={`${tickets.length} tickets`}>

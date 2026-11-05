@@ -102,6 +102,10 @@
 [data-theme="dark"] {
   color-scheme: dark;
 
+  /* Re-derived here so a dark-scoped element (a /system demo pane on a light
+     page) gets the dark accent ring, not the light one it would inherit. */
+  --focus-ring: var(--accent);
+
   --bg: var(--gray-990);
   --page: var(--gray-990);
   --tray: color-mix(in oklch, var(--gray-990), var(--gray-975));

@@ -18,6 +18,9 @@
 
 :root {
   --hairline: 1px;
+  /* Every button is fully rounded: labelled buttons, icon buttons and
+     toggles (SegmentedControl). */
+  --button-radius: 999px;
 }
 
 /* [data-theme] re-derives these inside a themed element, since a custom

@@ -22,17 +22,22 @@ const groups = [
   { key: "sent", title: "Sent" },
 ] as const;
 
+type GroupKey = (typeof groups)[number]["key"];
+
 export function QueueList({ currentId, onOpen }: { currentId: string; onOpen: (id: string) => void }) {
   const { queue, stateFor, effectiveFor } = useInbox();
 
   // Tags follow the ticket's state live, even while its row holds its place.
-  const meta = (t: Ticket) => {
+  // A tag that repeats its group's heading is left out; one that adds to it
+  // stays: "Sent by rule" and "Closed" always, and a state that no longer
+  // matches the group (a ticket sent while it holds its place in Needs review).
+  const meta = (t: Ticket, group: GroupKey) => {
     if (ruleSendFor(t.id)) return <Tag tone="ai">Sent by rule</Tag>;
-    if (!suggestionFor(t.id)) return <Tag>Not triaged</Tag>;
+    if (!suggestionFor(t.id)) return group === "untriaged" ? null : <Tag>Not triaged</Tag>;
     if (stateFor(t.id).closedAt) return <Tag>Closed</Tag>;
-    if (stateFor(t.id).sentAt) return <Tag tone="success">Sent</Tag>;
-    if (effectiveFor(t.id)?.kind === "not-a-request") return <Tag tone="ai">Not a request</Tag>;
-    return <Tag tone="warning">Needs review</Tag>;
+    if (stateFor(t.id).sentAt) return group === "sent" ? null : <Tag tone="success">Sent</Tag>;
+    if (effectiveFor(t.id)?.kind === "not-a-request") return group === "noAction" ? null : <Tag tone="ai">Not a request</Tag>;
+    return group === "needsReview" ? null : <Tag tone="warning">Needs review</Tag>;
   };
 
   return (
@@ -53,7 +58,7 @@ export function QueueList({ currentId, onOpen }: { currentId: string; onOpen: (i
                     subject={t.subject || "(No subject)"}
                     preview={previewOf(t.body)}
                     receivedAt={t.receivedAt}
-                    meta={meta(t)}
+                    meta={meta(t, key)}
                     onClick={() => onOpen(t.id)}
                   />
                 </li>

@@ -7,7 +7,7 @@
   justify-content: center;
   gap: 6px;
   border: 0;
-  border-radius: 8px;
+  border-radius: var(--button-radius);
   padding: 6px 14px;
   font-weight: var(--text-body-weight-strong);
   white-space: nowrap;
@@ -20,8 +20,22 @@
 }
 
 .button[data-size="small"] {
-  border-radius: 6px;
   padding: 2px 10px;
+}
+
+/* IconButton: a round button holding one icon, the same height as a
+   default Button's line. */
+.button[data-shape="icon"] {
+  inline-size: 32px;
+  block-size: 32px;
+  padding: 0;
+  color: var(--ink-2);
+}
+
+@media (hover: hover) {
+  .button[data-shape="icon"]:hover:not(:disabled) {
+    color: var(--ink);
+  }
 }
 
 .button[data-variant="primary"] {

@@ -1,11 +1,12 @@
 "use client";
 
 import { useEffect, useId, useRef, type ReactNode } from "react";
+import { IconButton } from "./icon-button";
 import styles from "./sheet.module.css";
 
 export type SheetProps = {
   open: boolean;
-  /** Called on Escape, a click on the scrim, or the close button. */
+  /** Called on Escape, a click on the scrim, or the round × button ("Close <title>"). */
   onClose: () => void;
   /** The sheet's name, shown as its heading. */
   title: string;
@@ -45,9 +46,7 @@ export function Sheet({ open, onClose, title, children }: SheetProps) {
           <h2 id={headingId} className={`text-heading ${styles.title}`}>
             {title}
           </h2>
-          <button type="button" className={`text-small ${styles.close}`} onClick={onClose}>
-            Close
-          </button>
+          <IconButton icon="close" aria-label={`Close ${title.toLowerCase()}`} onClick={onClose} />
         </div>
         <div className={styles.content}>{children}</div>
       </div>

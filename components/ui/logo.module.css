@@ -1,0 +1,7 @@
+/* The brand exception to the Petrol rule (DESIGN.md, rule 4): the mark is
+   drawn in currentColor and colored with the accent, so it follows light
+   and dark. It's not a control and never appears beside Approve. */
+.logo {
+  flex: none;
+  color: var(--accent);
+}
