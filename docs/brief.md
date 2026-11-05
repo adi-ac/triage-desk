@@ -255,6 +255,9 @@ What it can't claim is real-world use, so it gets tested with support agents and
 - Phones (below 768px): the queue sheet is a bottom sheet instead of a side sheet. It slides up from the bottom edge (300ms in, 220ms out, ease-drawer), is 90dvh tall so the page stays visible above it, has rounded top corners and a grab handle, and can be swiped down on the handle or header: it follows the finger, closes past 160px (or a quarter of its height) or a 0.5px/ms flick, and otherwise springs back. The backdrop, the ×, and Escape also close it; focus handling is unchanged. With reduced motion it simply appears and disappears, and dragging still works.
 - Switching theme no longer animates every color on the page.
 
+**No date jump on load** (2026-11-05)
+- Dates in the queue and the email's "Received" line no longer jump right after the page loads. They used to be drawn first in a UTC placeholder ("2 Nov, 10:02") and then swapped for local time ("Nov 2, 05:02 AM"), growing about 22px and pushing the company names and the "Received" line. Now an inline script writes local time before the first paint (Next's documented pattern), so times are never shown in UTC.
+
 **Focus ring** (decided 2026-11-03): the accent, 2px with a 2px offset, set globally on `:focus-visible` via a `--focus-ring` role. It is at least 6.59:1 on `surface` and `bg` in both themes.
 - The one documented exception to the Petrol rule (Petrol is only for decisions, high confidence, the selected queue item and Approve), confirmed 2026-11-04. My reason: keyboard focus must always be clearly visible, and it only appears while tabbing, so it never competes with Approve.
 

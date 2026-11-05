@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { themeScript } from "@/lib/theme";
+import { timeScript } from "@/lib/time-format";
 import { Geist, Geist_Mono, Schibsted_Grotesk } from "next/font/google";
 import "@/styles/tokens.css";
 import "@/styles/theme.css";
@@ -26,6 +27,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html lang="en" className={`${heading.variable} ${body.variable} ${mono.variable}`} suppressHydrationWarning>
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        {/* Lets each Time write local time before the first paint (lib/time-format.ts). */}
+        <script dangerouslySetInnerHTML={{ __html: timeScript }} />
       </head>
       <body>{children}</body>
     </html>

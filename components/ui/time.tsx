@@ -1,36 +1,21 @@
 "use client";
 
 import { useSyncExternalStore, type ComponentProps } from "react";
+import { applyTimeScript, formatTime } from "@/lib/time-format";
 
 const subscribe = () => () => {};
-
-/** Short form in the viewer's time zone: the time today, the date and time before that. */
-function short(date: Date, now: Date) {
-  const sameDay = date.toDateString() === now.toDateString();
-  if (sameDay) return new Intl.DateTimeFormat(undefined, { hour: "2-digit", minute: "2-digit" }).format(date);
-  const sameYear = date.getFullYear() === now.getFullYear();
-  return new Intl.DateTimeFormat(undefined, {
-    day: "numeric",
-    month: "short",
-    year: sameYear ? undefined : "numeric",
-    hour: "2-digit",
-    minute: "2-digit",
-  }).format(date);
-}
-
-const full = (date: Date) => new Intl.DateTimeFormat(undefined, { dateStyle: "full", timeStyle: "long" }).format(date);
+const todaySnapshot = () => new Date().toDateString();
 
 const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 const pad = (n: number) => String(n).padStart(2, "0");
 
 /**
- * The server doesn't know the viewer's zone, so the server render and the
- * hydration render show UTC ("2 Nov, 10:02") until the page hydrates.
- * Built by hand, not with Intl: Node's and the browser's date data differ
- * ("2 Nov, 10:02" vs "2 Nov at 10:02"), and any difference is a hydration
- * mismatch.
+ * What the server writes into the HTML. Never seen: the inline script after
+ * the element replaces it with local time before the first paint. Built by
+ * hand so the server render doesn't read the current time (Cache Components
+ * prerendering forbids it) or depend on Node's date data.
  */
-const serverShort = (date: Date) =>
+const placeholder = (date: Date) =>
   `${date.getUTCDate()} ${months[date.getUTCMonth()]}, ${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())}`;
 
 export type TimeProps = Omit<ComponentProps<"time">, "className" | "style" | "children" | "dateTime" | "title"> & {
@@ -42,13 +27,33 @@ export type TimeProps = Omit<ComponentProps<"time">, "className" | "style" | "ch
  * A moment, in the viewer's time zone: the time if it's today, the date and
  * time if it's older, and the full timestamp with its zone on hover. Mono,
  * so figures line up.
+ *
+ * Never shown in UTC, not even before the page hydrates: on a full page load
+ * an inline script right after the <time> writes the local text before the
+ * first paint (lib/time-format.ts, Next's documented pattern), and
+ * suppressHydrationWarning keeps it; after hydration the client renders the
+ * same text, so nothing changes on screen. On client-side navigation the
+ * script is inert (text/plain) and the component formats directly.
  */
 export function Time({ dateTime, ...props }: TimeProps) {
-  const hydrated = useSyncExternalStore(subscribe, () => true, () => false);
-  const date = new Date(dateTime);
+  // Today's date on the client (a stable string, so it's a valid snapshot);
+  // null on the server and during hydration, where the placeholder renders.
+  const today = useSyncExternalStore(subscribe, todaySnapshot, () => null);
+  const [text, title] =
+    today === null ? [placeholder(new Date(dateTime)), undefined] : formatTime(dateTime, new Date(today).getTime());
   return (
-    <time {...props} dateTime={dateTime} title={hydrated ? full(date) : undefined} className="text-mono-small">
-      {hydrated ? short(date, new Date()) : serverShort(date)}
-    </time>
+    <>
+      <time {...props} dateTime={dateTime} title={title} className="text-mono-small" suppressHydrationWarning>
+        {text}
+      </time>
+      <script
+        // Runs during HTML parsing on a full load; on the client React
+        // renders it as text/plain, so it never runs twice and React doesn't
+        // warn about rendering a script.
+        type={typeof window === "undefined" ? "text/javascript" : "text/plain"}
+        suppressHydrationWarning
+        dangerouslySetInnerHTML={{ __html: applyTimeScript }}
+      />
+    </>
   );
 }
