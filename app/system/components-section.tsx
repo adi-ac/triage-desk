@@ -382,7 +382,7 @@ export function ComponentsSection({ theme }: { theme: string }) {
       <Demo
         name="TimelineRow"
         props="actor: ai | human"
-        intro="Rows go in a Timeline, which is collapsed by default behind Activity · count (open here). The AI and team rules get a soft gray dot; a person gets a solid petrol dot and must be named. A field approved untouched gets its own row, worded as approved as suggested, never as set."
+        intro="Rows go in a Timeline, which is collapsed by default behind Activity · count (open here). The AI and team rules get a hollow ring (surface fill, ink-3 ring); a person gets a solid petrol dot and must be named. One continuous line joins the centres of the dots, whatever each row's height, and stops at the last row. A field approved untouched gets its own row, worded as approved as suggested, never as set."
       >
         <Timeline defaultOpen>
           <TimelineRow actor="ai" at="2026-11-02T16:48:00Z">

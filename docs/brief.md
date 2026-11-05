@@ -242,6 +242,10 @@ What it can't claim is real-world use, so it gets tested with support agents and
 - Below 1200px, opening the queue sheet moves focus to the sheet itself (`tabIndex={-1}`, no outline on the container), not to its close button, so no focus ring shows after a tap. Tab reaches the close button with its normal focus-visible ring. Closing returns focus to the inbox button: no ring after a tap or click, the usual ring after Escape or keyboard use. Focus-visible styles are never removed from controls.
 - The inbox icon button ("Open queue") uses the primary Petrol style: the Petrol gradient, an `accent-ink` icon and the primary hover. A documented exception to the Petrol rule (DESIGN.md rule 4): it's the queue's entry point on small screens, and since Approve is unpinned below 1200px the two rarely compete.
 
+**Activity timeline line** (decided 2026-11-05)
+- One continuous connector from the centre of each row's dot to the centre of the next (10px into the row to 10px past its bottom), 1px, centred on the dots, `--ink` at 28%; none after the last row. Dots sit above the line and are opaque.
+- The AI dot is a hollow ring: a surface fill with a 1.5px `ink-3` ring inside its edge. Person dots stay solid Petrol. (Before, the AI dot used the 7% pencil fill, which the line showed through.)
+
 **Focus ring** (decided 2026-11-03): the accent, 2px with a 2px offset, set globally on `:focus-visible` via a `--focus-ring` role. It is at least 6.59:1 on `surface` and `bg` in both themes.
 - The one documented exception to the Petrol rule (Petrol is only for decisions, high confidence, the selected queue item and Approve), confirmed 2026-11-04. My reason: keyboard focus must always be clearly visible, and it only appears while tabbing, so it never competes with Approve.
 

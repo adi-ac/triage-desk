@@ -11,7 +11,7 @@ type TimelineRowBase = Omit<ComponentProps<"li">, "className" | "style"> & {
 
 /**
  * One entry in an activity timeline; put rows in an <ol>. Children describe
- * what happened ("drafted a reply"). ai is pencil (a soft gray dot) and is
+ * what happened ("drafted a reply"). ai is a hollow ring (surface fill, ink-3 ring) and is
  * named "AI" unless you say otherwise (a team rule, say); human is ink (a
  * solid petrol dot) and must be named.
  */

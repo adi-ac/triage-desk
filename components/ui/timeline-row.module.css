@@ -8,21 +8,28 @@
   color: var(--ink-2);
 }
 
-/* The connector to the next row. */
+/* One continuous connector from the centre of this row's dot to the centre
+   of the next row's: the dot's centre is 10px into a row (5px margin + half
+   of 10px), so the line starts 10px in and ends 10px past the row's bottom,
+   whatever the row's height. 1px, centred on the 10px dot (4.5px in). None
+   after the last row. */
 .row:not(:last-child)::before {
   content: "";
   position: absolute;
-  inset-block: 14px -2px;
+  inset-block: 10px -10px;
   inset-inline-start: 4.5px;
   inline-size: 1px;
-  background: var(--line);
+  background: color-mix(in oklch, var(--ink) 28%, transparent);
 }
 
 .row:last-child {
   padding-block-end: 0;
 }
 
+/* Above the connector and opaque, so the line never shows through. */
 .marker {
+  position: relative;
+  z-index: 1;
   align-self: start;
   margin-block-start: 5px;
   inline-size: 10px;
@@ -30,14 +37,16 @@
   border-radius: 50%;
 }
 
+/* The AI or a team rule: a hollow ring, surface-filled with a 1.5px ink-3
+   ring inside its edge. */
 .row[data-actor="ai"] .marker {
-  background: var(--suggested-fill);
-  border: 1px var(--suggested-border-style) var(--suggested-border);
+  background: var(--surface);
+  box-shadow: inset 0 0 0 1.5px var(--ink-3);
 }
 
+/* A person: solid Petrol. */
 .row[data-actor="human"] .marker {
   background: var(--decided-border);
-  border: 1px var(--decided-border-style) var(--decided-border);
 }
 
 .text {
