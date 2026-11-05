@@ -132,7 +132,13 @@
 
 /* Schibsted Grotesk (the heading font), 14px, 550. The mask is opaque up
    to 30% before --fab-reveal and clear from it: 130% shows the whole word,
-   0% none of it, and in between the clear part grows from the right. */
+   0% none of it, and in between the clear part grows from the right.
+
+   Collapsing, the mask sweeps the word out right to left; opacity stays 1
+   until the collapse has finished, then resets to 0 at once, unseen.
+   Extending, the mask is fully revealed at once (the word is still at
+   opacity 0) and the word fades in as the space finishes opening: no
+   sweep and no movement. */
 .label {
   display: block;
   inline-size: max-content;
@@ -141,14 +147,19 @@
   font-weight: 550;
   line-height: 20px;
   --fab-reveal: 0%;
+  opacity: 0;
   mask-image: linear-gradient(to right, #000 calc(var(--fab-reveal) - 30%), transparent var(--fab-reveal));
-  transition: --fab-reveal var(--duration-fab-label) var(--ease-fab-label-out);
+  transition:
+    --fab-reveal var(--duration-fab-label) var(--ease-fab-label-out),
+    opacity 0s linear var(--delay-fab-label-reset);
 }
 
 .fab[data-extended] .label {
   --fab-reveal: 130%;
-  transition-timing-function: var(--ease-fab-label-in);
-  transition-delay: var(--delay-fab-label-in);
+  opacity: 1;
+  transition:
+    --fab-reveal 0s,
+    opacity var(--duration-fab-label-in) var(--ease-fab-label-in) var(--delay-fab-label-in);
 }
 
 /* Scrim */

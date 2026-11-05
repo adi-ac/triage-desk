@@ -20,18 +20,22 @@
      turning into the close ×. */
   --ease-fab: cubic-bezier(0.2, 0, 0, 1);
   --duration-fab-resize: 240ms;
+  /* Collapsing, the label sweeps out right to left (its mask), a strong
+     ease-out so the fade gets well ahead of the shrinking edge. */
   --duration-fab-label: 220ms;
-  /* The label's sweep. Out, a strong ease-out, so the fade gets well ahead
-     of the shrinking edge; in, a gentle one, so the word appears no faster
-     than the edge makes room for it. Either way no letter is cut off. */
   --ease-fab-label-out: var(--ease-out-quart);
-  --ease-fab-label-in: cubic-bezier(0, 0, 0.58, 1);
   --duration-fab-icon: 260ms;
   /* Collapsing: the label's fade starts at once and the width follows
      this much later, so the fade always runs ahead of the shrinking edge. */
   --delay-fab-collapse: 60ms;
-  /* Extending: the width grows first and the label fades in this much later. */
-  --delay-fab-label-in: 90ms;
+  /* Extending, the width grows first and the label simply fades in (no
+     sweep) this much later, as the space finishes opening. */
+  --duration-fab-label-in: 180ms;
+  --ease-fab-label-in: var(--ease-out-quart);
+  --delay-fab-label-in: 120ms;
+  /* Once a collapse has finished, the label's opacity resets to 0 (out of
+     sight, behind the mask), ready for the next fade in. */
+  --delay-fab-label-reset: calc(var(--delay-fab-collapse) + var(--duration-fab-resize));
   --delay-fab-icon: 40ms;
   /* The FAB's press. */
   --duration-press: 150ms;

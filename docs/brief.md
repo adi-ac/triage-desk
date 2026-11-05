@@ -268,6 +268,10 @@ What it can't claim is real-world use, so it gets tested with support agents and
 **The queue panel closes with a fade** (decided 2026-11-05)
 - Closing no longer shrinks the panel back into its corner (220ms). The whole panel, content still visible, fades out in place over 180ms, `cubic-bezier(0.2, 0, 0, 1)`, with no clip, movement or scaling; the content no longer fades out first, and the scrim fades out over the same 180ms. Opening is unchanged: it grows from the bottom-right corner over 340ms and its content fades in. Reduced motion is still instant. Reason (to confirm): once the person has picked a ticket or dismissed the queue, its origin no longer matters, so a short, quiet fade is enough and gets out of the way faster.
 
+**The FAB label fades in when it extends** (decided 2026-11-05)
+- Extending no longer reveals "Queue" with a left-to-right mask sweep. The button widens as before (240ms), and the label fades in, 180ms ease-out-quart after 120ms, as the space finishes opening; the mask is fully revealed at once at the start, while the label is still invisible. Collapsing on scroll down is unchanged: the right-to-left sweep, then the shrink. After a collapse finishes, the label's opacity resets to 0 for the next extend. Reduced motion: the label just appears. This replaces the gentler ease-out sweep chosen earlier the same day.
+- Measured: between about 130ms and 240ms into an extend, the button is still a few pixels narrower than the word, so the last 2 to 5px of the "e" are cut at the edge while the word is at 55 to 97% opacity. A delay of about 200ms would avoid that, at the cost of the word appearing later.
+
 **Focus ring** (decided 2026-11-03): the accent, 2px with a 2px offset, set globally on `:focus-visible` via a `--focus-ring` role. It is at least 6.59:1 on `surface` and `bg` in both themes.
 - The one documented exception to the Petrol rule (Petrol is only for decisions, high confidence, the selected queue item and Approve), confirmed 2026-11-04. My reason: keyboard focus must always be clearly visible, and it only appears while tabbing, so it never competes with Approve.
 
