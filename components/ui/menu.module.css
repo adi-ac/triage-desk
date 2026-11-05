@@ -1,0 +1,90 @@
+/* The trigger: Button's chrome, the label and a 12px caret 2px apart. */
+.trigger {
+  gap: 2px;
+}
+
+.caret {
+  flex: none;
+  color: var(--ink-2);
+  transition: transform 160ms ease-out;
+}
+
+.trigger[aria-expanded="true"] .caret {
+  transform: rotate(180deg);
+}
+
+/* In the top layer (popover), placed by the component with position: fixed.
+   12px corners and 4px padding, so the 8px items are concentric. */
+.popover {
+  position: fixed;
+  inset: auto;
+  margin: 0;
+  min-inline-size: 160px;
+  max-inline-size: calc(100vw - 16px);
+  padding: 4px;
+  border: 0;
+  border-radius: 12px;
+  color: var(--ink);
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-popover);
+  animation: menu-in 150ms ease-out;
+}
+
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    transform: scale(0.97);
+  }
+}
+
+.heading {
+  margin: 0;
+  padding: 6px 10px 4px;
+  color: var(--ink-3);
+}
+
+.list {
+  display: grid;
+}
+
+.item {
+  appearance: none;
+  display: block;
+  inline-size: 100%;
+  padding: 6px 10px;
+  border: 0;
+  border-radius: 8px;
+  text-align: start;
+  color: var(--ink);
+  background: transparent;
+  cursor: pointer;
+}
+
+/* Soft fill on hover and focus. With the keyboard, the focus ring shows as
+   well (the fill alone is too faint to be the only cue), drawn inside the
+   item so it doesn't overlap its neighbours. */
+.item:focus {
+  outline: none;
+  background: var(--button-bg-hover);
+}
+
+.item:focus-visible {
+  outline: 2px solid var(--focus-ring);
+  outline-offset: -2px;
+}
+
+@media (hover: hover) {
+  .item:hover {
+    background: var(--button-bg-hover);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .caret {
+    transition: none;
+  }
+
+  .popover {
+    animation: none;
+  }
+}

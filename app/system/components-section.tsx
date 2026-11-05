@@ -12,6 +12,7 @@ import {
   FieldReview,
   IconButton,
   Logo,
+  Menu,
   NoActionReview,
   Pane,
   QueueItem,
@@ -291,9 +292,20 @@ export function ComponentsSection({ theme }: { theme: string }) {
       <Demo
         name="FieldReview"
         props="field · options · value · onValueChange · approved"
-        intro="Reviewing one suggested field. While suggested: small secondary Keep, Switch to the runner-up, and Other… for the full list, so the override is one click and never competes with Approve. Once decided: the solid chip and a quiet Change link that reopens it. Try it; the data is LL-5040's hand-written suggestion."
+        intro="Reviewing one suggested field. While suggested: small secondary Keep, Switch to the runner-up, and an Other menu for the rest of the list, so the override is one click and never competes with Approve. Once decided: the solid chip and a quiet Change link that reopens it. Try it; the data is LL-5040's hand-written suggestion."
       >
         <FieldReviewDemo />
+      </Demo>
+
+      <Demo
+        name="Menu"
+        props="label · heading · items · onSelect · size"
+        intro="A button that reveals more options: its label and a 12px filled caret, never an ellipsis. The caret turns 180° while open. The menu is a popover below the button (surface-raised, popover shadow, 12px corners), left-aligned, or right-aligned if it would overflow; it sits in the top layer, so no pane clips it, and it floats over the layout instead of pushing it. Focus moves to the first item; Up and Down move; Escape closes and returns focus; a click outside or a scroll closes it. FieldReview's Other is one."
+      >
+        <div className={styles.inline}>
+          <Menu size="small" label="Other" heading="Category" items={categories.map((c) => ({ value: c, label: c }))} onSelect={() => {}} />
+          <Menu label="Other" heading="Urgency" items={urgencies.map((u) => ({ value: u, label: u }))} onSelect={() => {}} />
+        </div>
       </Demo>
 
       <Demo

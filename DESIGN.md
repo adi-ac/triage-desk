@@ -185,6 +185,21 @@ Default                              → variant="secondary"
 <Button variant="primary">Edit draft</Button>
 ```
 
+### Menu
+
+A button that reveals more options, and the menu it opens. **A button that reveals more options uses a filled caret, never an ellipsis**: the label ("Other") and a 12px filled caret-down (`--ink-2`, 2px gap) that turns 180° while open (160ms ease-out; instant with reduced motion). **Secondary choices go in a Menu, not an inline row that appears, so the layout doesn't shift.** The menu is a popover below the button: `--surface-raised`, `--shadow-popover`, 12px corners, 4px padding, a `text-overline` heading (its name, such as "Category"), then one `menuitem` per option (8px corners, `--button-bg-hover` soft fill on hover and focus). It's aligned to the button's left edge, or its right edge if it would overflow, and flips above if there's no room below. It renders in the top layer, so no pane or scroll container clips it. Entrance: scale 0.97 to 1 with a fade, 150ms ease-out, from the button's corner; none with reduced motion.
+
+Keyboard and screen readers: the trigger has `aria-haspopup="menu"` and `aria-expanded`; focus moves to the first item on open (ArrowDown on the trigger opens it too); Up, Down, Home and End move; Escape closes and returns focus to the trigger; Tab closes it. A click outside, a scroll or a resize closes it. `onSelect` gets the item's value; the menu closes without moving focus, since the choice usually replaces the trigger (FieldReview moves focus to "Change").
+
+```tsx
+// Correct
+<Menu size="small" label="Other" heading="Category" items={others.map((c) => ({ value: c, label: c }))} onSelect={choose} />
+
+// Incorrect: an ellipsis instead of a caret, and options that push the layout down when they appear
+<Button onClick={() => setOpen(true)}>Other…</Button>
+{open && <div className={styles.row}>{others.map((c) => <Button key={c}>{c}</Button>)}</div>}
+```
+
 ### IconButton
 
 A round secondary button holding one icon, with Button's chrome (raised, neutral, `--button-radius`). `icon` is one of `inbox`, `close` (the set in `components/ui/icon.tsx`; `monitor`, `sun` and `moon` are ThemeToggle's), and `aria-label` is required. For header actions and a Sheet's close; anything that approves or sends is a labelled Button.
@@ -235,7 +250,7 @@ A short label inside a row. A field value is a Chip.
 
 Reviewing one suggested field: category or urgency. Use it for every field a person reviews; never assemble chips, meters and buttons yourself.
 
-- While suggested: the pencil chip, the ConfidenceMeter, and three small secondary Buttons: "Keep", "Switch to <runner-up>" and "Other…", which opens the full list. The override is one click, and none of these competes with Approve.
+- While suggested: the pencil chip, the ConfidenceMeter, and two small secondary Buttons, "Keep" and "Switch to <runner-up>", and a small "Other" `Menu` with the rest of the list, headed with the field's name. The override is one click, and none of these competes with Approve.
 - Once kept or switched: the solid chip ("Set by you") and a quiet "Change" link that reopens the controls. The meter gives way to a quiet note, "Claude suggested Cancellation risk · 50%" (rule 2).
 - `approved`: locks the field. An untouched field shows "Approved as suggested" (rule 7).
 - `readOnly`: a reply a team rule sent. The chip stays pencil and the meter stays, Petrol, since nothing is left to block (rule 4); no controls, no decision styling.

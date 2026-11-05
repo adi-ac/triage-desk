@@ -23,6 +23,7 @@ export { FieldReview, type FieldReviewProps } from "./field-review";
 export { type IconName } from "./icon";
 export { IconButton, type IconButtonProps } from "./icon-button";
 export { Logo } from "./logo";
+export { Menu, type MenuItem, type MenuProps } from "./menu";
 export { NoActionReview, type NoActionReviewProps } from "./no-action-review";
 export { Pane, type PaneProps } from "./pane";
 export { QueueItem, type QueueItemProps } from "./queue-item";

@@ -6,6 +6,7 @@ import type { EmailEvidence, SuggestedField } from "@/lib/suggestion";
 import { Button } from "./button";
 import { Chip } from "./chip";
 import { ConfidenceMeter } from "./confidence-meter";
+import { Menu } from "./menu";
 import { QuoteList } from "./quote-list";
 import styles from "./field-review.module.css";
 
@@ -16,7 +17,7 @@ export type FieldReviewProps<T extends string> = {
   label: string;
   /** The model's pick, its confidence and the runner-up. */
   field: SuggestedField<T>;
-  /** Every value the field can take, for "Other…". */
+  /** Every value the field can take, for the "Other" menu. */
   options: readonly T[];
   /** What a person kept or switched to; null while it's still the model's suggestion. */
   value: T | null;
@@ -45,7 +46,7 @@ export type FieldReviewProps<T extends string> = {
 /**
  * Reviewing one suggested field. While suggested: the dashed chip, its
  * confidence, and small secondary "Keep", "Switch to <runner-up>" and
- * "Other…" (the full list), so the override is one click and never competes
+ * an "Other" menu (the rest of the list), so the override is one click and never competes
  * with Approve. Once kept or switched: the solid chip and a quiet "Change"
  * link that reopens the controls, and the meter gives way to a note of what
  * Claude suggested, since a meter beside a value must never show confidence
@@ -66,9 +67,7 @@ export function FieldReview<T extends string>({
   onEvidenceActive,
 }: FieldReviewProps<T>) {
   const headingId = useId();
-  const listId = useId();
   const [reopened, setReopened] = useState(false);
-  const [otherOpen, setOtherOpen] = useState(false);
   const changeRef = useRef<HTMLButtonElement>(null);
   const keepRef = useRef<HTMLButtonElement>(null);
   const pendingFocus = useRef<"change" | "keep" | null>(null);
@@ -89,7 +88,6 @@ export function FieldReview<T extends string>({
 
   function choose(next: T) {
     setReopened(false);
-    setOtherOpen(false);
     pendingFocus.current = "change";
     if (next !== value) onValueChange(next);
   }
@@ -159,23 +157,15 @@ export function FieldReview<T extends string>({
             </Button>
           )}
           {others.length > 0 && (
-            <Button size="small" aria-expanded={otherOpen} aria-controls={listId} onClick={() => setOtherOpen((o) => !o)}>
-              Other…
-            </Button>
+            <Menu
+              size="small"
+              label="Other"
+              heading={label}
+              items={others.map((o) => ({ value: o, label: o }))}
+              onSelect={choose}
+            />
           )}
         </div>
-      )}
-
-      {showControls && otherOpen && (
-        <ul id={listId} className={styles.options} aria-label={`Other ${label.toLowerCase()} options`}>
-          {others.map((option) => (
-            <li key={option}>
-              <Button size="small" onClick={() => choose(option)}>
-                {option}
-              </Button>
-            </li>
-          ))}
-        </ul>
       )}
 
       <QuoteList evidence={evidence} onEvidenceActive={onEvidenceActive} />
