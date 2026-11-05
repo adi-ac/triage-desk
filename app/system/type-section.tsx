@@ -61,8 +61,8 @@ const roles: Role[] = [
     name: "reading",
     className: "text-reading",
     family: "body",
-    spec: "14 / 1.6 · 400 · max 32em (~71 characters)",
-    use: "The customer's email",
+    spec: "14 / 1.6 · 400 · max 32em (~71 characters); email body from 1536px: 15 / 1.65 · max 600px (~88)",
+    use: "The customer's email, the draft and evidence quotes",
     sample: firstParagraph,
   },
   {
