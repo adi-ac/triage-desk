@@ -15,6 +15,14 @@
   box-shadow: var(--shadow-dialog);
 }
 
+/* The sheet itself takes focus on open (so a tap shows no ring); it's a
+   container, not a control, so it has no outline. Its controls keep their
+   focus-visible rings. */
+.sheet:focus,
+.sheet:focus-visible {
+  outline: none;
+}
+
 .sheet::backdrop {
   background: var(--scrim);
 }

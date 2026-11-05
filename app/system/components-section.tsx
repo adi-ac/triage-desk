@@ -218,11 +218,11 @@ export function ComponentsSection({ theme }: { theme: string }) {
 
       <Demo
         name="IconButton"
-        props="icon: inbox | close | pencil · aria-label · size: default | small · tooltip"
-        intro="A round secondary button holding one icon, with Button's chrome. The name is required, since the icon has no words. Default is 32px (Open queue, Close queue); small is 28px with a 14px icon (FieldReview's Change, last here). tooltip shows the name to its right on hover and keyboard focus: hover or tab to the pencil."
+        props="icon: inbox | close | pencil · aria-label · size: default | small · variant: secondary | primary · tooltip"
+        intro="A round secondary button holding one icon, with Button's chrome. The name is required, since the icon has no words. Default is 32px (Open queue, Close queue); Open queue is primary (Petrol), the one exception to the Petrol rule among icon buttons, since below 1200px it's the queue's entry point and Approve isn't pinned. Small is 28px with a 14px icon (FieldReview's Change, last here). tooltip shows the name to its right on hover and keyboard focus: hover or tab to the pencil."
       >
         <div className={styles.inline}>
-          <IconButton icon="inbox" aria-label="Open queue" />
+          <IconButton icon="inbox" variant="primary" aria-label="Open queue" />
           <IconButton icon="close" aria-label="Close queue" />
           <IconButton icon="inbox" aria-label="Open queue" disabled />
           <IconButton icon="pencil" size="small" tooltip aria-label="Change category" />

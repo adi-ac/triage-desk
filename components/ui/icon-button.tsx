@@ -9,6 +9,12 @@ export type IconButtonProps = Omit<ComponentProps<"button">, "className" | "styl
   /** default: 32px, 18px icon (header actions, a Sheet's close). small: 28px, 14px icon (inline, beside a value). */
   size?: "default" | "small";
   /**
+   * secondary (the default) is neutral. primary is Petrol, like Approve, and
+   * is for one button only: the inbox's "Open queue" below 1200px (DESIGN.md,
+   * rule 4).
+   */
+  variant?: "secondary" | "primary";
+  /**
    * Show the aria-label as a tooltip to the button's right on hover and
    * keyboard focus. Only where there's room to its right: not at a viewport edge.
    */
@@ -21,9 +27,9 @@ export type IconButtonProps = Omit<ComponentProps<"button">, "className" | "styl
  * a Sheet's close, and FieldReview's "Change"; anything that approves stays
  * a labelled Button.
  */
-export function IconButton({ icon, size = "default", tooltip = false, type = "button", ...props }: IconButtonProps) {
+export function IconButton({ icon, size = "default", variant = "secondary", tooltip = false, type = "button", ...props }: IconButtonProps) {
   return (
-    <button type={type} {...props} className={styles.button} data-variant="secondary" data-shape="icon" data-size={size}>
+    <button type={type} {...props} className={styles.button} data-variant={variant} data-shape="icon" data-size={size}>
       <Icon name={icon} size={size === "small" ? 14 : 18} />
       {tooltip && (
         // The same words as the aria-label, so it's hidden from screen readers to avoid reading them twice.

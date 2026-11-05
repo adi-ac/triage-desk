@@ -238,6 +238,10 @@ What it can't claim is real-world use, so it gets tested with support agents and
 **Queue sheet on tablets** (decided 2026-11-05)
 - On tablets (768–1199px) the queue sheet opens from the right edge and is 380px wide (down from 400px), with rounded corners on its left side. Phones keep the full-width sheet with no corners. Focus handling is unchanged.
 
+**Queue sheet focus and a Petrol inbox button** (decided 2026-11-05)
+- Below 1200px, opening the queue sheet moves focus to the sheet itself (`tabIndex={-1}`, no outline on the container), not to its close button, so no focus ring shows after a tap. Tab reaches the close button with its normal focus-visible ring. Closing returns focus to the inbox button: no ring after a tap or click, the usual ring after Escape or keyboard use. Focus-visible styles are never removed from controls.
+- The inbox icon button ("Open queue") uses the primary Petrol style: the Petrol gradient, an `accent-ink` icon and the primary hover. A documented exception to the Petrol rule (DESIGN.md rule 4): it's the queue's entry point on small screens, and since Approve is unpinned below 1200px the two rarely compete.
+
 **Focus ring** (decided 2026-11-03): the accent, 2px with a 2px offset, set globally on `:focus-visible` via a `--focus-ring` role. It is at least 6.59:1 on `surface` and `bg` in both themes.
 - The one documented exception to the Petrol rule (Petrol is only for decisions, high confidence, the selected queue item and Approve), confirmed 2026-11-04. My reason: keyboard focus must always be clearly visible, and it only appears while tabbing, so it never competes with Approve.
 

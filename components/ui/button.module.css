@@ -32,6 +32,12 @@
   color: var(--ink-2);
 }
 
+/* Primary icon button (the inbox's "Open queue" below 1200px): Approve's
+   Petrol gradient and edge, with the icon in accent-ink. */
+.button[data-shape="icon"][data-variant="primary"] {
+  color: var(--accent-ink);
+}
+
 .button[data-shape="icon"][data-size="small"] {
   inline-size: 28px;
   block-size: 28px;
@@ -41,6 +47,10 @@
 @media (hover: hover) {
   .button[data-shape="icon"]:hover:not(:disabled) {
     color: var(--ink);
+  }
+
+  .button[data-shape="icon"][data-variant="primary"]:hover:not(:disabled) {
+    color: var(--accent-ink);
   }
 }
 

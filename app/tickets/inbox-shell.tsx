@@ -43,7 +43,7 @@ function Shell({ id, children }: { id: string; children: ReactNode }) {
         <AppHeader
           actions={
             <span className={styles.queueButton}>
-              <IconButton icon="inbox" aria-label="Open queue" onClick={() => setQueueOpen(true)} />
+              <IconButton icon="inbox" variant="primary" aria-label="Open queue" onClick={() => setQueueOpen(true)} />
             </span>
           }
         />

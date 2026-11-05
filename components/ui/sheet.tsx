@@ -15,9 +15,12 @@ export type SheetProps = {
 
 /**
  * A dialog-level panel from the right edge (380px, full width on phones): surface-raised, the dialog shadow
- * and the scrim; full width on phones. Focus moves into it on open and back
- * to whatever opened it on close (native <dialog>). It closes on Escape and
- * on a click outside; the screen closes it when a choice is made inside.
+ * and the scrim; full width on phones. On open, focus moves to the sheet
+ * itself (not its close button), so a tap shows no focus ring; Tab then
+ * reaches the close button with its usual ring. On close, focus goes back
+ * to whatever opened it (native <dialog>), and the browser shows the ring
+ * only after keyboard use (Escape, Tab). It closes on Escape and on a click
+ * outside; the screen closes it when a choice is made inside.
  */
 export function Sheet({ open, onClose, title, children }: SheetProps) {
   const ref = useRef<HTMLDialogElement>(null);
@@ -26,7 +29,12 @@ export function Sheet({ open, onClose, title, children }: SheetProps) {
   useEffect(() => {
     const dialog = ref.current;
     if (!dialog) return;
-    if (open && !dialog.open) dialog.showModal();
+    if (open && !dialog.open) {
+      dialog.showModal();
+      // showModal focuses the first control (the close button); start on the
+      // sheet itself instead, so no ring appears after a tap.
+      dialog.focus();
+    }
     if (!open && dialog.open) dialog.close();
   }, [open]);
 
@@ -34,6 +42,7 @@ export function Sheet({ open, onClose, title, children }: SheetProps) {
     <dialog
       ref={ref}
       className={styles.sheet}
+      tabIndex={-1}
       aria-labelledby={headingId}
       onClose={onClose}
       onClick={(e) => {
