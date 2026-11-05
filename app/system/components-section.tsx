@@ -313,10 +313,12 @@ export function ComponentsSection({ theme }: { theme: string }) {
             accessible name says so. The level is derived inside, from the rounded percentage: high from{" "}
             {confidenceThresholds.high}%, medium from {confidenceThresholds.medium}%, low below. A pick
             under {confidenceThresholds.medium}% or within {confidenceThresholds.margin} points of its
-            runner-up is unsure and blocks Approve until a person keeps or switches it; screen readers
-            hear &ldquo;confirm before approving&rdquo; in the meter&apos;s value, and nothing extra is
-            shown. High and medium are petrol; amber is only for low. Always a bar, a figure and a
-            word, on one line, with no fill.
+            runner-up blocks Approve until a person keeps or switches it. The color follows that,
+            not the band: amber while the field needs a person before Approve, Petrol when it
+            doesn&apos;t. A pick that blocks only because it&apos;s a close call reads Close call
+            instead of its level word, and screen readers hear &ldquo;close call with
+            &lt;runner-up&gt;, confirm before approving&rdquo;. Always a bar, a figure and a word, on
+            one line, with no fill.
           </>
         }
       >
@@ -324,11 +326,12 @@ export function ComponentsSection({ theme }: { theme: string }) {
           {[0.92, 0.85, 0.71, 0.6, 0.48].map((v) => (
             <ConfidenceMeter key={v} value={v} />
           ))}
-          <p className={`text-overline ${styles.muted}`}>Within 15 points of the runner-up</p>
-          <ConfidenceMeter value={0.71} runnerUp={0.64} />
+          <p className={`text-overline ${styles.muted}`}>Close call: within 15 points of the runner-up</p>
+          <ConfidenceMeter value={0.71} runnerUp={0.64} runnerUpLabel="Cancellation risk" />
+          <ConfidenceMeter value={0.9} runnerUp={0.8} runnerUpLabel="Billing" />
           <p className={`text-overline ${styles.muted}`}>Kept or switched by a person</p>
           <ConfidenceMeter value={0.48} confirmed />
-          <ConfidenceMeter value={0.71} runnerUp={0.64} confirmed />
+          <ConfidenceMeter value={0.71} runnerUp={0.64} runnerUpLabel="Cancellation risk" confirmed />
         </div>
       </Demo>
 

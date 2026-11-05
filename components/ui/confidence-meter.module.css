@@ -1,6 +1,7 @@
-/* No border and no fill at any level, so it never reads as a chip. High
-   and medium are petrol and differ by their word and the bar's length; low
-   is amber. Always one line, and nothing in it shrinks. */
+/* No border and no fill, so it never reads as a chip. The color follows
+   whether the field blocks Approve, not the band: amber (the low tokens)
+   when it needs a person first, Petrol (the high tokens) when it doesn't.
+   Always one line, and nothing in it shrinks. */
 
 .meter {
   display: inline-flex;
@@ -13,17 +14,12 @@
   color: var(--confidence-text);
 }
 
-.meter[data-level="high"] {
+.meter[data-blocks="false"] {
   --confidence: var(--confidence-high);
   --confidence-text: var(--confidence-high-text);
 }
 
-.meter[data-level="medium"] {
-  --confidence: var(--confidence-medium);
-  --confidence-text: var(--confidence-medium-text);
-}
-
-.meter[data-level="low"] {
+.meter[data-blocks="true"] {
   --confidence: var(--confidence-low);
   --confidence-text: var(--confidence-low-text);
 }

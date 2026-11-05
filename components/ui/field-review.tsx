@@ -136,7 +136,12 @@ export function FieldReview<T extends string>({
         </p>
       ) : (
         <>
-          <ConfidenceMeter value={field.confidence} runnerUp={field.runnerUp?.confidence} confirmed={approved || readOnly} />
+          <ConfidenceMeter
+            value={field.confidence}
+            runnerUp={field.runnerUp?.confidence}
+            runnerUpLabel={field.runnerUp?.value}
+            confirmed={approved || readOnly}
+          />
           {explainEstimate && (
             <p className={`text-small ${styles.note}`}>Confidence is Claude&apos;s estimate, not a measured probability.</p>
           )}

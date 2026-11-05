@@ -18,12 +18,10 @@ const pairs: Pair[] = [
   { label: "Text on urgency evidence", fg: "--ink", bg: "--evidence-urgency", kind: "text" },
   { label: "Category evidence underline", fg: "--evidence-category-line", bg: "--evidence-category", kind: "non-text" },
   { label: "Urgency evidence underline", fg: "--evidence-urgency-line", bg: "--evidence-urgency", kind: "non-text" },
-  { label: "High confidence text", fg: "--confidence-high-text", bg: "--surface", kind: "text" },
-  { label: "High confidence meter", fg: "--confidence-high", bg: "--confidence-track", kind: "non-text" },
-  { label: "Medium confidence text", fg: "--confidence-medium-text", bg: "--surface", kind: "text" },
-  { label: "Medium confidence meter", fg: "--confidence-medium", bg: "--confidence-track", kind: "non-text" },
-  { label: "Low confidence text", fg: "--confidence-low-text", bg: "--surface", kind: "text" },
-  { label: "Low confidence meter", fg: "--confidence-low", bg: "--confidence-track", kind: "non-text" },
+  { label: "Confidence text, doesn't block (Petrol)", fg: "--confidence-high-text", bg: "--surface", kind: "text" },
+  { label: "Confidence meter, doesn't block (Petrol)", fg: "--confidence-high", bg: "--confidence-track", kind: "non-text" },
+  { label: "Confidence text, blocks Approve (amber)", fg: "--confidence-low-text", bg: "--surface", kind: "text" },
+  { label: "Confidence meter, blocks Approve (amber)", fg: "--confidence-low", bg: "--confidence-track", kind: "non-text" },
   { label: "Urgent", fg: "--severity-urgent-text", bg: "--severity-urgent-fill", kind: "text" },
   { label: "High severity", fg: "--severity-high-text", bg: "--severity-high-fill", kind: "text" },
   { label: "Normal severity", fg: "--severity-normal-text", bg: "--surface", kind: "text" },
@@ -127,13 +125,15 @@ export function TrustSection({ theme }: { theme: string }) {
       <section className={styles.card}>
         <h3 className={`text-heading ${styles.cardTitle}`}>Confidence</h3>
         <p className={`text-body ${styles.muted} ${styles.cardIntro}`}>
-          Confidence is Claude&apos;s estimate, not a measured probability. High and medium are
-          petrol, like Approve, and differ by the word and the bar&apos;s length. Amber is only for
-          low, which always blocks Approve. No level has a fill or hint text.
+          Confidence is Claude&apos;s estimate, not a measured probability. The color says whether
+          the field needs a person before Approve, not how high the figure is. Amber: it blocks
+          Approve, because it&apos;s under 60% or a close call within 15 points of its runner-up
+          (then the word reads Close call). Petrol: it doesn&apos;t block. No fill, no hint text.
         </p>
         <div className={styles.stack}>
           <ConfidenceMeter value={0.92} />
           <ConfidenceMeter value={0.71} />
+          <ConfidenceMeter value={0.71} runnerUp={0.64} runnerUpLabel="Cancellation risk" />
           <ConfidenceMeter value={0.48} />
         </div>
       </section>
