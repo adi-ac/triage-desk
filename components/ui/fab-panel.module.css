@@ -22,18 +22,12 @@
  * icon, then the label 6px after it, with 14px padding on the left and 16px
  * on the right. Fixed to the right edge, so it grows and shrinks leftward.
  *
- * Its width transitions directly, between 44px and the extended width:
- * 14 + 20 + 6 + the label + 16. The component measures the label into
- * --fab-label-width (once, and when the font loads). Until then the
- * extended width is invalid and falls back to auto, the same width, so the
- * server HTML is already right.
- *
- * Collapsing, the label sweeps out first (a right-to-left gradient mask),
+ * Collapsing, the label fades out first, a right-to-left gradient sweep,
  * and the width, padding and gap follow --delay-fab-collapse later, so the
- * sweep always runs ahead of the shrinking edge and no letter is cut off.
- * Extending, the width, padding and gap grow at once, and the label fades
- * in --delay-fab-label-in later. Each state's transition-delay is the one
- * for arriving in it.
+ * fade always runs ahead of the shrinking edge and no letter is cut off.
+ * Extending is the reverse: the width first, then the label sweeps back in
+ * --delay-fab-label-in later. Each state's transition-delay is the one for
+ * arriving in it.
  *
  * Its display is set here, so it shows from the first paint and stays
  * displayed whether or not it's in the top layer (the browser hides a
@@ -45,10 +39,8 @@
   z-index: 10;
   display: inline-flex;
   align-items: center;
-  justify-content: flex-start;
   gap: 0;
-  box-sizing: border-box;
-  inline-size: 44px;
+  inline-size: auto;
   block-size: 44px;
   margin: 0;
   padding: 12px;
@@ -64,7 +56,6 @@
   -webkit-tap-highlight-color: transparent;
   touch-action: manipulation;
   transition:
-    inline-size var(--duration-fab-resize) var(--ease-fab) var(--delay-fab-collapse),
     gap var(--duration-fab-resize) var(--ease-fab) var(--delay-fab-collapse),
     padding-inline-start var(--duration-fab-resize) var(--ease-fab) var(--delay-fab-collapse),
     padding-inline-end var(--duration-fab-resize) var(--ease-fab) var(--delay-fab-collapse),
@@ -73,7 +64,6 @@
 
 .fab[data-extended] {
   gap: 6px;
-  inline-size: calc(14px + 20px + 6px + var(--fab-label-width) + 16px);
   padding-inline: 14px 16px;
   transition-delay: 0s;
 }
@@ -121,27 +111,34 @@
   rotate: 0deg;
 }
 
-/* The label's space: whatever the button's width leaves after the icon,
-   gap and padding, clipped at the content edge, so the right padding is
-   always kept. The label inside keeps its full width, so the mask's stops
-   are relative to the whole word. */
+/* The label's width: a one-column grid from 0fr (collapsed) to 1fr, so it
+   animates to the label's exact width. The track clips; the label inside
+   keeps its full width, so the mask's stops are relative to the whole word. */
+.labelClip {
+  display: grid;
+  grid-template-columns: 0fr;
+  transition: grid-template-columns var(--duration-fab-resize) var(--ease-fab) var(--delay-fab-collapse);
+}
+
+.fab[data-extended] .labelClip {
+  grid-template-columns: 1fr;
+  transition-delay: 0s;
+}
+
 .labelTrack {
-  flex: 1 1 auto;
   min-inline-size: 0;
   overflow: hidden;
 }
 
-/* Schibsted Grotesk (the heading font), 14px, 550.
+/* Schibsted Grotesk (the heading font), 14px, 550. The mask is opaque up
+   to 30% before --fab-reveal and clear from it: 130% shows the whole word,
+   0% none of it, and in between the clear part grows from the right.
 
-   Collapsing: the gradient mask sweeps the word out right to left. It's
-   opaque up to 30% before --fab-reveal and clear from it: 130% shows the
-   whole word, 0% none of it. Opacity stays as it is until the collapse has
-   finished, then resets to 0, unseen.
-
-   Extended (and while fading in): no mask at all. The component starts
-   every extend from opacity 0 (data-fade="start": no transition, which
-   also cancels an interrupted collapse) and lets the fade run from the
-   next frame. */
+   Collapsing, the mask sweeps the word out right to left; opacity stays 1
+   until the collapse has finished, then resets to 0 at once, unseen.
+   Extending, the mask is fully revealed at once (the word is still at
+   opacity 0) and the word fades in as the space finishes opening: no
+   sweep and no movement. */
 .label {
   display: block;
   inline-size: max-content;
@@ -160,13 +157,9 @@
 .fab[data-extended] .label {
   --fab-reveal: 130%;
   opacity: 1;
-  mask-image: none;
-  transition: opacity var(--duration-fab-label-in) var(--ease-fab-label-in) var(--delay-fab-label-in);
-}
-
-.fab[data-extended] .label[data-fade="start"] {
-  opacity: 0;
-  transition: none;
+  transition:
+    --fab-reveal 0s,
+    opacity var(--duration-fab-label-in) var(--ease-fab-label-in) var(--delay-fab-label-in);
 }
 
 /* Scrim */
