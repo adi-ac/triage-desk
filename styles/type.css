@@ -57,12 +57,6 @@
   --text-reading-leading: 1.6;
   --text-reading-measure: 32em;
 
-  /* The email body only (EmailBody), not the draft or evidence quotes,
-     which also use text-reading. The same as reading text, except on large
-     desktops (below). */
-  --text-email-size: var(--text-reading-size);
-  --text-email-leading: var(--text-reading-leading);
-
   /* Metadata, help text, captions */
   --text-small-size: 13px;
   --text-small-leading: 1.45;
@@ -90,17 +84,13 @@
   }
 }
 
-/* Large desktop: the email body is 15px with 1.65 leading and a 600px
-   measure, about 88 characters a line, so the inbox's email column
-   (measure + 40px of pane padding) is 640px. At 664px and 14px it ran about
-   104 characters a line, too long to read comfortably; slightly larger text
-   keeps the column wide while shortening lines. The one place a 15px size
-   is used. In px, because the shell's column widths here are fixed px. */
+/* Large desktop: the email's measure widens to 664px, so the inbox's email
+   column (measure + 40px of pane padding) is 704px, the width of the
+   original artifact's email column, which read better on big screens. In
+   px here, because the shell's column widths at this size are fixed px. */
 @media (min-width: 1536px) {
   :root {
-    --text-reading-measure: 600px;
-    --text-email-size: 15px;
-    --text-email-leading: 1.65;
+    --text-reading-measure: 664px;
   }
 }
 

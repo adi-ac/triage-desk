@@ -7,13 +7,9 @@
   margin: 0;
 }
 
-/* Two classes, so it wins over text-reading's own size: the email body's
-   tokens, which grow on large desktops (styles/type.css). */
-.email .body {
+.body {
   display: grid;
   gap: 1em;
-  font-size: var(--text-email-size);
-  line-height: var(--text-email-leading);
 }
 
 /* Keeps single line breaks, such as a signature's. */
