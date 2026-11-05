@@ -46,7 +46,7 @@ export type FieldReviewProps<T extends string> = {
 
 /**
  * Reviewing one suggested field. While suggested: the dashed chip, its
- * confidence, and small secondary "Keep", "Switch to <runner-up>" and
+ * confidence, and small secondary "Keep", "Use <runner-up>" and
  * an "Other" menu (the rest of the list), so the override is one click and never competes
  * with Approve. Once kept or switched: the solid chip, a round pencil
  * "Change <field>" button that reopens the controls, and, in place of the
@@ -154,7 +154,7 @@ export function FieldReview<T extends string>({
           </Button>
           {alternative && (
             <Button size="small" onClick={() => choose(alternative)}>
-              Switch to {alternative}
+              Use {alternative}
             </Button>
           )}
           {others.length > 0 && (

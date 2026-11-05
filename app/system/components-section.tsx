@@ -293,7 +293,7 @@ export function ComponentsSection({ theme }: { theme: string }) {
       <Demo
         name="FieldReview"
         props="field · options · value · onValueChange · approved"
-        intro="Reviewing one suggested field. While suggested: small secondary Keep, Switch to the runner-up, and an Other menu for the rest of the list, so the override is one click and never competes with Approve. Once decided: the solid chip, a round pencil Change button (with a tooltip) that reopens it, and the AI suggested … · n% line, which always shows: it's the words that say a person decided. Try it; the data is LL-5040's hand-written suggestion."
+        intro="Reviewing one suggested field. While suggested: small secondary Keep, Use <runner-up> (short, so Keep / Use / Other fit on one line in the 320px desktop triage pane; a longer label wraps the row instead), and an Other menu for the rest of the list, so the override is one click and never competes with Approve. Once decided: the solid chip, a round pencil Change button (with a tooltip) that reopens it, and the AI suggested … · n% line, which always shows: it's the words that say a person decided. Try it; the data is LL-5040's hand-written suggestion."
       >
         <FieldReviewDemo />
       </Demo>

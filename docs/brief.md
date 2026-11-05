@@ -213,6 +213,13 @@ What it can't claim is real-world use, so it gets tested with support agents and
 - We tried a wider layout from 1536px (Queue 360px, Email 704px, Triage 360px, a 664px reading measure; then 15px text with a 600px measure and a 640px email column) and reverted it (git revert of both commits). Every desktop width is back to Queue 320px, Email 488px, Triage 400px, the 448px measure and the 1288px max width.
 - My reason: a wide email column made lines too long (about 104 characters at 664px and 14px), and the fixes traded away the width we wanted.
 
+**Desktop layout: equal side columns** (decided 2026-11-05)
+- Every desktop width (1200px and up): Queue 320px (unchanged), Email 568px, Triage 320px, so queue and triage are equal; the shell max width stays 1288px. The email body is 15px with 1.65 line height and a 528px measure (about 78 characters a line), so the email column is still exactly measure + pane padding (528 + 40). Only the email body is 15px; the draft and evidence quotes stay 14px. Below 1200px nothing changes.
+- FieldReview's "Switch to <runner-up>" is now "Use <runner-up>", so Keep / Use / Other fit on one line in the 320px triage pane. If a label is ever too long, the row wraps with Other moving to the next line, never clipped.
+- The 1536px large-desktop layout is removed again (a revert of its re-apply), so every desktop width uses these columns.
+- My reason: equal side columns, and the email gets the space.
+- Checked: all 40 tickets at 1300px have a 320px triage pane with no wrapping or overflow in the Keep / Use / Other rows, one-line meters, no sideways scroll, and a footer of Approve plus a one-line summary under it (or a single row when nothing blocks). The tightest row is "Keep | Use Cancellation risk | Other", with 0.45px to spare in Geist; a different font rendering could wrap Other to the next line, which is the intended fallback. Email lines run 73–81 characters at 1300 and 1728px. At exactly 1200px the email column shrinks to 480px (the window is narrower than the 1288px shell), as columns did there before.
+
 **Focus ring** (decided 2026-11-03): the accent, 2px with a 2px offset, set globally on `:focus-visible` via a `--focus-ring` role. It is at least 6.59:1 on `surface` and `bg` in both themes.
 - The one documented exception to the Petrol rule (Petrol is only for decisions, high confidence, the selected queue item and Approve), confirmed 2026-11-04. My reason: keyboard focus must always be clearly visible, and it only appears while tabbing, so it never competes with Approve.
 

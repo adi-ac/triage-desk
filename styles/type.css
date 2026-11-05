@@ -57,6 +57,12 @@
   --text-reading-leading: 1.6;
   --text-reading-measure: 32em;
 
+  /* The email body only (EmailBody), not the draft or evidence quotes,
+     which also use text-reading. The same as reading text below 1200px;
+     15px / 1.65 on desktop (below). */
+  --text-email-size: var(--text-reading-size);
+  --text-email-leading: var(--text-reading-leading);
+
   /* Metadata, help text, captions */
   --text-small-size: 13px;
   --text-small-leading: 1.45;
@@ -81,6 +87,19 @@
 @media (min-width: 768px) {
   :root {
     --text-input-size: var(--text-body-size);
+  }
+}
+
+/* Desktop (1200px and up): the email body is 15px with 1.65 leading and a
+   528px measure, about 78 characters a line, so the inbox's email column
+   (measure + 40px of pane padding) is 568px, between equal 320px queue and
+   triage columns. 15px is the one size outside the scale above, and only
+   the email body uses it. In px, because the desktop columns are fixed px. */
+@media (min-width: 1200px) {
+  :root {
+    --text-reading-measure: 528px;
+    --text-email-size: 15px;
+    --text-email-leading: 1.65;
   }
 }
 
