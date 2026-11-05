@@ -204,8 +204,9 @@ What it can't claim is real-world use, so it gets tested with support agents and
 - My reason: "the interface should describe the role, not the vendor, so it stays accurate if the model changes and reads as a product, not a demo of one provider."
 
 **Suggested chips in dark mode** (decided 2026-11-05)
-- Dark mode only: suggested chips (Chip `state="suggested"`, such as the pre-selected Category and Urgency) use a 13% ink fill, `color-mix(in oklch, var(--ink) 13%, transparent)`, instead of the shared 7%, through their own token, `--suggested-chip-fill`. It's set for system dark and explicit dark; light mode is unchanged (the token equals `--suggested-fill` there). The suggested draft box, AI tags and the AI timeline dot keep 7%.
-- My reason: at 7% they were nearly the same tone as the 8% secondary buttons beside them.
+- Dark mode only: suggested chips (Chip `state="suggested"`, such as the pre-selected Category and Urgency) are recessed with a thin edge: background `--bg` (darker than the pane card) and a 1px `--line` edge, no other border. Own tokens, `--suggested-chip-fill` and `--suggested-chip-edge`, set for system dark and explicit dark; in light they give the usual 7% fill and no edge, so light is unchanged. The suggested draft box and AI tags keep their 7% fill.
+- My reason: with the shared 7% fill they were nearly the same tone as the 8% secondary buttons beside them; recessing them mirrors light mode, where the suggestion sits in the surface and the buttons sit on it.
+- Replaces, the same day, a first try that raised the dark chip fill to 13% ink: it separated the chip from the buttons by being lighter, where this separates it by sitting below them, as in light.
 - A deliberate dark-mode exception to the single pencil fill, recorded in DESIGN.md rule 1 and the Chip section.
 
 **Focus ring** (decided 2026-11-03): the accent, 2px with a 2px offset, set globally on `:focus-visible` via a `--focus-ring` role. It is at least 6.59:1 on `surface` and `bg` in both themes.

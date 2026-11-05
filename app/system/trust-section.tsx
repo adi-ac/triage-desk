@@ -11,7 +11,7 @@ const draftText = "Hi Aisha, thanks for checking before your renewal. Here's wha
 
 const pairs: Pair[] = [
   { label: "Suggestion text on its fill", fg: "--suggested-text", bg: "--suggested-fill", kind: "text" },
-  { label: "Suggested chip text on its fill (13% in dark)", fg: "--suggested-text", bg: "--suggested-chip-fill", kind: "text" },
+  { label: "Suggested chip text on its fill (recessed bg in dark)", fg: "--suggested-text", bg: "--suggested-chip-fill", kind: "text" },
   { label: "AI tag text on the suggestion fill", fg: "--ink-2", bg: "--suggested-fill", kind: "text" },
   { label: "Decision text on its fill", fg: "--decided-text", bg: "--decided-fill", kind: "text" },
   { label: "Decision border on surface", fg: "--decided-border", bg: "--surface", kind: "non-text" },

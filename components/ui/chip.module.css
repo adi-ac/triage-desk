@@ -12,11 +12,14 @@
   background: var(--surface);
 }
 
+/* Its own tokens: in dark mode it's recessed (bg fill, a 1px line edge),
+   so it doesn't match the buttons beside it. The edge is drawn on the
+   chip's existing 1px border, so it sits inside the chip's box, and it's
+   transparent in light. */
 .chip[data-state="suggested"] {
   color: var(--suggested-text);
-  /* Its own token: 13% in dark mode, so it doesn't match the buttons beside it. */
   background: var(--suggested-chip-fill);
-  border: 1px var(--suggested-border-style) var(--suggested-border);
+  border: 1px solid var(--suggested-chip-edge);
 }
 
 .chip[data-state="decided"] {
