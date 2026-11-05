@@ -5,7 +5,9 @@
    right of the email. Below 1200px the measure is 32em at 14px, 448px, so
    the column is 488px. From 1200px it's 528px at 15px (type.css), so the
    column is 568px between equal 320px queue and triage columns, and the
-   shell is centered: 320 + 16 + 568 + 16 + 320 + 2 × 24 = 1288. */
+   shell is centered: 320 + 16 + 568 + 16 + 320 + 2 × 24 = 1288.
+   From 1536px the measure is 608px, so the column is 648px and the shell
+   1368px: 320 + 16 + 648 + 16 + 320 + 48. */
 .shell {
   --email-column: calc(var(--text-reading-measure) + 2 * (4px + 16px));
 
@@ -30,6 +32,13 @@
     grid-template-rows: auto minmax(0, 1fr);
     max-inline-size: 1288px;
     block-size: 100dvh;
+  }
+}
+
+/* Large desktop: a wider email column; the side columns stay 320px. */
+@media (min-width: 1536px) {
+  .shell {
+    max-inline-size: 1368px;
   }
 }
 

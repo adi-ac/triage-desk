@@ -103,6 +103,15 @@
   }
 }
 
+/* Large desktop (1536px and up): the same 15px / 1.65 text on a 608px
+   measure, about 89 characters a line (accepted: support emails are short),
+   so the email column is 648px. */
+@media (min-width: 1536px) {
+  :root {
+    --text-reading-measure: 608px;
+  }
+}
+
 .text-title,
 .text-heading,
 .text-subheading {

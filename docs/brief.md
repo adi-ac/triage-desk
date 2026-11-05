@@ -220,6 +220,12 @@ What it can't claim is real-world use, so it gets tested with support agents and
 - My reason: equal side columns, and the email gets the space.
 - Checked: all 40 tickets at 1300px have a 320px triage pane with no wrapping or overflow in the Keep / Use / Other rows, one-line meters, no sideways scroll, and a footer of Approve plus a one-line summary under it (or a single row when nothing blocks). The tightest row is "Keep | Use Cancellation risk | Other", with 0.45px to spare in Geist; a different font rendering could wrap Other to the next line, which is the intended fallback. Email lines run 73–81 characters at 1300 and 1728px. At exactly 1200px the email column shrinks to 480px (the window is narrower than the 1288px shell), as columns did there before.
 
+**Large desktop, from 1536px** (decided 2026-11-05)
+- From 1536px only: Queue 320px, Email 648px, Triage 320px; the shell max width is 1368px, centered. The email's measure becomes 608px with the same 15px / 1.65 text, so the column is still exactly measure + pane padding (608 + 40). Below 1536px nothing changes.
+- Lines run about 89 characters, accepted because support emails are short.
+- Checked: at 1536, 1728 and 1920px the columns are 320 / 648 / 320 in a centered 1368px shell, and the email text fills exactly 608px; on LL-5040 full lines run 83–94 characters (86 on average). At 1300 and 1535px nothing changed (320 / 568 / 320, 528px, 1288px). The triage pane is 320px as below 1536px, where all 40 tickets were checked.
+- My reason: big screens get a wider email column.
+
 **Focus ring** (decided 2026-11-03): the accent, 2px with a 2px offset, set globally on `:focus-visible` via a `--focus-ring` role. It is at least 6.59:1 on `surface` and `bg` in both themes.
 - The one documented exception to the Petrol rule (Petrol is only for decisions, high confidence, the selected queue item and Approve), confirmed 2026-11-04. My reason: keyboard focus must always be clearly visible, and it only appears while tabbing, so it never competes with Approve.
 
