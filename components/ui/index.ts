@@ -2,7 +2,7 @@
  * Base components. Every color comes from a token in styles/; none takes a
  * className or style, so the trust language can't be overridden per screen.
  */
-export { AppHeader, type AppHeaderProps } from "./app-header";
+export { AppHeader } from "./app-header";
 export { ApproveBar, type ApproveBarProps } from "./approve-bar";
 export { Banner, type BannerProps, type BannerTone } from "./banner";
 export { Button, type ButtonProps, type ButtonSize, type ButtonVariant } from "./button";
@@ -19,6 +19,7 @@ export { DraftEditor, type DraftEditorProps, type DraftState } from "./draft-edi
 export { EmailBody, type EmailBodyProps } from "./email-body";
 export { EvidenceItem, type EvidenceItemProps } from "./evidence-item";
 export { EvidenceMark, type EvidenceMarkProps } from "./evidence-mark";
+export { FabPanel, type FabPanelProps } from "./fab-panel";
 export { FieldReview, type FieldReviewProps } from "./field-review";
 export { type IconName } from "./icon";
 export { IconButton, type IconButtonProps } from "./icon-button";
@@ -29,7 +30,6 @@ export { Pane, type PaneProps } from "./pane";
 export { QueueItem, type QueueItemProps } from "./queue-item";
 export { SegmentedControl, type SegmentedControlProps, type SegmentedOption } from "./segmented-control";
 export { Severity, type SeverityLevel, type SeverityProps } from "./severity";
-export { Sheet, type SheetProps } from "./sheet";
 export { Tag, type TagProps, type TagTone } from "./tag";
 export { ThemeToggle, useTheme } from "./theme-toggle";
 export { Time, type TimeProps } from "./time";

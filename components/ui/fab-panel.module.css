@@ -1,0 +1,302 @@
+/*
+ * FabPanel (DESIGN.md, FabPanel and Motion): a floating action button at
+ * the bottom right and the panel it opens above itself. The scrim, the
+ * panel and the button are popovers in the top layer, in that order.
+ */
+
+/* The label's fade: the gradient mask's stop position, so it can transition. */
+@property --fab-reveal {
+  syntax: "<percentage>";
+  inherits: false;
+  initial-value: 130%;
+}
+
+.root {
+  display: contents;
+}
+
+/* Button
+ *
+ * Collapsed: 44 × 44, 12px padding on both sides, the 20px icon centered.
+ * Extended (only at the very top of the page, with the panel closed): the
+ * icon, then the label 6px after it, with 14px padding on the left and 16px
+ * on the right. Fixed to the right edge, so it grows and shrinks leftward.
+ *
+ * Collapsing, the label fades out first, a right-to-left gradient sweep,
+ * and the width, padding and gap follow --delay-fab-collapse later, so the
+ * fade always runs ahead of the shrinking edge and no letter is cut off.
+ * Extending is the reverse: the width first, then the label sweeps back in
+ * --delay-fab-label-in later. Each state's transition-delay is the one for
+ * arriving in it.
+ *
+ * Its display is set here, so it shows from the first paint and stays
+ * displayed whether or not it's in the top layer (the browser hides a
+ * popover that isn't open only through a UA style, which this overrides).
+ */
+.fab {
+  position: fixed;
+  inset: auto 16px calc(16px + env(safe-area-inset-bottom, 0px)) auto;
+  z-index: 10;
+  display: inline-flex;
+  align-items: center;
+  gap: 0;
+  inline-size: auto;
+  block-size: 44px;
+  margin: 0;
+  padding: 12px;
+  overflow: visible;
+  border: 0;
+  border-radius: var(--button-radius);
+  appearance: none;
+  color: var(--accent-ink);
+  background: var(--button-primary-bg);
+  box-shadow: var(--shadow-fab);
+  cursor: pointer;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+  transition:
+    gap var(--duration-fab-resize) var(--ease-fab) var(--delay-fab-collapse),
+    padding-inline-start var(--duration-fab-resize) var(--ease-fab) var(--delay-fab-collapse),
+    padding-inline-end var(--duration-fab-resize) var(--ease-fab) var(--delay-fab-collapse),
+    scale var(--duration-press) ease-out;
+}
+
+.fab[data-extended] {
+  gap: 6px;
+  padding-inline: 14px 16px;
+  transition-delay: 0s;
+}
+
+@media (hover: hover) {
+  .fab:hover {
+    background: var(--button-primary-bg-hover);
+  }
+}
+
+.fab:active {
+  scale: 0.96;
+}
+
+/* The inbox icon and the close ×, stacked. Opening, the icon turns and
+   fades out as the × turns and fades in; closing reverses it. */
+.icons {
+  display: grid;
+  flex: none;
+  inline-size: 20px;
+  block-size: 20px;
+}
+
+.openIcon,
+.closeIcon {
+  grid-area: 1 / 1;
+  display: grid;
+  transition:
+    opacity var(--duration-fab-icon) var(--ease-fab) var(--delay-fab-icon),
+    rotate var(--duration-fab-icon) var(--ease-fab) var(--delay-fab-icon);
+}
+
+.closeIcon {
+  opacity: 0;
+  rotate: -90deg;
+}
+
+.fab[data-open] .openIcon {
+  opacity: 0;
+  rotate: 90deg;
+}
+
+.fab[data-open] .closeIcon {
+  opacity: 1;
+  rotate: 0deg;
+}
+
+/* The label's width: a one-column grid from 0fr (collapsed) to 1fr, so it
+   animates to the label's exact width. The track clips; the label inside
+   keeps its full width, so the mask's stops are relative to the whole word. */
+.labelClip {
+  display: grid;
+  grid-template-columns: 0fr;
+  transition: grid-template-columns var(--duration-fab-resize) var(--ease-fab) var(--delay-fab-collapse);
+}
+
+.fab[data-extended] .labelClip {
+  grid-template-columns: 1fr;
+  transition-delay: 0s;
+}
+
+.labelTrack {
+  min-inline-size: 0;
+  overflow: hidden;
+}
+
+/* Schibsted Grotesk (the heading font), 14px, 550. The mask is opaque up
+   to 30% before --fab-reveal and clear from it: 130% shows the whole word,
+   0% none of it, and in between the clear part grows from the right. */
+.label {
+  display: block;
+  inline-size: max-content;
+  font-family: var(--font-heading);
+  font-size: 14px;
+  font-weight: 550;
+  line-height: 20px;
+  --fab-reveal: 0%;
+  mask-image: linear-gradient(to right, #000 calc(var(--fab-reveal) - 30%), transparent var(--fab-reveal));
+  transition: --fab-reveal var(--duration-fab-label) var(--ease-fab-label-out);
+}
+
+.fab[data-extended] .label {
+  --fab-reveal: 130%;
+  transition-timing-function: var(--ease-fab-label-in);
+  transition-delay: var(--delay-fab-label-in);
+}
+
+/* Scrim */
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  inline-size: auto;
+  block-size: auto;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: var(--scrim);
+  opacity: 0;
+  transition:
+    opacity var(--duration-scrim) ease-out,
+    display var(--duration-scrim) allow-discrete,
+    overlay var(--duration-scrim) allow-discrete;
+}
+
+.scrim:popover-open {
+  opacity: 1;
+}
+
+@starting-style {
+  .scrim:popover-open {
+    opacity: 0;
+  }
+}
+
+/* Panel
+ *
+ * 12px above the button (16 + 44 + 12 = 72px from the bottom), 20px
+ * corners, surface-raised and the dialog shadow. Phones: the width of the
+ * email and triage panes (16px side margins), from just below the app
+ * header (the shell's 16px padding + the 32px header + 8px) to just above
+ * the button. Tablets: 380px wide, 16px from the right, up to 640px tall.
+ *
+ * It grows diagonally from its bottom-right corner, the corner nearest the
+ * button: a clip-path from a point at that corner to the whole panel. The
+ * open clip reaches past the panel's edges so its shadow isn't cut off.
+ * Its content fades in a fifth of the way in, and fades out first on close.
+ * Transitions, not keyframes, so closing mid-entrance reverses smoothly;
+ * display and overlay transition discretely so the exit plays before it's
+ * hidden.
+ */
+.panel {
+  position: fixed;
+  inset: 56px 16px calc(72px + env(safe-area-inset-bottom, 0px)) 16px;
+  inline-size: auto;
+  block-size: auto;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  flex-direction: column;
+  border: 0;
+  border-radius: 20px;
+  color: var(--ink);
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-dialog);
+  clip-path: inset(100% 0 0 100% round 20px);
+  transition:
+    clip-path var(--duration-panel-out) var(--ease-panel-out),
+    display var(--duration-panel-out) allow-discrete,
+    overlay var(--duration-panel-out) allow-discrete;
+}
+
+.panel:popover-open {
+  display: flex;
+  clip-path: inset(-40px -40px -64px -40px round 20px);
+  transition:
+    clip-path var(--duration-panel-in) var(--ease-panel-in),
+    display var(--duration-panel-in) allow-discrete,
+    overlay var(--duration-panel-in) allow-discrete;
+}
+
+@starting-style {
+  .panel:popover-open {
+    clip-path: inset(100% 0 0 100% round 20px);
+  }
+}
+
+.panel > * {
+  opacity: 0;
+  transition: opacity var(--duration-panel-content-out) var(--ease-out-quart);
+}
+
+.panel:popover-open > * {
+  opacity: 1;
+  transition: opacity var(--duration-panel-content-in) var(--ease-out-quart) var(--delay-panel-content-in);
+}
+
+@starting-style {
+  .panel:popover-open > * {
+    opacity: 0;
+  }
+}
+
+/* The panel takes focus on open (so a tap shows no ring); it's a container,
+   not a control, so it has no outline. Its controls keep their rings. */
+.panel:focus,
+.panel:focus-visible {
+  outline: none;
+}
+
+@media (min-width: 768px) {
+  .panel {
+    inset: auto 16px calc(72px + env(safe-area-inset-bottom, 0px)) auto;
+    inline-size: 380px;
+    max-block-size: min(640px, calc(100dvh - 64px - 72px - env(safe-area-inset-bottom, 0px)));
+  }
+}
+
+.header {
+  /* The title starts at 16px, where the list's rows start their text (4px
+     inset + 12px row padding). */
+  padding: 16px 16px 10px;
+  border-block-end: var(--hairline) solid var(--line);
+}
+
+.title {
+  margin: 0;
+}
+
+.content {
+  flex: 1;
+  min-block-size: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  /* Lists inset 4px, as in Pane inset="list". */
+  padding: 8px 4px;
+}
+
+/* No motion before the first paint (a page that loads scrolled collapses
+   the button at once), and none under reduced motion: no fades, sweep,
+   clip or turn; every state switches instantly. The button still extends
+   and collapses. */
+.fab:not([data-motion]),
+.fab:not([data-motion]) * {
+  transition: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .fab,
+  .fab *,
+  .scrim,
+  .panel,
+  .panel > * {
+    transition: none !important;
+  }
+}

@@ -2,28 +2,52 @@
  * Motion: a few purposeful animations, each explaining a change the person
  * caused (DESIGN.md, Motion). This is a tool used all day, so frequent
  * actions get little or no motion, and nothing animates on page load. Only
- * transform, opacity and colors animate. Every animation turns off under
+ * transform, opacity, colors and clip paths animate, except the queue FAB's
+ * width as it extends and collapses. Every animation turns off under
  * prefers-reduced-motion, in its own component's CSS.
  */
 
 :root {
   /* Small enters and color changes. */
   --ease-out-quart: cubic-bezier(0.165, 0.84, 0.44, 1);
-  /* Sheets: a fast start that settles softly. */
-  --ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
-
   /* A field turning decided (Keep, Use, a menu pick): color only. */
   --duration-decide: 120ms;
   /* Approve becoming the sent line; the draft turning approved. */
   --duration-sent: 150ms;
   /* The Other menu's entrance and its caret. */
   --duration-menu: 150ms;
-  /* The queue sheet on tablets (from the right) and phones (from the bottom).
-     Exits are faster than entrances. */
-  --duration-sheet-in: 260ms;
-  --duration-sheet-out: 200ms;
-  --duration-bottom-sheet-in: 300ms;
-  --duration-bottom-sheet-out: 220ms;
+  /* The queue FAB (FabPanel): extending and collapsing, and its icon
+     turning into the close ×. */
+  --ease-fab: cubic-bezier(0.2, 0, 0, 1);
+  --duration-fab-resize: 240ms;
+  --duration-fab-label: 220ms;
+  /* The label's sweep. Out, a strong ease-out, so the fade gets well ahead
+     of the shrinking edge; in, a gentle one, so the word appears no faster
+     than the edge makes room for it. Either way no letter is cut off. */
+  --ease-fab-label-out: var(--ease-out-quart);
+  --ease-fab-label-in: cubic-bezier(0, 0, 0.58, 1);
+  --duration-fab-icon: 260ms;
+  /* Collapsing: the label's fade starts at once and the width follows
+     this much later, so the fade always runs ahead of the shrinking edge. */
+  --delay-fab-collapse: 60ms;
+  /* Extending: the width grows first and the label fades in this much later. */
+  --delay-fab-label-in: 90ms;
+  --delay-fab-icon: 40ms;
+  /* The FAB's press. */
+  --duration-press: 150ms;
+
+  /* The panel the FAB opens: it grows from its bottom-right corner and
+     shrinks back into it. Exits are faster than entrances. */
+  --ease-panel-in: cubic-bezier(0.05, 0.7, 0.1, 1);
+  --ease-panel-out: cubic-bezier(0.3, 0, 0.8, 0.15);
+  --duration-panel-in: 340ms;
+  --duration-panel-out: 220ms;
+  /* Its content fades in after about a fifth of the entrance, and out first on exit. */
+  --delay-panel-content-in: 68ms;
+  --duration-panel-content-in: 200ms;
+  --duration-panel-content-out: 90ms;
+  /* The scrim behind it, both ways. */
+  --duration-scrim: 220ms;
 }
 
 /* Switching theme shouldn't animate every color on the page: ThemeToggle

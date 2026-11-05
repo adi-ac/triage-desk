@@ -10,6 +10,7 @@ import {
   EvidenceItem,
   EvidenceMark,
   FieldReview,
+  FabPanel,
   IconButton,
   Logo,
   Menu,
@@ -18,7 +19,6 @@ import {
   QueueItem,
   SegmentedControl,
   Severity,
-  Sheet,
   Tag,
   Time,
   Timeline,
@@ -44,15 +44,43 @@ const demoBlockers = approveBlockers({
 });
 const excerpt = firstScreen.body.split("\n\n").slice(1, 4).join("\n\n");
 
-function SheetDemo() {
+function FabPanelDemo() {
+  const [shown, setShown] = useState(false);
   const [open, setOpen] = useState(false);
   return (
-    <>
-      <IconButton icon="inbox" aria-label="Open queue" onClick={() => setOpen(true)} />
-      <Sheet open={open} onClose={() => setOpen(false)} title="Queue">
-        <p className="text-small">The queue goes here.</p>
-      </Sheet>
-    </>
+    <div className={styles.inline}>
+      <Button
+        size="small"
+        onClick={() => {
+          setOpen(false);
+          setShown((s) => !s);
+        }}
+      >
+        {shown ? "Hide the FAB" : "Show the FAB"}
+      </Button>
+      {shown && (
+        <p className={`text-small ${styles.muted}`}>
+          It&apos;s at the bottom right of this page, collapsed because the page is scrolled. Scroll to the very top to see it extend.
+        </p>
+      )}
+      {shown && (
+        <FabPanel open={open} onOpenChange={setOpen} title="Queue" icon="inbox">
+          <div className={styles.queue}>
+            {tickets.slice(0, 12).map((t) => (
+              <QueueItem
+                key={t.id}
+                sender={t.from.name}
+                company={t.account?.company}
+                subject={t.subject || "(No subject)"}
+                preview={preview(t)}
+                receivedAt={t.receivedAt}
+                onClick={() => setOpen(false)}
+              />
+            ))}
+          </div>
+        </FabPanel>
+      )}
+    </div>
   );
 }
 
@@ -218,11 +246,11 @@ export function ComponentsSection({ theme }: { theme: string }) {
 
       <Demo
         name="IconButton"
-        props="icon: inbox | close | pencil · aria-label · size: default | small · variant: secondary | primary · tooltip"
-        intro="A round secondary button holding one icon, with Button's chrome. The name is required, since the icon has no words. Default is 32px (Open queue, Close queue); Open queue is primary (Petrol), the one exception to the Petrol rule among icon buttons, since below 1200px it's the queue's entry point and Approve isn't pinned. Small is 28px with a 14px icon (FieldReview's Change, last here). tooltip shows the name to its right on hover and keyboard focus: hover or tab to the pencil."
+        props="icon: inbox | close | pencil · aria-label · size: default | small · tooltip"
+        intro="A round secondary button holding one icon, with Button's chrome. Never Petrol: the queue's floating button is FabPanel. The name is required, since the icon has no words. Default is 32px with an 18px icon; small is 28px with a 14px icon (FieldReview's Change, last here). tooltip shows the name to its right on hover and keyboard focus: hover or tab to the pencil."
       >
         <div className={styles.inline}>
-          <IconButton icon="inbox" variant="primary" aria-label="Open queue" />
+          <IconButton icon="inbox" aria-label="Open queue" />
           <IconButton icon="close" aria-label="Close queue" />
           <IconButton icon="inbox" aria-label="Open queue" disabled />
           <IconButton icon="pencil" size="small" tooltip aria-label="Change category" />
@@ -231,15 +259,15 @@ export function ComponentsSection({ theme }: { theme: string }) {
 
       <Demo
         name="Logo and AppHeader"
-        props="AppHeader: actions?"
+        props="AppHeader: no props"
         intro={
           <>
             The mark at 22px, then TriageDesk at 16px semibold. Its viewBox is the artwork&apos;s
             bounds, not the source file&apos;s padding, so the mark fills its box and matches the
             text. It&apos;s drawn in currentColor and colored with the accent, so it follows light
             and dark: the one brand exception to the Petrol rule. AppHeader is the header row on
-            every screen: this brand on the left, the theme toggle (System, Light, Dark) and any
-            IconButtons on the right, and never a Banner. The live one is at the top of this page.
+            every screen: this brand on the left, the theme toggle (System, Light, Dark) on the
+            right, and never a Banner. The live one is at the top of this page.
           </>
         }
       >
@@ -509,11 +537,11 @@ export function ComponentsSection({ theme }: { theme: string }) {
       </Demo>
 
       <Demo
-        name="Sheet"
-        props="open · onClose · title"
-        intro="A dialog-level panel: from 768px it slides in from the right, 380px with rounded corners on its left side (260ms in, 200ms out); on phones it's a bottom sheet, 90dvh with rounded top corners and a grab handle, that slides up (300ms in, 220ms out) and can be swiped down to dismiss. Surface-raised, the dialog shadow and the scrim. Focus moves in on open and back to the button on close. Escape, a click outside or the round × (Close queue) closes it. The inbox's Open queue button opens the queue in one."
+        name="FabPanel"
+        props="open · onOpenChange · title · icon · onOpened?"
+        intro="The queue's entry point below 1200px: a 44px round Petrol button fixed 16px from the bottom right, and the panel it opens 12px above it. At the very top of the page it's extended, the inbox icon and Queue; any scroll down collapses it to the icon, the label sweeping out right to left before the width shrinks. Opening, it collapses, the icon turns into a ×, and the panel grows from its bottom-right corner (340ms in, 220ms out) over a scrim. The one button stays on top and is the close; a scrim tap, Escape or a pick closes it too. Focus moves into the panel and back to the button. On phones the panel is as wide as the panes; from 768px it's 380px and up to 640px tall."
       >
-        <SheetDemo />
+        <FabPanelDemo />
       </Demo>
 
       <Demo

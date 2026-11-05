@@ -46,13 +46,21 @@
   grid-column: 1 / -1;
 }
 
-/* Below 1200px the queue is behind the "Open queue" button. */
+/* Below 1200px the queue is behind the FAB at the bottom right. The page
+   ends 16px above it (16px from the bottom + 44px + 16px), so it never
+   covers the last of the content. */
 .queuePane {
   display: none;
 }
 
-.queueButton {
+.queueFab {
   display: contents;
+}
+
+@media (max-width: 1199px) {
+  .shell {
+    padding-block-end: calc(76px + env(safe-area-inset-bottom, 0px));
+  }
 }
 
 @media (min-width: 1200px) {
@@ -61,7 +69,7 @@
     min-block-size: 0;
   }
 
-  .queueButton {
+  .queueFab {
     display: none;
   }
 }
