@@ -351,7 +351,7 @@ export function ComponentsSection({ theme }: { theme: string }) {
       <Demo
         name="EmailBody"
         props="body · evidence"
-        intro="The customer's email with the model's quotes marked in place. Quotes that don't match the email word for word are dropped. A quote cited for both fields (the renewal date here) is marked once, in urgency red, and the evidence item under either field highlights it. Every screen uses this; none marks quotes itself."
+        intro="The customer's email with the AI's quotes marked in place. Quotes that don't match the email word for word are dropped. A quote cited for both fields (the renewal date here) is marked once, in urgency red, and the evidence item under either field highlights it. Every screen uses this; none marks quotes itself."
       >
         <EmailBody
           subject={firstScreen.subject}
@@ -365,7 +365,7 @@ export function ComponentsSection({ theme }: { theme: string }) {
         />
       </Demo>
 
-      <Demo name="EvidenceMark" props="supports: category | urgency" intro="The mark EmailBody and EvidenceItem use: a fill and a dashed underline, since the model made the mark.">
+      <Demo name="EvidenceMark" props="supports: category | urgency" intro="The mark EmailBody and EvidenceItem use: a fill and a dashed underline, since the AI made the mark.">
         <p className="text-reading">
           Could you tell me <EvidenceMark supports="category">how to export everything we have in Ledgerline</EvidenceMark>?{" "}
           <EvidenceMark supports="urgency">Our renewal is on 15 December</EvidenceMark>.
@@ -382,7 +382,7 @@ export function ComponentsSection({ theme }: { theme: string }) {
       <Demo
         name="TimelineRow"
         props="actor: ai | human"
-        intro="Rows go in a Timeline, which is collapsed by default behind Activity · count (open here). The model and team rules get a soft gray dot; a person gets a solid petrol dot and must be named. A field approved untouched gets its own row, worded as approved as suggested, never as set."
+        intro="Rows go in a Timeline, which is collapsed by default behind Activity · count (open here). The AI and team rules get a soft gray dot; a person gets a solid petrol dot and must be named. A field approved untouched gets its own row, worded as approved as suggested, never as set."
       >
         <Timeline defaultOpen>
           <TimelineRow actor="ai" at="2026-11-02T16:48:00Z">
@@ -406,7 +406,7 @@ export function ComponentsSection({ theme }: { theme: string }) {
           <Banner tone="warning" title="Approve is blocked" action={<Button size="small">Use runner-up</Button>}>
             The top two categories are 0.07 apart, below the 0.15 margin.
           </Banner>
-          <Banner tone="error" title="Today's live-model limit is used up" action={<Button size="small">Try a recorded email</Button>}>
+          <Banner tone="error" title="Today's live AI limit is used up" action={<Button size="small">Try a recorded email</Button>}>
             Paste-your-own is back tomorrow. The recorded examples still work.
           </Banner>
         </div>
@@ -443,16 +443,16 @@ export function ComponentsSection({ theme }: { theme: string }) {
       <Demo
         name="DraftEditor"
         props="state: suggested | edited | approved | sent-by-rule · blocker · warning"
-        intro="Suggested is the model's untouched draft: a soft gray fill with no border, like any suggestion. Type in it and it turns edited, with a solid border. Approved is read-only in the decided style. The note keeps saying who drafted it."
+        intro="Suggested is the AI's untouched draft: a soft gray fill with no border, like any suggestion. Type in it and it turns edited, with a solid border. Approved is read-only in the decided style. The note keeps saying who drafted it."
       >
-        <DraftEditor label="Draft reply" state="suggested" rows={3} note="Drafted by the model" defaultValue={draft} />
-        <DraftEditor label="Draft reply" state="edited" rows={3} note="Drafted by the model, edited by you" defaultValue={draft} />
-        <DraftEditor label="Reply" state="approved" rows={3} note="Drafted by the model, approved by you at 16:55" defaultValue={draft} />
+        <DraftEditor label="Draft reply" state="suggested" rows={3} note="Drafted by AI" defaultValue={draft} />
+        <DraftEditor label="Draft reply" state="edited" rows={3} note="Drafted by AI, edited by you" defaultValue={draft} />
+        <DraftEditor label="Reply" state="approved" rows={3} note="Drafted by AI, approved by you at 16:55" defaultValue={draft} />
         <DraftEditor
           label="Draft reply"
           state="edited"
           rows={3}
-          note="Drafted by the model, edited by you"
+          note="Drafted by AI, edited by you"
           warning="The draft was written for How-to; the category is now Cancellation risk. Check it still fits."
           defaultValue={draft}
         />
@@ -460,11 +460,11 @@ export function ComponentsSection({ theme }: { theme: string }) {
           label="Draft reply"
           state="suggested"
           rows={3}
-          note="Drafted by the model"
+          note="Drafted by AI"
           blocker={demoBlockers.find((b) => b.target === "draft")?.message}
           defaultValue={suggestion.draft}
         />
-        <DraftEditor label="Reply" state="sent-by-rule" rows={3} note="Drafted by the model, sent by rule without review" defaultValue={draft} />
+        <DraftEditor label="Reply" state="sent-by-rule" rows={3} note="Drafted by AI, sent by rule without review" defaultValue={draft} />
       </Demo>
 
       <Demo

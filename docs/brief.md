@@ -226,6 +226,11 @@ What it can't claim is real-world use, so it gets tested with support agents and
 - Checked: at 1536, 1728 and 1920px the columns are 320 / 648 / 320 in a centered 1368px shell, and the email text fills exactly 608px; on LL-5040 full lines run 83–94 characters (86 on average). At 1300 and 1535px nothing changed (320 / 568 / 320, 528px, 1288px). The triage pane is 320px as below 1536px, where all 40 tickets were checked.
 - My reason: big screens get a wider email column.
 
+**Approve on small screens, and "AI" in the draft note** (decided 2026-11-05)
+- Below 1200px (phones and tablets) the triage footer, with Approve and the blocker summary, is no longer sticky: it sits at the end of the pane, after the draft and the activity, and the person scrolls to reach it. Desktop (1200px and up) keeps it pinned. This changes the rule that Approve is always visible: it's pinned on desktop and at the end of the pane on smaller screens, never hidden.
+- My reason: on small screens the pinned bar took up too much of the view while reading.
+- The draft note says "Drafted by AI" (and "Drafted by AI, edited by you", and so on), not "Drafted by the model", following DESIGN.md rule 8. The unshown field blocker messages say "The AI is …% sure" and "or use <runner-up>", and /system's copy follows.
+
 **Focus ring** (decided 2026-11-03): the accent, 2px with a 2px offset, set globally on `:focus-visible` via a `--focus-ring` role. It is at least 6.59:1 on `surface` and `bg` in both themes.
 - The one documented exception to the Petrol rule (Petrol is only for decisions, high confidence, the selected queue item and Approve), confirmed 2026-11-04. My reason: keyboard focus must always be clearly visible, and it only appears while tabbing, so it never competes with Approve.
 

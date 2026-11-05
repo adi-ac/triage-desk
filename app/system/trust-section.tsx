@@ -42,7 +42,7 @@ export function TrustSection({ theme }: { theme: string }) {
       <section className={styles.card}>
         <h3 className={`text-heading ${styles.cardTitle}`}>Pencil and ink</h3>
         <p className={`text-body ${styles.muted} ${styles.cardIntro}`}>
-          Anything the model proposes is pencil: a soft gray fill with no visible border. Anything a
+          Anything the AI proposes is pencil: a soft gray fill with no visible border. Anything a
           person sets or approves is ink: a petrol tint with a solid petrol border, and it always
           says how it was decided: Approved as suggested on the chip, or, for a field a person kept
           or switched, the AI suggested … · n% line under it (who set it is in the chip&apos;s
@@ -60,7 +60,7 @@ export function TrustSection({ theme }: { theme: string }) {
               <span className="text-small">Urgency</span>
               <Chip state="suggested">Normal</Chip>
             </div>
-            <p className={`text-small ${styles.muted}`}>Suggested by the model, not yet reviewed</p>
+            <p className={`text-small ${styles.muted}`}>Suggested by AI, not yet reviewed</p>
           </div>
           <div className={styles.field}>
             <p className={`text-overline ${styles.muted}`}>Ink · decided</p>
@@ -88,14 +88,14 @@ export function TrustSection({ theme }: { theme: string }) {
             label="Draft reply"
             state="suggested"
             rows={2}
-            note="Drafted by the model"
+            note="Drafted by AI"
             defaultValue={draftText}
           />
           <DraftEditor
             label="Reply"
             state="approved"
             rows={2}
-            note="Drafted by the model, approved by you at 16:55"
+            note="Drafted by AI, approved by you at 16:55"
             defaultValue={draftText}
           />
         </div>
@@ -109,11 +109,11 @@ export function TrustSection({ theme }: { theme: string }) {
       <section className={styles.card}>
         <h3 className={`text-heading ${styles.cardTitle}`}>Evidence</h3>
         <p className={`text-body ${styles.muted} ${styles.cardIntro}`}>
-          Quotes the model used, marked in the email with a fill and a dashed underline, since the
-          model made the mark. Category evidence is the model&apos;s gray; urgency evidence is red,
+          Quotes the AI used, marked in the email with a fill and a dashed underline, since the
+          AI made the mark. Category evidence is the AI&apos;s gray; urgency evidence is red,
           like severity. In the triage panel, the evidence list beside the email names which is
           which, so color isn&apos;t the only cue. These marks are an illustration, not a
-          recorded model output.
+          recorded AI output.
         </p>
         <div className={styles.legend}>
           <span className="text-small">

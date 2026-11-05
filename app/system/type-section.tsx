@@ -47,7 +47,7 @@ const roles: Role[] = [
     family: "body",
     spec: "14 / 1.5 · 400",
     use: "Default UI text",
-    sample: "The model can't separate How-to from Cancellation risk. Pick one to continue.",
+    sample: "The AI can't separate How-to from Cancellation risk. Pick one to continue.",
   },
   {
     name: "body-strong",

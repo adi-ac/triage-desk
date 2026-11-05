@@ -54,14 +54,23 @@
   padding: 8px 4px;
 }
 
-/* Pinned: at the card's foot when the shell gives the pane a height, and
-   sticky to the bottom of the viewport when it doesn't (one column). */
+/* Below 1200px the footer isn't sticky: it sits at the end of the pane,
+   after the content, and the page scrolls to it. On small screens a pinned
+   bar took up too much of the view while reading. */
 .footer {
-  position: sticky;
-  inset-block-end: 0;
   padding: 12px 16px;
   border-block-start: var(--hairline) solid var(--line);
   border-end-start-radius: 10px;
   border-end-end-radius: 10px;
   background: var(--surface);
+}
+
+/* Desktop (1200px and up): pinned at the card's foot. The shell gives the
+   pane a height, so the content scrolls above the footer and it's always
+   in view. */
+@media (min-width: 1200px) {
+  .footer {
+    position: sticky;
+    inset-block-end: 0;
+  }
 }

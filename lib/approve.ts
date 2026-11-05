@@ -44,12 +44,12 @@ export function approveBlockers({ fields, draft }: { fields: ApproveField[]; dra
     const reason = unsureReason(field.confidence, field.runnerUp?.confidence);
     if (!reason) continue;
     const choice = field.runnerUp
-      ? `Keep ${field.value} or switch to ${field.runnerUp.value}.`
+      ? `Keep ${field.value} or use ${field.runnerUp.value}.`
       : `Keep ${field.value} or change it.`;
     if (reason === "low") {
       blockers.push({
         target: field.name,
-        message: `The model is ${toPercent(field.confidence)}% sure the ${field.name} is ${field.value}, below ${confidenceThresholds.medium}%. ${choice}`,
+        message: `The AI is ${toPercent(field.confidence)}% sure the ${field.name} is ${field.value}, below ${confidenceThresholds.medium}%. ${choice}`,
       });
     } else {
       const gap = toPercent(field.confidence) - toPercent(field.runnerUp!.confidence);

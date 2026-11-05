@@ -185,10 +185,10 @@ function Triage({ ticketId, email, suggestion, prior, onEvidenceActive }: Triage
   ].filter(Boolean);
 
   const note = sent
-    ? `Drafted by the model, ${state.draftEdited ? "edited and approved" : "approved"} by you`
+    ? `Drafted by AI, ${state.draftEdited ? "edited and approved" : "approved"} by you`
     : state.draftEdited
-      ? "Drafted by the model, edited by you"
-      : "Drafted by the model";
+      ? "Drafted by AI, edited by you"
+      : "Drafted by AI";
 
   return (
     <Pane
@@ -310,7 +310,7 @@ function RuleSentTriage({ ticketId, email, suggestion, onEvidenceActive }: Triag
           key={ticketId}
           label="Reply"
           state="sent-by-rule"
-          note="Drafted by the model, sent by rule without review"
+          note="Drafted by AI, sent by rule without review"
           rows={6}
           defaultValue={suggestion.draft}
         />
