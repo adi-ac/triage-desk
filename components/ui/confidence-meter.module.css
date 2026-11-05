@@ -1,7 +1,6 @@
-/* No border and no fill at any level, so it never reads as a chip. Low and
-   medium differ by their word, the bar's length and the hint. Always one
-   line: the reading (bar, figure, word) never shrinks; the hint truncates
-   with an ellipsis when the meter runs out of room. */
+/* No border and no fill at any level, so it never reads as a chip. High
+   and medium are petrol and differ by their word and the bar's length; low
+   is amber. Always one line, and nothing in it shrinks. */
 
 .meter {
   display: inline-flex;
@@ -50,12 +49,4 @@
   display: block;
   block-size: 100%;
   background: var(--confidence);
-}
-
-.hint {
-  flex: 0 1 auto;
-  min-inline-size: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  color: var(--ink-2);
 }

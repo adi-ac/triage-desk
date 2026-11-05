@@ -8,6 +8,12 @@ export type PaneProps = Omit<ComponentProps<"section">, "className" | "style" | 
   meta?: ReactNode;
   /** Pinned to the bottom of the card while its content scrolls: the triage pane's ApproveBar. */
   footer?: ReactNode;
+  /**
+   * "list" insets the content 4px instead of 16px, for a list whose rows
+   * carry their own 12px padding (the queue): row text still lines up with
+   * the title, and a row's hover or selected fill has 4px on each side.
+   */
+  inset?: "default" | "list";
 };
 
 /**
@@ -15,7 +21,7 @@ export type PaneProps = Omit<ComponentProps<"section">, "className" | "style" | 
  * The card's content scrolls on its own when the shell gives the pane a
  * height; the footer stays pinned at the bottom either way.
  */
-export function Pane({ title, meta, footer, children, ...props }: PaneProps) {
+export function Pane({ title, meta, footer, inset = "default", children, ...props }: PaneProps) {
   const headingId = useId();
   return (
     <section aria-labelledby={headingId} {...props} className={styles.pane}>
@@ -26,7 +32,9 @@ export function Pane({ title, meta, footer, children, ...props }: PaneProps) {
         {meta && <div className={`text-small ${styles.meta}`}>{meta}</div>}
       </div>
       <div className={styles.card}>
-        <div className={styles.content}>{children}</div>
+        <div className={styles.content} data-inset={inset}>
+          {children}
+        </div>
         {footer && <div className={styles.footer}>{footer}</div>}
       </div>
     </section>

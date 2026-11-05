@@ -23,7 +23,6 @@ const pairs: Pair[] = [
   { label: "Medium confidence text", fg: "--confidence-medium-text", bg: "--surface", kind: "text" },
   { label: "Medium confidence meter", fg: "--confidence-medium", bg: "--confidence-track", kind: "non-text" },
   { label: "Low confidence text", fg: "--confidence-low-text", bg: "--surface", kind: "text" },
-  { label: "Confirm first hint", fg: "--ink-2", bg: "--surface", kind: "text" },
   { label: "Low confidence meter", fg: "--confidence-low", bg: "--confidence-track", kind: "non-text" },
   { label: "Urgent", fg: "--severity-urgent-text", bg: "--severity-urgent-fill", kind: "text" },
   { label: "High severity", fg: "--severity-high-text", bg: "--severity-high-fill", kind: "text" },
@@ -128,10 +127,9 @@ export function TrustSection({ theme }: { theme: string }) {
       <section className={styles.card}>
         <h3 className={`text-heading ${styles.cardTitle}`}>Confidence</h3>
         <p className={`text-body ${styles.muted} ${styles.cardIntro}`}>
-          Confidence is Claude&apos;s estimate, not a measured probability. High is petrol, like
-          Approve: fine to go ahead. Medium and low are amber, with no fill: they differ by the
-          word, the bar&apos;s length and the hint. Low always asks to confirm first and blocks
-          Approve.
+          Confidence is Claude&apos;s estimate, not a measured probability. High and medium are
+          petrol, like Approve, and differ by the word and the bar&apos;s length. Amber is only for
+          low, which always blocks Approve. No level has a fill or hint text.
         </p>
         <div className={styles.stack}>
           <ConfidenceMeter value={0.92} />

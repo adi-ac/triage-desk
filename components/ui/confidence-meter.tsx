@@ -6,8 +6,7 @@ export { confidenceLevel, confidenceThresholds, toPercent, unsureReason, type Co
 
 const words: Record<ConfidenceLevel, string> = { high: "High", medium: "Medium", low: "Low" };
 
-/** Shown: always "confirm first", on one line. Read out: the full reason. */
-const hint = "confirm first";
+/** Not shown: the meter has no hint text. Read out as part of its value. */
 const spoken = { low: "confirm before approving", close: "close to the runner-up, confirm before approving" };
 
 export type ConfidenceMeterProps = Omit<ComponentProps<"div">, "className" | "style" | "children"> & {
@@ -23,9 +22,9 @@ export type ConfidenceMeterProps = Omit<ComponentProps<"div">, "className" | "st
  * Always a bar, a percentage and a level word, never a chip: high shares
  * its petrol with decisions, so shape and words keep them apart. The value
  * is Claude's own estimate, not a measured probability; the accessible name
- * says so on every meter. An unsure pick adds "confirm first" until a person
- * keeps or switches it. Always one line: the hint truncates with an ellipsis
- * when there's no room, and the meter never wraps or scrolls sideways.
+ * says so on every meter. An unsure pick adds "confirm before approving" to
+ * the accessible value until a person keeps or switches it; nothing extra is
+ * shown. Always one line, never wrapping or scrolling sideways.
  */
 export function ConfidenceMeter({ value, runnerUp, confirmed = false, ...props }: ConfidenceMeterProps) {
   const percent = toPercent(value);
@@ -51,11 +50,6 @@ export function ConfidenceMeter({ value, runnerUp, confirmed = false, ...props }
         <span className="text-mono">{percent}%</span>
         <span>{words[level]} confidence</span>
       </span>
-      {reason && (
-        <span className={styles.hint} aria-hidden>
-          · {hint}
-        </span>
-      )}
     </div>
   );
 }

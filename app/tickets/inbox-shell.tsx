@@ -51,7 +51,7 @@ function Shell({ id, children }: { id: string; children: ReactNode }) {
       <h1 className="visually-hidden">Inbox</h1>
 
       <div className={styles.queuePane}>
-        <Pane title="Queue" meta={`${tickets.length} tickets`}>
+        <Pane title="Queue" meta={`${tickets.length} tickets`} inset="list">
           <QueueList currentId={id} onOpen={open} />
         </Pane>
       </div>

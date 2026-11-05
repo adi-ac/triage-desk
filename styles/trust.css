@@ -8,8 +8,8 @@
  *   gray fill      the model: suggestions (no border); the evidence it
  *                  quotes is a fill plus a dashed underline
  *   petrol, solid  a person: decisions (the same accent as Approve)
- *   petrol         high confidence: fine to go ahead (shares the accent)
- *   amber          uncertainty: medium and low confidence
+ *   petrol         high and medium confidence (shares the accent)
+ *   amber          low confidence only: it blocks Approve
  *   red            urgency: urgent and high severity, urgency evidence
  *
  * Suggestions and decisions are flat at every level: no shadow, no gradient.
@@ -46,14 +46,14 @@
   --evidence-urgency: var(--critical-soft);
   --evidence-urgency-line: var(--critical);
 
-  /* Confidence: high is petrol, "fine to go ahead", like Approve; medium
-     and low are amber, "check this". No level has a fill: low and medium
-     differ by their word, the bar's length and the hint to confirm. */
+  /* Confidence: high and medium are petrol, like Approve; amber is only
+     for low, which blocks Approve. No level has a fill. High and medium
+     differ by their word and the bar's length. */
   --confidence-track: var(--line);
   --confidence-high: var(--accent);
   --confidence-high-text: var(--accent-text);
-  --confidence-medium: var(--warning);
-  --confidence-medium-text: var(--ink-2);
+  --confidence-medium: var(--accent);
+  --confidence-medium-text: var(--accent-text);
   --confidence-low: var(--warning);
   --confidence-low-text: var(--warning);
 

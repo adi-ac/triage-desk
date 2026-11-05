@@ -82,6 +82,7 @@
 
 .groupTitle {
   margin: 0;
-  padding-inline: 14px;
+  /* Same as a QueueItem's padding, so headings line up with item text and the title. */
+  padding-inline: 12px;
   color: var(--ink-3);
 }

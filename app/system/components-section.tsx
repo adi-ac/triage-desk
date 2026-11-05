@@ -313,9 +313,10 @@ export function ComponentsSection({ theme }: { theme: string }) {
             accessible name says so. The level is derived inside, from the rounded percentage: high from{" "}
             {confidenceThresholds.high}%, medium from {confidenceThresholds.medium}%, low below. A pick
             under {confidenceThresholds.medium}% or within {confidenceThresholds.margin} points of its
-            runner-up is unsure and adds confirm first, until a person keeps or switches it. Always
-            a bar, a figure and a word, on one line: in a narrow column the hint truncates with an
-            ellipsis (screen readers still hear the full reason). No level has a fill.
+            runner-up is unsure and blocks Approve until a person keeps or switches it; screen readers
+            hear &ldquo;confirm before approving&rdquo; in the meter&apos;s value, and nothing extra is
+            shown. High and medium are petrol; amber is only for low. Always a bar, a figure and a
+            word, on one line, with no fill.
           </>
         }
       >
@@ -328,10 +329,6 @@ export function ComponentsSection({ theme }: { theme: string }) {
           <p className={`text-overline ${styles.muted}`}>Kept or switched by a person</p>
           <ConfidenceMeter value={0.48} confirmed />
           <ConfidenceMeter value={0.71} runnerUp={0.64} confirmed />
-          <p className={`text-overline ${styles.muted}`}>In a narrow column</p>
-          <div className={styles.narrow}>
-            <ConfidenceMeter value={0.48} />
-          </div>
         </div>
       </Demo>
 
@@ -401,28 +398,30 @@ export function ComponentsSection({ theme }: { theme: string }) {
 
       <Demo
         name="QueueItem"
-        intro="Content props only. The open ticket has a petrol tint, with its secondary text stepped up to ink-2. A tag that repeats its group's heading is left out (no Needs review under Needs review); Sent by rule and Closed always stay."
+        intro="Content props only. 12px inline padding, in a Pane with inset=list (4px), so item text and group headings start where the Queue title does and the fill has 4px on each side. The open ticket has a petrol tint, with its secondary text stepped up to ink-2. A tag that repeats its group's heading is left out (no Needs review under Needs review); Sent by rule and Closed always stay."
       >
-        <div className={styles.queue}>
-          <p className={`text-overline ${styles.muted}`}>Needs review</p>
-          <QueueItem
-            current
-            sender={firstScreen.from.name}
-            company={firstScreen.account?.company}
-            subject={firstScreen.subject}
-            preview={preview(firstScreen)}
-            receivedAt={firstScreen.receivedAt}
-          />
-          <p className={`text-overline ${styles.muted}`}>Sent</p>
-          <QueueItem
-            sender={autoSent.from.name}
-            company={autoSent.account?.company}
-            subject={autoSent.subject}
-            preview={preview(autoSent)}
-            receivedAt={autoSent.receivedAt}
-            meta={<Tag tone="ai">Sent by rule</Tag>}
-          />
-        </div>
+        <Pane title="Queue" meta="2 tickets" inset="list">
+          <div className={styles.queue}>
+            <p className={`text-overline ${styles.muted} ${styles.groupTitle}`}>Needs review</p>
+            <QueueItem
+              current
+              sender={firstScreen.from.name}
+              company={firstScreen.account?.company}
+              subject={firstScreen.subject}
+              preview={preview(firstScreen)}
+              receivedAt={firstScreen.receivedAt}
+            />
+            <p className={`text-overline ${styles.muted} ${styles.groupTitle}`}>Sent</p>
+            <QueueItem
+              sender={autoSent.from.name}
+              company={autoSent.account?.company}
+              subject={autoSent.subject}
+              preview={preview(autoSent)}
+              receivedAt={autoSent.receivedAt}
+              meta={<Tag tone="ai">Sent by rule</Tag>}
+            />
+          </div>
+        </Pane>
       </Demo>
 
       <Demo
@@ -454,8 +453,8 @@ export function ComponentsSection({ theme }: { theme: string }) {
 
       <Demo
         name="Pane"
-        props="title · meta · footer"
-        intro="A gray tray holding the header and wrapping a white card, with concentric corners (14px tray, 10px card). The footer stays pinned at the bottom of the card while the content scrolls. Screens never build their own."
+        props="title · meta · footer · inset: default | list"
+        intro="A gray tray holding the header and wrapping a white card, with concentric corners (14px tray, 10px card). The title starts exactly where the content does, 20px from the tray's edge. The footer stays pinned at the bottom of the card while the content scrolls. inset=list (the queue) insets the content 4px for rows that carry their own 12px padding. Screens never build their own."
       >
         <Pane title="Email" meta={<span className="text-mono-small">LL-5040</span>}>
           <p className="text-reading">Could you tell me how to export everything we have in Ledgerline?</p>
@@ -471,7 +470,7 @@ export function ComponentsSection({ theme }: { theme: string }) {
       <Demo
         name="ApproveBar"
         props="blockers · targets · sentAt · afterSend: next-ticket | back-to-inbox"
-        intro="Approve, with a one-line summary of what blocks it; each item jumps to where it's fixed, and the reason is shown there (the field's hint, the draft's highlighted placeholders), not in a list. After sending: the sent line (by you, or by rule), and Next ticket in the inbox or Back to inbox for a ticket opened on its own."
+        intro="Approve, with a one-line summary of what blocks it; each item jumps to where it's fixed, and the reason is shown there (a low field's amber meter, the draft's highlighted placeholders), not in a list. After sending: the sent line (by you, or by rule), and Next ticket in the inbox or Back to inbox for a ticket opened on its own."
       >
         <div className={styles.blocks}>
           <ApproveBar blockers={demoBlockers} targets={{}} onApprove={() => {}} sentAt={null} afterSend="next-ticket" onAfterSend={() => {}} />
