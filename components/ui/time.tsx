@@ -20,9 +20,18 @@ function short(date: Date, now: Date) {
 
 const full = (date: Date) => new Intl.DateTimeFormat(undefined, { dateStyle: "full", timeStyle: "long" }).format(date);
 
-/** The server doesn't know the viewer's zone, so it renders UTC until the page hydrates. */
+const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+const pad = (n: number) => String(n).padStart(2, "0");
+
+/**
+ * The server doesn't know the viewer's zone, so the server render and the
+ * hydration render show UTC ("2 Nov, 10:02") until the page hydrates.
+ * Built by hand, not with Intl: Node's and the browser's date data differ
+ * ("2 Nov, 10:02" vs "2 Nov at 10:02"), and any difference is a hydration
+ * mismatch.
+ */
 const serverShort = (date: Date) =>
-  new Intl.DateTimeFormat("en-GB", { day: "numeric", month: "short", hour: "2-digit", minute: "2-digit", timeZone: "UTC" }).format(date);
+  `${date.getUTCDate()} ${months[date.getUTCMonth()]}, ${pad(date.getUTCHours())}:${pad(date.getUTCMinutes())}`;
 
 export type TimeProps = Omit<ComponentProps<"time">, "className" | "style" | "children" | "dateTime" | "title"> & {
   /** ISO 8601. */
