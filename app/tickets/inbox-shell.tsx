@@ -1,8 +1,8 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useState, type ReactNode } from "react";
-import { AppHeader, FabPanel, Pane } from "@/components/ui";
+import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { AppHeader, FabPanel, FabPanelHeaderButton, Pane } from "@/components/ui";
 import { tickets } from "@/fixtures/tickets";
 import { InboxProvider } from "./inbox-state";
 import { QueueList } from "./queue-list";
@@ -25,8 +25,9 @@ export function InboxShell({ children }: { children: ReactNode }) {
 function Shell({ id, children }: { id: string; children: ReactNode }) {
   const router = useRouter();
   const [queueOpen, setQueueOpen] = useState(false);
-  // Tablets: the queue's header button goes here (FabPanel navSlot).
-  const [navSlot, setNavSlot] = useState<HTMLSpanElement | null>(null);
+  // Tablets: the queue's header button (FabPanel navButton).
+  const queueId = useId();
+  const navButton = useRef<HTMLButtonElement>(null);
 
   const open = (ticketId: string) => {
     setQueueOpen(false);
@@ -46,7 +47,20 @@ function Shell({ id, children }: { id: string; children: ReactNode }) {
   return (
     <main className={styles.shell}>
       <div className={styles.header}>
-        <AppHeader actions={<span ref={setNavSlot} className={styles.navSlot} />} />
+        <AppHeader
+          actions={
+            <span className={styles.navSlot}>
+              <FabPanelHeaderButton
+                ref={navButton}
+                open={queueOpen}
+                onOpenChange={setQueueOpen}
+                title="Queue"
+                icon="inbox"
+                controls={queueId}
+              />
+            </span>
+          }
+        />
       </div>
       <h1 className="visually-hidden">Inbox</h1>
 
@@ -65,7 +79,8 @@ function Shell({ id, children }: { id: string; children: ReactNode }) {
           title="Queue"
           icon="inbox"
           onOpened={centerCurrent}
-          navSlot={navSlot}
+          id={queueId}
+          navButton={navButton}
         >
           <QueueList currentId={id} onOpen={open} />
         </FabPanel>

@@ -1,7 +1,16 @@
 "use client";
 
-import { useEffect, useId, useLayoutEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
-import { createPortal } from "react-dom";
+import {
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState,
+  useSyncExternalStore,
+  type ReactNode,
+  type Ref,
+  type RefObject,
+} from "react";
 import { Icon, type IconName } from "./icon";
 import styles from "./fab-panel.module.css";
 
@@ -16,13 +25,15 @@ export type FabPanelProps = {
   children: ReactNode;
   /** Called after the panel opens, with its scrolling element, e.g. to bring the current item into view. */
   onOpened?: (scroller: HTMLDivElement) => void;
+  /** The panel's id, for a FabPanelHeaderButton's `controls`. */
+  id?: string;
   /**
-   * Tablets (768px and up): an element in the AppHeader, to the right of the
-   * theme toggle, where the trigger is a 32px header button instead of the
-   * FAB, and the panel opens 8px below that header, as wide as it. Leave
-   * it out and the FAB is the trigger at every width.
+   * Tablets (768px and up): a FabPanelHeaderButton in the AppHeader, to the
+   * right of the theme toggle. It's the trigger instead of the FAB, and the
+   * panel opens 8px below that header, as wide as it. Leave it out and the
+   * FAB is the trigger at every width.
    */
-  navSlot?: HTMLElement | null;
+  navButton?: RefObject<HTMLButtonElement | null>;
 };
 
 const tabletQuery = "(min-width: 768px)";
@@ -48,21 +59,21 @@ const atTopSnapshot = () => window.scrollY <= 0;
  * top and the panel is closed; how it extends, collapses and morphs is in
  * fab-panel.module.css.
  *
- * With navSlot, tablets get a header button instead (the inbox): the same
+ * With navButton, tablets get a header button instead (the inbox): the same
  * one-button rule. It sits in the header until the panel opens; then it's
  * shown in the top layer above the scrim and panel, fixed where it was
  * (page scroll is locked, so it can't move), and becomes the close. It
  * leaves the top layer only once the panel's exit has finished, so the
  * fading scrim never covers it.
  */
-export function FabPanel({ open, onOpenChange, title, icon, children, onOpened, navSlot }: FabPanelProps) {
+export function FabPanel({ open, onOpenChange, title, icon, children, onOpened, id, navButton }: FabPanelProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const scrimRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const scrollerRef = useRef<HTMLDivElement>(null);
   const fabRef = useRef<HTMLButtonElement>(null);
-  const navRef = useRef<HTMLButtonElement>(null);
-  const panelId = useId();
+  const ownId = useId();
+  const panelId = id ?? ownId;
   const name = title.toLowerCase();
 
   // At the top on the server and during hydration, so the button is
@@ -104,7 +115,10 @@ export function FabPanel({ open, onOpenChange, title, icon, children, onOpened, 
     const panel = panelRef.current;
     const fab = fabRef.current;
     if (!root || !scrim || !panel || !fab) return;
-    const nav = navRef.current;
+    const nav = navButton?.current ?? null;
+    // The header button's slot keeps its 32px place in the header, so it's
+    // where the button is, in or out of the top layer.
+    const navSlot = nav?.parentElement;
     const tablet = () => nav !== null && matchMedia(tabletQuery).matches;
 
     if (!open) {
@@ -183,21 +197,10 @@ export function FabPanel({ open, onOpenChange, title, icon, children, onOpened, 
       document.removeEventListener("keydown", onKeyDown);
       removeEventListener("resize", place);
     };
-  }, [open, navSlot]);
-
-  const iconMorph = (size: number) => (
-    <span className={styles.icons} data-size={size} aria-hidden>
-      <span className={styles.openIcon}>
-        <Icon name={icon} size={size} />
-      </span>
-      <span className={styles.closeIcon}>
-        <Icon name="close" size={size} />
-      </span>
-    </span>
-  );
+  }, [open, navButton]);
 
   return (
-    <div ref={rootRef} className={styles.root} data-nav={navSlot ? "" : undefined}>
+    <div ref={rootRef} className={styles.root} data-nav={navButton ? "" : undefined}>
       <div ref={scrimRef} popover="manual" className={styles.scrim} onClick={() => onOpenChange(false)} />
       <div
         ref={panelRef}
@@ -228,32 +231,67 @@ export function FabPanel({ open, onOpenChange, title, icon, children, onOpened, 
         aria-controls={panelId}
         onClick={() => onOpenChange(!open)}
       >
-        {iconMorph(20)}
+        <IconMorph icon={icon} size={20} />
         <span className={styles.labelClip} aria-hidden>
           <span className={styles.labelTrack}>
             <span className={styles.label}>{title}</span>
           </span>
         </span>
       </button>
-      {navSlot &&
-        createPortal(
-          <button
-            ref={navRef}
-            type="button"
-            popover="manual"
-            className={styles.navButton}
-            data-open={open ? "" : undefined}
-            aria-label={open ? `Close ${name}` : `Open ${name}`}
-            aria-expanded={open}
-            aria-haspopup="dialog"
-            aria-controls={panelId}
-            onClick={() => onOpenChange(!open)}
-          >
-            {iconMorph(18)}
-          </button>,
-          navSlot,
-        )}
     </div>
+  );
+}
+
+export type FabPanelHeaderButtonProps = {
+  /** FabPanel's navButton ref. */
+  ref: Ref<HTMLButtonElement>;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  /** The same title and icon as the FabPanel. */
+  title: string;
+  icon: IconName;
+  /** The FabPanel's id. */
+  controls: string;
+};
+
+/**
+ * The queue's trigger on tablets (DESIGN.md, FabPanel): a round 32px
+ * button in Approve's primary style, in the AppHeader's actions slot (the
+ * slot keeps its 32px place). Rendered with the header, so it's in the
+ * server HTML; FabPanel moves it into the top layer while the panel is
+ * open. Hidden on phones by the screen, which shows the FAB there.
+ */
+export function FabPanelHeaderButton({ ref, open, onOpenChange, title, icon, controls }: FabPanelHeaderButtonProps) {
+  const name = title.toLowerCase();
+  return (
+    <button
+      ref={ref}
+      type="button"
+      popover="manual"
+      className={styles.navButton}
+      data-open={open ? "" : undefined}
+      aria-label={open ? `Close ${name}` : `Open ${name}`}
+      aria-expanded={open}
+      aria-haspopup="dialog"
+      aria-controls={controls}
+      onClick={() => onOpenChange(!open)}
+    >
+      <IconMorph icon={icon} size={18} />
+    </button>
+  );
+}
+
+/** The trigger's icon and the close ×, stacked; data-open on the button turns one into the other. */
+function IconMorph({ icon, size }: { icon: IconName; size: 18 | 20 }) {
+  return (
+    <span className={styles.icons} data-size={size} aria-hidden>
+      <span className={styles.openIcon}>
+        <Icon name={icon} size={size} />
+      </span>
+      <span className={styles.closeIcon}>
+        <Icon name="close" size={size} />
+      </span>
+    </span>
   );
 }
 
