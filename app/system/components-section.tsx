@@ -538,8 +538,8 @@ export function ComponentsSection({ theme }: { theme: string }) {
 
       <Demo
         name="FabPanel"
-        props="open · onOpenChange · title · icon · onOpened?"
-        intro="The queue's entry point below 1200px: a 44px round Petrol button fixed 16px from the bottom right, and the panel it opens 12px above it. At the very top of the page it's extended, the inbox icon and Queue; any scroll down collapses it to the icon, the label sweeping out right to left before the width shrinks; back at the top it widens and the label fades in. Opening, it collapses, the icon turns into a ×, and the panel grows from its bottom-right corner (340ms) over a scrim; closing, it simply fades out (180ms). The one button stays on top and is the close; a scrim tap, Escape or a pick closes it too. Focus moves into the panel and back to the button. On phones the panel is as wide as the panes; from 768px it's 380px and up to 640px tall."
+        props="open · onOpenChange · title · icon · onOpened? · navSlot?"
+        intro="The queue's entry point below 1200px: a 44px round Petrol button fixed 16px from the bottom right, and the panel it opens 12px above it. At the very top of the page it's extended, the inbox icon and Queue; any scroll down collapses it to the icon, the label sweeping out right to left before the width shrinks; back at the top it widens and the label fades in. Opening, it collapses, the icon turns into a ×, and the panel grows from its bottom-right corner (340ms) over a scrim; closing, it simply fades out (180ms). The one button stays on top and is the close; a scrim tap, Escape or a pick closes it too. Focus moves into the panel and back to the button. On phones the panel is as wide as the panes; from 768px it's 380px and up to 640px tall. In the inbox, tablets use a 32px header button instead (navSlot), with the panel opening below the header across both panes."
       >
         <FabPanelDemo />
       </Demo>

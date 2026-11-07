@@ -57,9 +57,41 @@
   display: contents;
 }
 
-@media (max-width: 1199px) {
+/* Phones: the FAB. The page ends 16px above it. */
+@media (max-width: 767px) {
   .shell {
     padding-block-end: calc(76px + env(safe-area-inset-bottom, 0px));
+  }
+}
+
+/* Tablets: the queue's button is in the header (the FabPanel navSlot, to
+   the right of the theme toggle), and the header is sticky so it's always
+   in reach. It sticks 12px from the top; a page-colored band behind it
+   (12px above and below, and across the shell's 24px padding) hides the
+   panes scrolling under it, without changing the layout. */
+.navSlot {
+  display: none;
+}
+
+@media (min-width: 768px) and (max-width: 1199px) {
+  .navSlot {
+    display: inline-flex;
+    inline-size: 32px;
+    block-size: 32px;
+  }
+
+  .header {
+    position: sticky;
+    inset-block-start: 12px;
+    z-index: 5;
+  }
+
+  .header::before {
+    content: "";
+    position: absolute;
+    inset: -12px -24px;
+    z-index: -1;
+    background: var(--page);
   }
 }
 

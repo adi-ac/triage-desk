@@ -101,12 +101,17 @@
   rotate: -90deg;
 }
 
-.fab[data-open] .openIcon {
+.icons[data-size="18"] {
+  inline-size: 18px;
+  block-size: 18px;
+}
+
+[data-open] > .icons > .openIcon {
   opacity: 0;
   rotate: 90deg;
 }
 
-.fab[data-open] .closeIcon {
+[data-open] > .icons > .closeIcon {
   opacity: 1;
   rotate: 0deg;
 }
@@ -160,6 +165,47 @@
   transition:
     --fab-reveal 0s,
     opacity var(--duration-fab-label-in) var(--ease-fab-label-in) var(--delay-fab-label-in);
+}
+
+/* Header button (tablets, with navSlot)
+ *
+ * A round 32px button in Approve's primary style with an 18px icon, in the
+ * header slot to the right of the theme toggle. While the panel is open
+ * it's in the top layer, fixed at the slot's position (--nav-top and
+ * --nav-left, set by the component; the slot keeps its 32px place), and
+ * its icon turns into the × on the FAB's timing. No press scale: it's a
+ * header control, like the theme toggle.
+ */
+.navButton {
+  position: relative;
+  inset: auto;
+  display: inline-grid;
+  place-items: center;
+  box-sizing: border-box;
+  inline-size: 32px;
+  block-size: 32px;
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+  border: 0;
+  border-radius: var(--button-radius);
+  appearance: none;
+  color: var(--accent-ink);
+  background: var(--button-primary-bg);
+  box-shadow: var(--shadow-button-primary);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.navButton:popover-open {
+  position: fixed;
+  inset: var(--nav-top) auto auto var(--nav-left);
+}
+
+@media (hover: hover) {
+  .navButton:hover {
+    background: var(--button-primary-bg-hover);
+  }
 }
 
 /* Scrim */
@@ -273,6 +319,28 @@
     inline-size: 380px;
     max-block-size: min(640px, calc(100dvh - 64px - 72px - env(safe-area-inset-bottom, 0px)));
   }
+
+  /* With a header button (the inbox on tablets): no FAB, and the panel
+     opens 8px below the header, from the email pane's left edge to the
+     triage pane's right edge (the header row spans exactly those columns;
+     the component measures it on open and on resize), down to 16px from
+     the bottom of the viewport. It grows from its top-right corner, under
+     the button; it still closes with the plain fade. */
+  .root[data-nav] .fab {
+    display: none;
+  }
+
+  .root[data-nav] .panel {
+    inset: var(--panel-top, 64px) auto calc(16px + env(safe-area-inset-bottom, 0px)) var(--panel-left, 16px);
+    inline-size: var(--panel-width, calc(100vw - 32px));
+    max-block-size: none;
+  }
+
+  @starting-style {
+    .root[data-nav] .panel:popover-open {
+      clip-path: inset(0 0 100% 100% round 20px);
+    }
+  }
 }
 
 .header {
@@ -307,6 +375,7 @@
 @media (prefers-reduced-motion: reduce) {
   .fab,
   .fab *,
+  .navButton *,
   .scrim,
   .panel,
   .panel > * {

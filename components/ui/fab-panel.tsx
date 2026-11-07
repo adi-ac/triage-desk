@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useId, useLayoutEffect, useRef, useState, useSyncExternalStore, type ReactNode } from "react";
+import { createPortal } from "react-dom";
 import { Icon, type IconName } from "./icon";
 import styles from "./fab-panel.module.css";
 
@@ -15,7 +16,16 @@ export type FabPanelProps = {
   children: ReactNode;
   /** Called after the panel opens, with its scrolling element, e.g. to bring the current item into view. */
   onOpened?: (scroller: HTMLDivElement) => void;
+  /**
+   * Tablets (768px and up): an element in the AppHeader, to the right of the
+   * theme toggle, where the trigger is a 32px header button instead of the
+   * FAB, and the panel opens 8px below that header, as wide as it. Leave
+   * it out and the FAB is the trigger at every width.
+   */
+  navSlot?: HTMLElement | null;
 };
+
+const tabletQuery = "(min-width: 768px)";
 
 const subscribeScroll = (onChange: () => void) => {
   addEventListener("scroll", onChange, { passive: true });
@@ -37,13 +47,21 @@ const atTopSnapshot = () => window.scrollY <= 0;
  * The button shows its label only when the page is scrolled to the very
  * top and the panel is closed; how it extends, collapses and morphs is in
  * fab-panel.module.css.
+ *
+ * With navSlot, tablets get a header button instead (the inbox): the same
+ * one-button rule. It sits in the header until the panel opens; then it's
+ * shown in the top layer above the scrim and panel, fixed where it was
+ * (page scroll is locked, so it can't move), and becomes the close. It
+ * leaves the top layer only once the panel's exit has finished, so the
+ * fading scrim never covers it.
  */
-export function FabPanel({ open, onOpenChange, title, icon, children, onOpened }: FabPanelProps) {
+export function FabPanel({ open, onOpenChange, title, icon, children, onOpened, navSlot }: FabPanelProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const scrimRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const scrollerRef = useRef<HTMLDivElement>(null);
   const fabRef = useRef<HTMLButtonElement>(null);
+  const navRef = useRef<HTMLButtonElement>(null);
   const panelId = useId();
   const name = title.toLowerCase();
 
@@ -86,31 +104,68 @@ export function FabPanel({ open, onOpenChange, title, icon, children, onOpened }
     const panel = panelRef.current;
     const fab = fabRef.current;
     if (!root || !scrim || !panel || !fab) return;
+    const nav = navRef.current;
+    const tablet = () => nav !== null && matchMedia(tabletQuery).matches;
 
     if (!open) {
       if (panel.matches(":popover-open")) panel.hidePopover();
       if (scrim.matches(":popover-open")) scrim.hidePopover();
-      // Back to the button, unless it already has focus (it was the close).
-      // The browser shows the ring only after keyboard use (Escape, Enter
-      // on a ticket), not after a tap or click.
-      if (opened.current && document.activeElement !== fab) moveFocus(fab, pointerInput.current);
-      return;
+      // Back to the button that's showing, unless it already has focus (it
+      // was the close). The browser shows the ring only after keyboard use
+      // (Escape, Enter on a ticket), not after a tap or click.
+      const trigger = tablet() ? nav! : fab;
+      if (opened.current && document.activeElement !== trigger) moveFocus(trigger, pointerInput.current);
+      // The header button leaves the top layer once the scrim and panel
+      // have faded out (at once under reduced motion), not before, so the
+      // fading scrim never covers it.
+      if (!nav?.matches(":popover-open")) return;
+      let cancelled = false;
+      const exits = [...panel.getAnimations(), ...scrim.getAnimations()].map((a) => a.finished);
+      Promise.allSettled(exits).then(() => {
+        if (cancelled) return;
+        nav.hidePopover();
+        nav.style.removeProperty("--nav-top");
+        nav.style.removeProperty("--nav-left");
+      });
+      return () => {
+        cancelled = true;
+      };
     }
 
     opened.current = true;
+    // On tablets, place the panel under the header and pin the header
+    // button where it is, before either joins the top layer.
+    const place = () => {
+      if (!tablet()) return;
+      const header = navSlot?.closest("header");
+      if (header) {
+        const h = header.getBoundingClientRect();
+        panel.style.setProperty("--panel-top", `${h.bottom + 8}px`);
+        panel.style.setProperty("--panel-left", `${h.left}px`);
+        panel.style.setProperty("--panel-width", `${h.width}px`);
+      }
+      // The slot keeps the button's 32px place in the header, so it's where
+      // the button is, in or out of the top layer.
+      const b = navSlot!.getBoundingClientRect();
+      nav!.style.setProperty("--nav-top", `${b.top}px`);
+      nav!.style.setProperty("--nav-left", `${b.left}px`);
+    };
+    place();
     // Not shown yet, or still playing its exit (reopened mid-close).
     if (!scrim.matches(":popover-open")) scrim.showPopover();
     if (!panel.matches(":popover-open")) panel.showPopover();
     // The panel joined the top layer above the button; re-show the button
     // so it's on top again. It stays displayed throughout (its display is
     // set in CSS), so this never flickers or restarts its transitions.
-    if (fab.matches(":popover-open")) fab.hidePopover();
-    fab.showPopover();
+    for (const button of tablet() ? [nav!] : [fab]) {
+      if (button.matches(":popover-open")) button.hidePopover();
+      button.showPopover();
+    }
     if (scrollerRef.current) callbacks.current.onOpened?.(scrollerRef.current);
     // Into the panel itself, not its first control, so a tap shows no ring.
     moveFocus(panel, pointerInput.current);
 
-    const restoreInert = inertOthers(root);
+    const restoreInert = inertOthers(nav ? [root, nav] : [root]);
     const html = document.documentElement;
     const overflow = html.style.overflow;
     html.style.overflow = "hidden";
@@ -121,15 +176,28 @@ export function FabPanel({ open, onOpenChange, title, icon, children, onOpened }
       }
     };
     document.addEventListener("keydown", onKeyDown);
+    addEventListener("resize", place);
     return () => {
       restoreInert();
       html.style.overflow = overflow;
       document.removeEventListener("keydown", onKeyDown);
+      removeEventListener("resize", place);
     };
-  }, [open]);
+  }, [open, navSlot]);
+
+  const iconMorph = (size: number) => (
+    <span className={styles.icons} data-size={size} aria-hidden>
+      <span className={styles.openIcon}>
+        <Icon name={icon} size={size} />
+      </span>
+      <span className={styles.closeIcon}>
+        <Icon name="close" size={size} />
+      </span>
+    </span>
+  );
 
   return (
-    <div ref={rootRef} className={styles.root}>
+    <div ref={rootRef} className={styles.root} data-nav={navSlot ? "" : undefined}>
       <div ref={scrimRef} popover="manual" className={styles.scrim} onClick={() => onOpenChange(false)} />
       <div
         ref={panelRef}
@@ -160,20 +228,31 @@ export function FabPanel({ open, onOpenChange, title, icon, children, onOpened }
         aria-controls={panelId}
         onClick={() => onOpenChange(!open)}
       >
-        <span className={styles.icons} aria-hidden>
-          <span className={styles.openIcon}>
-            <Icon name={icon} size={20} />
-          </span>
-          <span className={styles.closeIcon}>
-            <Icon name="close" size={20} />
-          </span>
-        </span>
+        {iconMorph(20)}
         <span className={styles.labelClip} aria-hidden>
           <span className={styles.labelTrack}>
             <span className={styles.label}>{title}</span>
           </span>
         </span>
       </button>
+      {navSlot &&
+        createPortal(
+          <button
+            ref={navRef}
+            type="button"
+            popover="manual"
+            className={styles.navButton}
+            data-open={open ? "" : undefined}
+            aria-label={open ? `Close ${name}` : `Open ${name}`}
+            aria-expanded={open}
+            aria-haspopup="dialog"
+            aria-controls={panelId}
+            onClick={() => onOpenChange(!open)}
+          >
+            {iconMorph(18)}
+          </button>,
+          navSlot,
+        )}
     </div>
   );
 }
@@ -192,15 +271,17 @@ function moveFocus(el: HTMLElement, afterPointer: boolean) {
 }
 
 /**
- * Makes everything outside `root` inert (the siblings of root and of each
- * of its ancestors, up to <body>), so Tab and screen readers stay in the
- * panel and the button, and returns a function that undoes it.
+ * Makes everything outside `keep` inert (the siblings of each kept element
+ * and of each of its ancestors, up to <body>), so Tab and screen readers
+ * stay in the panel and its button, and returns a function that undoes it.
  */
-function inertOthers(root: Element) {
+function inertOthers(keep: Element[]) {
+  const spared = new Set<Element>();
+  for (const el of keep) for (let n: Element | null = el; n && n !== document.body; n = n.parentElement) spared.add(n);
   const changed: Element[] = [];
-  for (let node: Element | null = root; node && node !== document.body; node = node.parentElement) {
+  for (const node of spared) {
     for (const sibling of node.parentElement?.children ?? []) {
-      if (sibling !== node && !sibling.hasAttribute("inert")) {
+      if (!spared.has(sibling) && !sibling.hasAttribute("inert")) {
         sibling.setAttribute("inert", "");
         changed.push(sibling);
       }

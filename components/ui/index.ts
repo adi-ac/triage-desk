@@ -2,7 +2,7 @@
  * Base components. Every color comes from a token in styles/; none takes a
  * className or style, so the trust language can't be overridden per screen.
  */
-export { AppHeader } from "./app-header";
+export { AppHeader, type AppHeaderProps } from "./app-header";
 export { ApproveBar, type ApproveBarProps } from "./approve-bar";
 export { Banner, type BannerProps, type BannerTone } from "./banner";
 export { Button, type ButtonProps, type ButtonSize, type ButtonVariant } from "./button";

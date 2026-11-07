@@ -25,27 +25,28 @@ export function InboxShell({ children }: { children: ReactNode }) {
 function Shell({ id, children }: { id: string; children: ReactNode }) {
   const router = useRouter();
   const [queueOpen, setQueueOpen] = useState(false);
+  // Tablets: the queue's header button goes here (FabPanel navSlot).
+  const [navSlot, setNavSlot] = useState<HTMLSpanElement | null>(null);
 
   const open = (ticketId: string) => {
     setQueueOpen(false);
     router.push(`/tickets/${ticketId}`);
   };
 
-  // From 1200px the queue is a pane and the FAB is hidden, so a panel left
-  // open by resizing closes.
+  // The queue's trigger and panel change with the width (FAB on phones,
+  // header button on tablets, a pane from 1200px), so a panel left open by
+  // resizing across 768px or 1200px closes.
   useEffect(() => {
-    const desktop = matchMedia("(min-width: 1200px)");
-    const onChange = () => {
-      if (desktop.matches) setQueueOpen(false);
-    };
-    desktop.addEventListener("change", onChange);
-    return () => desktop.removeEventListener("change", onChange);
+    const queries = ["(min-width: 768px)", "(min-width: 1200px)"].map((q) => matchMedia(q));
+    const onChange = () => setQueueOpen(false);
+    queries.forEach((q) => q.addEventListener("change", onChange));
+    return () => queries.forEach((q) => q.removeEventListener("change", onChange));
   }, []);
 
   return (
     <main className={styles.shell}>
       <div className={styles.header}>
-        <AppHeader />
+        <AppHeader actions={<span ref={setNavSlot} className={styles.navSlot} />} />
       </div>
       <h1 className="visually-hidden">Inbox</h1>
 
@@ -64,6 +65,7 @@ function Shell({ id, children }: { id: string; children: ReactNode }) {
           title="Queue"
           icon="inbox"
           onOpened={centerCurrent}
+          navSlot={navSlot}
         >
           <QueueList currentId={id} onOpen={open} />
         </FabPanel>
