@@ -44,9 +44,38 @@ function Shell({ id, children }: { id: string; children: ReactNode }) {
     return () => queries.forEach((q) => q.removeEventListener("change", onChange));
   }, []);
 
+  // Tablets: whether the sticky header has stuck (12px from the top), which
+  // shows the bar behind it. Read at most once a frame.
+  const headerRef = useRef<HTMLDivElement>(null);
+  const [stuck, setStuck] = useState(false);
+  useEffect(() => {
+    let frame = 0;
+    const check = () => {
+      frame = 0;
+      const header = headerRef.current;
+      if (header) setStuck(getComputedStyle(header).position === "sticky" && header.getBoundingClientRect().top <= 12);
+    };
+    const onChange = () => {
+      if (!frame) frame = requestAnimationFrame(check);
+    };
+    check();
+    addEventListener("scroll", onChange, { passive: true });
+    addEventListener("resize", onChange);
+    return () => {
+      cancelAnimationFrame(frame);
+      removeEventListener("scroll", onChange);
+      removeEventListener("resize", onChange);
+    };
+  }, []);
+
   return (
     <main className={styles.shell}>
-      <div className={styles.header}>
+      <div
+        ref={headerRef}
+        className={styles.header}
+        data-stuck={stuck ? "" : undefined}
+        data-queue-open={queueOpen ? "" : undefined}
+      >
         <AppHeader
           actions={
             <span className={styles.navSlot}>

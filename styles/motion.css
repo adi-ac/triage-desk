@@ -51,6 +51,10 @@
      fades with the panel, not separately. */
   --delay-panel-content-in: 68ms;
   --duration-panel-content-in: 200ms;
+  /* Tablets: the stuck header's bottom border fading out while the queue
+     panel is open (the panel sits just under it), and back on close. */
+  --duration-header-edge: 160ms;
+  --ease-header-edge: cubic-bezier(0.2, 0, 0, 1);
   /* The scrim behind it: in with the panel's entrance, out with its fade. */
   --duration-scrim-in: 220ms;
   --duration-scrim-out: var(--duration-panel-out);

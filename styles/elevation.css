@@ -44,8 +44,11 @@
      shadow. The ring only just separates a white surface from the gray
      page; it mirrors dark mode's white rings and steps up with the level.
      The shadows are kept barely there on purpose (see docs/brief.md). */
+  /* The pane's outline, light #0000000f and dark #ffffff12. Its own token so
+     the tablet header's bottom border (inbox.module.css) can't drift from it. */
+  --pane-ring: rgb(0 0 0 / 0.06);
   --shadow-pane:
-    0 0 0 var(--hairline) rgb(0 0 0 / 0.06),
+    0 0 0 var(--hairline) var(--pane-ring),
     0 1px 1.4px #00000003,
     0 4px 8.4px -2.8px #00000005;
   --shadow-popover:
@@ -90,7 +93,8 @@
 
 @media (prefers-color-scheme: dark) {
   :root:not([data-theme="light"]) {
-    --shadow-pane: 0 0 0 var(--hairline) rgb(255 255 255 / 0.07);
+    --pane-ring: rgb(255 255 255 / 0.07);
+    --shadow-pane: 0 0 0 var(--hairline) var(--pane-ring);
     --shadow-popover: 0 0 0 var(--hairline) rgb(255 255 255 / 0.1);
     --shadow-dialog: 0 0 0 var(--hairline) rgb(255 255 255 / 0.13);
 
@@ -108,7 +112,8 @@
 }
 
 [data-theme="dark"] {
-  --shadow-pane: 0 0 0 var(--hairline) rgb(255 255 255 / 0.07);
+  --pane-ring: rgb(255 255 255 / 0.07);
+  --shadow-pane: 0 0 0 var(--hairline) var(--pane-ring);
   --shadow-popover: 0 0 0 var(--hairline) rgb(255 255 255 / 0.1);
   --shadow-dialog: 0 0 0 var(--hairline) rgb(255 255 255 / 0.13);
 

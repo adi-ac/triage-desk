@@ -66,9 +66,9 @@
 
 /* Tablets: the queue's button is in the header (the FabPanel navSlot, to
    the right of the theme toggle), and the header is sticky so it's always
-   in reach. It sticks 12px from the top; a page-colored band behind it
-   (12px above and below, and across the shell's 24px padding) hides the
-   panes scrolling under it, without changing the layout. */
+   in reach. It sticks 12px from the top; once stuck, a bar behind it
+   (below) hides the panes scrolling under it, without changing the
+   layout. */
 .navSlot {
   display: none;
 }
@@ -86,12 +86,47 @@
     z-index: 5;
   }
 
+  /* The bar below is 100vw wide, which includes a classic scrollbar;
+     clipping (not a scroll container, so the header still sticks) keeps
+     it from ever scrolling the page sideways. */
+  .shell {
+    overflow-x: clip;
+  }
+
+  /* The bar behind it: full width, from the top of the viewport to 12px
+     below the header. Invisible until the header sticks; then the panes
+     scroll under a 72% page-colored, blurred bar with a bottom border in
+     the panes' own outline color (--pane-ring, var(--hairline) wide). The
+     border is drawn like the panes' outline, as a box-shadow, because
+     browsers round a 0.5px border up to 1px but not a 0.5px shadow. */
   .header::before {
     content: "";
     position: absolute;
-    inset: -12px -24px;
+    inset-block: -12px;
+    inset-inline: calc(50% - 50vw);
     z-index: -1;
-    background: var(--page);
+    box-shadow: 0 var(--hairline) 0 0 transparent;
+  }
+
+  .header[data-stuck]::before {
+    background: color-mix(in oklch, var(--page) 72%, transparent);
+    -webkit-backdrop-filter: blur(10px) saturate(1.4);
+    backdrop-filter: blur(10px) saturate(1.4);
+    box-shadow: 0 var(--hairline) 0 0 var(--pane-ring);
+    transition: box-shadow var(--duration-header-edge) var(--ease-header-edge);
+  }
+
+  /* While the queue panel is open (it opens 8px below the header, over
+     this line), the border fades out, and back on close. The background
+     and blur stay. */
+  .header[data-stuck][data-queue-open]::before {
+    box-shadow: 0 var(--hairline) 0 0 transparent;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .header[data-stuck]::before {
+    transition: none;
   }
 }
 
