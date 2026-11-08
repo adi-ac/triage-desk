@@ -16,6 +16,15 @@
   line-height: var(--text-email-leading);
 }
 
+/* Phones (below 768px): no reading measure. The email fills its pane, which
+   is already narrower than the measure would be, so lines never stop short
+   of the card's edge. Tablets and desktop keep --text-reading-measure. */
+@media (max-width: 767px) {
+  .email .body {
+    max-inline-size: none;
+  }
+}
+
 /* Keeps single line breaks, such as a signature's. */
 .paragraph {
   margin: 0;
