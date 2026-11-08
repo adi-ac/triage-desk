@@ -257,29 +257,41 @@ export function HeaderPanel({
     // never shrinks or moves; how much of it is covered goes to
     // --panel-keyboard (zero otherwise), which the New ticket form turns
     // into extra scroll room, so its footer can be scrolled above the
-    // keyboard. iOS also scrolls the page to reveal the focused field, lock
-    // or not, which would push the panel's header off the top: the page
-    // goes back where it was, and the focused field is brought into view
-    // inside the panel, above the keyboard, instead.
+    // keyboard. The focused field is brought into view inside the panel,
+    // above the keyboard, smoothly and only when it's hidden (revealFocused).
+    // A tap on a field focuses it without iOS's own scroll (NewTicketForm);
+    // if iOS pans the page anyway (the keyboard opening, Safari's ↑ ↓ field
+    // arrows), the lock puts it back (restore() only scrolls if the page
+    // has actually moved).
     const viewport = window.visualViewport;
     let keyboard = 0;
     const fitKeyboard = () => {
       if (!viewport) return;
       // Open: the visual viewport is shorter than the window (not zoomed).
       const open = Math.abs(viewport.scale - 1) < 0.01 && viewport.height < innerHeight - 1;
-      // Put the page back first (it fires another visualViewport scroll,
-      // so this runs again with fresh values), then measure.
-      if (open || keyboard > 0) lock.current?.restore();
+      // Put the page back first if it moved (that fires another
+      // visualViewport scroll, so this runs again with fresh values).
+      lock.current?.restore();
       const covered = open ? panel.getBoundingClientRect().bottom - (viewport.offsetTop + viewport.height) : 0;
       const next = Math.max(0, Math.round(covered));
+      if (next === keyboard) return;
       panel.style.setProperty("--panel-keyboard", `${next}px`);
-      if (next > 0 && next !== keyboard) revealFocused(panel);
+      // The keyboard opened or changed height (the AutoFill bar shows for
+      // the name fields, not for Message): reveal the focused field only if
+      // it's now covered; never just because the height changed.
+      if (next > 0) revealFocused(panel);
       keyboard = next;
     };
-    // A field focused while the keyboard is already open (tapping from one
-    // field to the next).
+    // Focus moved to another field with the keyboard open (a tap, or
+    // Safari's ↑ ↓ arrows, which move focus without a tap): in the next
+    // frame, put the page back if iOS panned it, then reveal the field if
+    // it's hidden.
     const onFocusIn = () => {
-      if (keyboard > 0) requestAnimationFrame(() => revealFocused(panel));
+      if (keyboard === 0) return;
+      requestAnimationFrame(() => {
+        lock.current?.restore();
+        revealFocused(panel);
+      });
     };
     panel.addEventListener("focusin", onFocusIn);
     fitKeyboard();
@@ -513,8 +525,22 @@ function lockPage(keep: Element[], panel: Element): PageLock {
   const onTouchMove = (e: TouchEvent) => {
     if (!canScroll(e.target, panel)) e.preventDefault();
   };
+  // Anything that scrolls the page while it's locked (iOS panning to a
+  // field focused with Safari's ↑ ↓ arrows) is put back as soon as the
+  // scroll is seen, in the same frame, before it paints.
+  const onScroll = () => putBack();
+  // The layout scroll, or (iOS, not zoomed) the visual viewport panned
+  // over it: either way the page has moved.
+  const putBack = () => {
+    const viewport = window.visualViewport;
+    const panned = viewport && Math.abs(viewport.scale - 1) < 0.01 && Math.abs(viewport.offsetTop) >= 1;
+    if (Math.abs(window.scrollY - target) >= 1 || panned) {
+      window.scrollTo({ top: target, left: 0, behavior: "instant" });
+    }
+  };
   apply();
   document.addEventListener("touchmove", onTouchMove, { passive: false });
+  addEventListener("scroll", onScroll, { passive: true });
   const restoreInert = inertOthers(keep);
   return {
     scrollToTop() {
@@ -525,14 +551,15 @@ function lockPage(keep: Element[], panel: Element): PageLock {
       window.scrollTo({ top: 0, left: 0, behavior: "instant" });
       target = 0;
     },
-    // Back to where the page is meant to be, if something scrolled it while
-    // locked (iOS revealing a focused field).
+    // Back to where the page is meant to be, only if something scrolled it
+    // while locked (iOS panning to a focused field); otherwise nothing.
     restore() {
-      if (Math.abs(window.scrollY - target) >= 1) window.scrollTo({ top: target, left: 0, behavior: "instant" });
+      putBack();
     },
     release() {
       lift();
       document.removeEventListener("touchmove", onTouchMove);
+      removeEventListener("scroll", onScroll);
       restoreInert();
       if (Math.abs(window.scrollY - target) >= 1) window.scrollTo({ top: target, left: 0, behavior: "instant" });
     },
@@ -569,10 +596,12 @@ function canScroll(target: EventTarget | null, panel: Element) {
 }
 
 /**
- * Scrolls the focused field into view inside the panel's scrolling area,
- * within the part above the on-screen keyboard, without scrolling the
- * page: its label and top edge in view, so a tall field (the message)
- * shows where the caret starts.
+ * Brings the focused field (with its label) into view inside the panel's
+ * scrolling area, within the part above the on-screen keyboard, without
+ * scrolling the page. Only when it isn't fully visible there, 12px clear
+ * above and below; then by the smallest distance (the nearest edge),
+ * smoothly. A field already in view never moves. A field taller than the
+ * area (the message) shows its label and top, where the caret starts.
  */
 function revealFocused(panel: HTMLElement) {
   const field = document.activeElement;
@@ -588,10 +617,14 @@ function revealFocused(panel: HTMLElement) {
     // Its label too, when it has one above it.
     const label = "labels" in field ? (field as HTMLInputElement).labels?.[0] : undefined;
     const top = Math.min(rect.top, label?.getBoundingClientRect().top ?? rect.top);
-    const margin = 8;
-    if (top < area.top + margin) box.scrollTop -= area.top + margin - top;
+    const margin = 12;
+    let delta = 0;
+    if (top < area.top + margin) delta = top - (area.top + margin);
     else if (rect.bottom > area.bottom - margin) {
-      box.scrollTop += Math.min(rect.bottom - (area.bottom - margin), top - (area.top + margin));
+      delta = Math.min(rect.bottom - (area.bottom - margin), top - (area.top + margin));
+    }
+    if (Math.abs(delta) >= 1) {
+      box.scrollBy({ top: delta, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
     }
     return;
   }

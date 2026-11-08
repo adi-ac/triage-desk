@@ -1,6 +1,6 @@
 "use client";
 
-import { useId, useState, type ReactNode } from "react";
+import { useId, useRef, useState, type ReactNode, type TouchEvent } from "react";
 import { Button } from "./button";
 import styles from "./new-ticket-form.module.css";
 
@@ -44,6 +44,8 @@ Operations lead, Tidewater Co-op`,
 export function NewTicketForm({ variant }: NewTicketFormProps) {
   const id = useId();
   const [values, setValues] = useState(empty);
+  // Where the current touch started, so a drag (scrolling the form) isn't a tap.
+  const touch = useRef<{ x: number; y: number } | null>(null);
   // Checked on every input: both required fields need non-blank text.
   const ready = values.name.trim() !== "" && values.message.trim() !== "";
   const bind = (key: keyof Values) => ({
@@ -57,6 +59,16 @@ export function NewTicketForm({ variant }: NewTicketFormProps) {
     <form
       className={styles.form}
       data-variant={variant}
+      // The panel (iOS): a tap on a field that doesn't have focus yet
+      // focuses it without the browser's own scroll, which pans the whole
+      // page to reveal the field and fights HeaderPanel's page lock (the
+      // page dropped and slid back on every field change). HeaderPanel
+      // brings the field into view inside the panel instead, smoothly and
+      // only when it's hidden. The keyboard still opens, since the focus
+      // happens inside the tap. Once a field has focus, taps in it are left
+      // alone, so the caret can still be placed. The Dialog is unchanged.
+      onTouchStart={variant === "panel" ? (e) => (touch.current = point(e)) : undefined}
+      onTouchEnd={variant === "panel" ? (e) => focusWithoutScroll(e, touch.current) : undefined}
       // Enter in a text field submits (the browser's implicit submission,
       // which a disabled submit button blocks).
       onSubmit={(e) => {
@@ -127,6 +139,29 @@ export function NewTicketForm({ variant }: NewTicketFormProps) {
       {variant === "panel" && <div className={styles.keyboardSpace} aria-hidden />}
     </form>
   );
+}
+
+function point(e: TouchEvent) {
+  const t = e.changedTouches[0];
+  return t ? { x: t.clientX, y: t.clientY } : null;
+}
+
+/** The field a tap landed on (its label counts), if it doesn't have focus yet. */
+function tappedField(target: EventTarget) {
+  if (!(target instanceof Element)) return null;
+  const label = target.closest("label");
+  const field = label?.control ?? target.closest("input, textarea");
+  return field instanceof HTMLElement && field !== document.activeElement ? field : null;
+}
+
+/** On a tap (not a drag), focuses the field without the browser scrolling the page to it. */
+function focusWithoutScroll(e: TouchEvent, start: { x: number; y: number } | null) {
+  const end = point(e);
+  if (!start || !end || Math.hypot(end.x - start.x, end.y - start.y) > 10) return;
+  const field = tappedField(e.target);
+  if (!field) return;
+  e.preventDefault();
+  field.focus({ preventScroll: true });
 }
 
 function Field({
