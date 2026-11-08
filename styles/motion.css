@@ -2,8 +2,7 @@
  * Motion: a few purposeful animations, each explaining a change the person
  * caused (DESIGN.md, Motion). This is a tool used all day, so frequent
  * actions get little or no motion, and nothing animates on page load. Only
- * transform, opacity, colors and clip paths animate, except the queue FAB's
- * width as it extends and collapses. Every animation turns off under
+ * transform, opacity, colors and clip paths animate. Every animation turns off under
  * prefers-reduced-motion, in its own component's CSS.
  */
 
@@ -16,46 +15,32 @@
   --duration-sent: 150ms;
   /* The Other menu's entrance and its caret. */
   --duration-menu: 150ms;
-  /* The queue FAB (FabPanel): extending and collapsing, and its icon
-     turning into the close ×. */
-  --ease-fab: cubic-bezier(0.2, 0, 0, 1);
-  --duration-fab-resize: 240ms;
-  /* Collapsing, the label sweeps out right to left (its mask), a strong
-     ease-out so the fade gets well ahead of the shrinking edge. */
-  --duration-fab-label: 220ms;
-  --ease-fab-label-out: var(--ease-out-quart);
-  --duration-fab-icon: 260ms;
-  /* Collapsing: the label's fade starts at once and the width follows
-     this much later, so the fade always runs ahead of the shrinking edge. */
-  --delay-fab-collapse: 60ms;
-  /* Extending, the width grows first and the label simply fades in (no
-     sweep) this much later, as the space finishes opening. */
-  --duration-fab-label-in: 180ms;
-  --ease-fab-label-in: var(--ease-out-quart);
-  --delay-fab-label-in: 120ms;
-  /* Once a collapse has finished, the label's opacity resets to 0 (out of
-     sight, behind the mask), ready for the next fade in. */
-  --delay-fab-label-reset: calc(var(--delay-fab-collapse) + var(--duration-fab-resize));
-  --delay-fab-icon: 40ms;
-  /* The FAB's press. */
-  --duration-press: 150ms;
+  /* The queue button's icon turning into the close × and back (HeaderPanel). */
+  --duration-icon-morph: 260ms;
+  --delay-icon-morph: 40ms;
+  --ease-icon-morph: cubic-bezier(0.2, 0, 0, 1);
 
-  /* The panel the FAB opens: it grows from its bottom-right corner, and
-     closes with a plain fade (no movement, no clip). Exits are faster than
-     entrances. */
+  /* The queue panel (HeaderPanel): it grows from its top-right corner,
+     under the header button, and closes back into it. Opening is a clip;
+     closing, the clip runs back while the whole panel fades out, starting
+     a little later. */
   --ease-panel-in: cubic-bezier(0.05, 0.7, 0.1, 1);
-  --ease-panel-out: cubic-bezier(0.2, 0, 0, 1);
   --duration-panel-in: 340ms;
-  --duration-panel-out: 180ms;
+  --ease-panel-out: cubic-bezier(0.3, 0, 0.2, 1);
+  --duration-panel-out: 240ms;
+  --ease-panel-fade-out: cubic-bezier(0.4, 0, 1, 1);
+  --duration-panel-fade-out: 200ms;
+  --delay-panel-fade-out: 40ms;
   /* Its content fades in after about a fifth of the entrance. On close it
-     fades with the panel, not separately. */
+     stays visible and closes with the panel. */
   --delay-panel-content-in: 68ms;
   --duration-panel-content-in: 200ms;
-  /* Tablets: the stuck header's bottom border fading out while the queue
-     panel is open (the panel sits just under it), and back on close. */
+  /* Below 1200px: the stuck header's bottom border fading in and out with
+     the stuck state, and out while the queue panel is open (the panel sits
+     just under it). */
   --duration-header-edge: 160ms;
   --ease-header-edge: cubic-bezier(0.2, 0, 0, 1);
-  /* The scrim behind it: in with the panel's entrance, out with its fade. */
+  /* The scrim behind the panel: in with its entrance, out with its close. */
   --duration-scrim-in: 220ms;
   --duration-scrim-out: var(--duration-panel-out);
 }

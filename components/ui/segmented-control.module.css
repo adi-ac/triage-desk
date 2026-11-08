@@ -43,3 +43,27 @@
   block-size: 28px;
   padding: 0;
 }
+
+/* Phones: icon options (ThemeToggle) get an invisible touch target 44px
+   tall, without changing their size. Sideways it fills the 2px gaps and
+   the group's padding, so the options' targets meet without overlapping;
+   they can't be 44px wide, since the options sit 30px apart. */
+@media (max-width: 767px) {
+  .segment[data-icon] {
+    position: relative;
+  }
+
+  .segment[data-icon]::after {
+    content: "";
+    position: absolute;
+    inset: -8px -1px;
+  }
+
+  .segment[data-icon]:first-child::after {
+    inset-inline-start: -2px;
+  }
+
+  .segment[data-icon]:last-child::after {
+    inset-inline-end: -2px;
+  }
+}

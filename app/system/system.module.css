@@ -669,3 +669,21 @@
   gap: 8px;
   margin: 0;
 }
+
+/* The HeaderPanel demo's stand-in header row. */
+.panelDemoHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 8px 8px 12px;
+  border-radius: 12px;
+  background: var(--bg);
+}
+
+.panelDemoSlot {
+  display: inline-flex;
+  flex: none;
+  inline-size: 32px;
+  block-size: 32px;
+}

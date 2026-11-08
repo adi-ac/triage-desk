@@ -2,7 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
-import { AppHeader, FabPanel, FabPanelHeaderButton, Pane } from "@/components/ui";
+import { AppHeader, HeaderPanel, HeaderPanelButton, Pane } from "@/components/ui";
 import { tickets } from "@/fixtures/tickets";
 import { InboxProvider } from "./inbox-state";
 import { QueueList } from "./queue-list";
@@ -10,7 +10,8 @@ import styles from "./inbox.module.css";
 
 /**
  * The inbox shell (DESIGN.md, Layout, with a queue): the header row, the
- * queue pane from 1200px or, below, the queue FAB and the panel it opens,
+ * queue pane from 1200px or, below, the queue's header button and the panel
+ * it opens below the header,
  * and the open ticket's email and triage panes.
  */
 export function InboxShell({ children }: { children: ReactNode }) {
@@ -25,35 +26,42 @@ export function InboxShell({ children }: { children: ReactNode }) {
 function Shell({ id, children }: { id: string; children: ReactNode }) {
   const router = useRouter();
   const [queueOpen, setQueueOpen] = useState(false);
-  // Tablets: the queue's header button (FabPanel navButton).
+  // Below 1200px: the queue's header button (HeaderPanel's button).
   const queueId = useId();
-  const navButton = useRef<HTMLButtonElement>(null);
+  const queueButton = useRef<HTMLButtonElement>(null);
 
   const open = (ticketId: string) => {
     setQueueOpen(false);
     router.push(`/tickets/${ticketId}`);
   };
 
-  // The queue's trigger and panel change with the width (FAB on phones,
-  // header button on tablets, a pane from 1200px), so a panel left open by
-  // resizing across 768px or 1200px closes.
+  // From 1200px the queue is a pane and the header button is hidden, so a
+  // panel left open by resizing past 1200px closes.
   useEffect(() => {
-    const queries = ["(min-width: 768px)", "(min-width: 1200px)"].map((q) => matchMedia(q));
-    const onChange = () => setQueueOpen(false);
-    queries.forEach((q) => q.addEventListener("change", onChange));
-    return () => queries.forEach((q) => q.removeEventListener("change", onChange));
+    const desktop = matchMedia("(min-width: 1200px)");
+    const onChange = () => {
+      if (desktop.matches) setQueueOpen(false);
+    };
+    desktop.addEventListener("change", onChange);
+    return () => desktop.removeEventListener("change", onChange);
   }, []);
 
-  // Tablets: whether the sticky header has stuck (12px from the top), which
-  // shows the bar behind it. Read at most once a frame.
+  // Below 1200px: whether the panes have passed under the sticky header's
+  // bar (the header's bottom + 12px), which shows the bar. Read at most
+  // once a frame.
   const headerRef = useRef<HTMLDivElement>(null);
+  const ticketRef = useRef<HTMLDivElement>(null);
   const [stuck, setStuck] = useState(false);
   useEffect(() => {
     let frame = 0;
     const check = () => {
       frame = 0;
       const header = headerRef.current;
-      if (header) setStuck(getComputedStyle(header).position === "sticky" && header.getBoundingClientRect().top <= 12);
+      // The first pane (the ticket wrapper is display: contents).
+      const pane = [...(ticketRef.current?.children ?? [])].find((el) => el.getClientRects().length > 0);
+      if (!header || !pane) return;
+      const sticky = getComputedStyle(header).position === "sticky";
+      setStuck(sticky && pane.getBoundingClientRect().top < header.getBoundingClientRect().bottom + 12);
     };
     const onChange = () => {
       if (!frame) frame = requestAnimationFrame(check);
@@ -79,8 +87,8 @@ function Shell({ id, children }: { id: string; children: ReactNode }) {
         <AppHeader
           actions={
             <span className={styles.navSlot}>
-              <FabPanelHeaderButton
-                ref={navButton}
+              <HeaderPanelButton
+                ref={queueButton}
                 open={queueOpen}
                 onOpenChange={setQueueOpen}
                 title="Queue"
@@ -99,20 +107,21 @@ function Shell({ id, children }: { id: string; children: ReactNode }) {
         </Pane>
       </div>
 
-      <div className={styles.ticket}>{children}</div>
+      <div ref={ticketRef} className={styles.ticket}>
+        {children}
+      </div>
 
-      <div className={styles.queueFab}>
-        <FabPanel
+      <div className={styles.queuePanel}>
+        <HeaderPanel
           open={queueOpen}
           onOpenChange={setQueueOpen}
           title="Queue"
-          icon="inbox"
-          onOpened={centerCurrent}
           id={queueId}
-          navButton={navButton}
+          button={queueButton}
+          onOpened={centerCurrent}
         >
           <QueueList currentId={id} onOpen={open} />
-        </FabPanel>
+        </HeaderPanel>
       </div>
     </main>
   );

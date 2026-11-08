@@ -4,7 +4,7 @@ import { ThemeToggle } from "./theme-toggle";
 import styles from "./app-header.module.css";
 
 export type AppHeaderProps = {
-  /** After the theme toggle. Only the inbox's queue button on tablets (FabPanelHeaderButton, in a 32px slot). */
+  /** After the theme toggle. Only the inbox's queue button below 1200px (HeaderPanelButton, in a 32px slot). */
   actions?: ReactNode;
 };
 

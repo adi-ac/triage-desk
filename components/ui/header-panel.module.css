@@ -1,0 +1,230 @@
+/*
+ * HeaderPanel (DESIGN.md, HeaderPanel and Motion): a button in the app
+ * header and the panel it opens below the header. The scrim, the panel and
+ * the button are popovers in the top layer while it's open, in that order.
+ */
+
+.root {
+  display: contents;
+}
+
+/* Button
+ *
+ * A round 32px button in Approve's primary style with an 18px icon, in a
+ * 32px slot in the header. While the panel is open it's in the top layer,
+ * fixed at the slot's position (--button-top and --button-left, set by the
+ * component), and its icon turns into the ×. Its display is set here, so
+ * the UA style that hides a closed popover never applies to it. No press
+ * scale: it's a header control, like the theme toggle.
+ */
+.button {
+  position: relative;
+  inset: auto;
+  display: inline-grid;
+  place-items: center;
+  box-sizing: border-box;
+  inline-size: 32px;
+  block-size: 32px;
+  margin: 0;
+  padding: 0;
+  overflow: visible;
+  border: 0;
+  border-radius: var(--button-radius);
+  appearance: none;
+  color: var(--accent-ink);
+  background: var(--button-primary-bg);
+  box-shadow: var(--shadow-button-primary);
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.button:popover-open {
+  position: fixed;
+  inset: var(--button-top) auto auto var(--button-left);
+}
+
+@media (hover: hover) {
+  .button:hover {
+    background: var(--button-primary-bg-hover);
+  }
+}
+
+/* Phones: an invisible 44px touch target, centered, without changing the
+   button's size. The header leaves 8px between it and the theme toggle,
+   whose options stop 2px short, so the two never overlap. */
+@media (max-width: 767px) {
+  .button::after {
+    content: "";
+    position: absolute;
+    inset: -6px;
+    border-radius: var(--button-radius);
+  }
+}
+
+/* The icon and the close ×, stacked. Opening, the icon turns and fades out
+   as the × turns and fades in; closing reverses it. */
+.icons {
+  display: grid;
+  inline-size: 18px;
+  block-size: 18px;
+}
+
+.openIcon,
+.closeIcon {
+  grid-area: 1 / 1;
+  display: grid;
+  transition:
+    opacity var(--duration-icon-morph) var(--ease-icon-morph) var(--delay-icon-morph),
+    rotate var(--duration-icon-morph) var(--ease-icon-morph) var(--delay-icon-morph);
+}
+
+.closeIcon {
+  opacity: 0;
+  rotate: -90deg;
+}
+
+.button[data-open] .openIcon {
+  opacity: 0;
+  rotate: 90deg;
+}
+
+.button[data-open] .closeIcon {
+  opacity: 1;
+  rotate: 0deg;
+}
+
+/* Scrim: the whole viewport, header included. */
+
+.scrim {
+  position: fixed;
+  inset: 0;
+  inline-size: auto;
+  block-size: auto;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  background: var(--scrim);
+  opacity: 0;
+  transition:
+    opacity var(--duration-scrim-out) var(--ease-panel-out),
+    display var(--duration-scrim-out) allow-discrete,
+    overlay var(--duration-scrim-out) allow-discrete;
+}
+
+.scrim:popover-open {
+  opacity: 1;
+  transition:
+    opacity var(--duration-scrim-in) ease-out,
+    display var(--duration-scrim-in) allow-discrete,
+    overlay var(--duration-scrim-in) allow-discrete;
+}
+
+@starting-style {
+  .scrim:popover-open {
+    opacity: 0;
+  }
+}
+
+/* Panel
+ *
+ * 8px below the header and exactly as wide as the header row (the panes'
+ * width: 16px side margins on phones, the email pane's left edge to the
+ * triage pane's right edge on tablets), down to 16px from the bottom of the
+ * viewport. The component measures the header on open and on resize.
+ * 20px corners, surface-raised and the dialog shadow.
+ *
+ * It grows diagonally from its top-right corner, under the button: a
+ * clip-path from a point at that corner to the whole panel (the open clip
+ * reaches past the edges so the shadow isn't cut off), its content fading
+ * in a fifth of the way in. Closing, it clips back into that corner while
+ * the whole panel, content still visible, fades out a little later; display
+ * and overlay transition discretely over the close, so it stays rendered
+ * until it's done. Transitions, not keyframes, so reversing mid-way is
+ * smooth.
+ */
+.panel {
+  position: fixed;
+  inset: var(--panel-top, 56px) auto calc(16px + env(safe-area-inset-bottom, 0px)) var(--panel-left, 16px);
+  inline-size: var(--panel-width, calc(100vw - 32px));
+  block-size: auto;
+  margin: 0;
+  padding: 0;
+  overflow: hidden;
+  flex-direction: column;
+  border: 0;
+  border-radius: 20px;
+  color: var(--ink);
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-dialog);
+  clip-path: inset(0 0 100% 100% round 20px);
+  opacity: 0;
+  transition:
+    clip-path var(--duration-panel-out) var(--ease-panel-out),
+    opacity var(--duration-panel-fade-out) var(--ease-panel-fade-out) var(--delay-panel-fade-out),
+    display var(--duration-panel-out) allow-discrete,
+    overlay var(--duration-panel-out) allow-discrete;
+}
+
+.panel:popover-open {
+  display: flex;
+  clip-path: inset(-40px -40px -64px -40px round 20px);
+  opacity: 1;
+  transition:
+    clip-path var(--duration-panel-in) var(--ease-panel-in),
+    display var(--duration-panel-in) allow-discrete,
+    overlay var(--duration-panel-in) allow-discrete;
+}
+
+@starting-style {
+  .panel:popover-open {
+    clip-path: inset(0 0 100% 100% round 20px);
+  }
+}
+
+.panel:popover-open > * {
+  transition: opacity var(--duration-panel-content-in) var(--ease-out-quart) var(--delay-panel-content-in);
+}
+
+@starting-style {
+  .panel:popover-open > * {
+    opacity: 0;
+  }
+}
+
+/* The panel takes focus on open (so a tap shows no ring); it's a container,
+   not a control, so it has no outline. Its controls keep their rings. */
+.panel:focus,
+.panel:focus-visible {
+  outline: none;
+}
+
+.header {
+  /* The title starts at 16px, where the list's rows start their text (4px
+     inset + 12px row padding). */
+  padding: 16px 16px 10px;
+  border-block-end: var(--hairline) solid var(--line);
+}
+
+.title {
+  margin: 0;
+}
+
+.content {
+  flex: 1;
+  min-block-size: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  /* Lists inset 4px, as in Pane inset="list". */
+  padding: 8px 4px;
+}
+
+/* Reduced motion: no clip, fades or icon turn; everything switches
+   instantly. */
+@media (prefers-reduced-motion: reduce) {
+  .button *,
+  .scrim,
+  .panel,
+  .panel > * {
+    transition: none !important;
+  }
+}

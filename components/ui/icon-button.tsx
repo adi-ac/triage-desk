@@ -19,7 +19,7 @@ export type IconButtonProps = Omit<ComponentProps<"button">, "className" | "styl
  * A round secondary button holding one icon, with the same chrome as Button
  * (raised, neutral, fully rounded). For small icon actions such as
  * FieldReview's "Change"; anything that approves stays a labelled Button.
- * Never Petrol: the queue's floating button is FabPanel.
+ * Never Petrol: the queue's header button is HeaderPanelButton.
  */
 export function IconButton({ icon, size = "default", tooltip = false, type = "button", ...props }: IconButtonProps) {
   return (

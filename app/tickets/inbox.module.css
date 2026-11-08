@@ -10,19 +10,22 @@
    1368px: 320 + 16 + 648 + 16 + 320 + 48. */
 .shell {
   --email-column: calc(var(--text-reading-measure) + 2 * (4px + 16px));
+  /* The shell's padding, which is also where the sticky header sticks. */
+  --shell-pad: 16px;
 
   display: grid;
   grid-template-columns: minmax(0, 1fr);
   gap: 16px;
-  padding: 16px;
+  padding: var(--shell-pad);
   margin-inline: auto;
 }
 
 @media (min-width: 768px) {
   .shell {
+    --shell-pad: 24px;
+
     grid-template-columns: minmax(0, var(--email-column)) 360px;
     justify-content: center;
-    padding: 24px;
   }
 }
 
@@ -46,43 +49,32 @@
   grid-column: 1 / -1;
 }
 
-/* Below 1200px the queue is behind the FAB at the bottom right. The page
-   ends 16px above it (16px from the bottom + 44px + 16px), so it never
-   covers the last of the content. */
+/* Below 1200px (phones and tablets) the queue is behind a button in the
+   header (HeaderPanelButton, in this 32px slot to the right of the theme
+   toggle) and opens in a HeaderPanel below the header. From 1200px it's
+   a pane and neither shows. */
 .queuePane {
   display: none;
 }
 
-.queueFab {
+.queuePanel {
   display: contents;
 }
 
-/* Phones: the FAB. The page ends 16px above it. */
-@media (max-width: 767px) {
-  .shell {
-    padding-block-end: calc(76px + env(safe-area-inset-bottom, 0px));
-  }
-}
-
-/* Tablets: the queue's button is in the header (the FabPanel navSlot, to
-   the right of the theme toggle), and the header is sticky so it's always
-   in reach. It sticks 12px from the top; once stuck, a bar behind it
-   (below) hides the panes scrolling under it, without changing the
-   layout. */
 .navSlot {
-  display: none;
+  display: inline-flex;
+  inline-size: 32px;
+  block-size: 32px;
 }
 
-@media (min-width: 768px) and (max-width: 1199px) {
-  .navSlot {
-    display: inline-flex;
-    inline-size: 32px;
-    block-size: 32px;
-  }
-
+@media (max-width: 1199px) {
+  /* The header is sticky, so the queue button is always in reach. It
+     sticks exactly where it rests at the top of the page (the shell's
+     padding), so it never moves: not when it sticks, and not when a
+     picked ticket opens at the top. */
   .header {
     position: sticky;
-    inset-block-start: 12px;
+    inset-block-start: var(--shell-pad);
     z-index: 5;
   }
 
@@ -94,18 +86,20 @@
   }
 
   /* The bar behind it: full width, from the top of the viewport to 12px
-     below the header. Invisible until the header sticks; then the panes
-     scroll under a 72% page-colored, blurred bar with a bottom border in
-     the panes' own outline color (--pane-ring, var(--hairline) wide). The
-     border is drawn like the panes' outline, as a box-shadow, because
-     browsers round a 0.5px border up to 1px but not a 0.5px shadow. */
+     below the header. Invisible until the panes pass under it (data-stuck,
+     set by the shell); then they scroll under a 72% page-colored, blurred
+     bar with a bottom border in the panes' own outline color (--pane-ring,
+     var(--hairline) wide). The border is drawn like the panes' outline, as
+     a box-shadow, because browsers round a 0.5px border up to 1px but not
+     a 0.5px shadow. It fades in and out with the stuck state. */
   .header::before {
     content: "";
     position: absolute;
-    inset-block: -12px;
+    inset-block: calc(-1 * var(--shell-pad)) -12px;
     inset-inline: calc(50% - 50vw);
     z-index: -1;
     box-shadow: 0 var(--hairline) 0 0 transparent;
+    transition: box-shadow var(--duration-header-edge) var(--ease-header-edge);
   }
 
   .header[data-stuck]::before {
@@ -113,7 +107,6 @@
     -webkit-backdrop-filter: blur(10px) saturate(1.4);
     backdrop-filter: blur(10px) saturate(1.4);
     box-shadow: 0 var(--hairline) 0 0 var(--pane-ring);
-    transition: box-shadow var(--duration-header-edge) var(--ease-header-edge);
   }
 
   /* While the queue panel is open (it opens 8px below the header, over
@@ -125,7 +118,7 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .header[data-stuck]::before {
+  .header::before {
     transition: none;
   }
 }
@@ -136,7 +129,8 @@
     min-block-size: 0;
   }
 
-  .queueFab {
+  .queuePanel,
+  .navSlot {
     display: none;
   }
 }

@@ -19,7 +19,7 @@ export { DraftEditor, type DraftEditorProps, type DraftState } from "./draft-edi
 export { EmailBody, type EmailBodyProps } from "./email-body";
 export { EvidenceItem, type EvidenceItemProps } from "./evidence-item";
 export { EvidenceMark, type EvidenceMarkProps } from "./evidence-mark";
-export { FabPanel, FabPanelHeaderButton, type FabPanelHeaderButtonProps, type FabPanelProps } from "./fab-panel";
+export { HeaderPanel, HeaderPanelButton, type HeaderPanelButtonProps, type HeaderPanelProps } from "./header-panel";
 export { FieldReview, type FieldReviewProps } from "./field-review";
 export { type IconName } from "./icon";
 export { IconButton, type IconButtonProps } from "./icon-button";

@@ -1,4 +1,4 @@
-import { useState, type ReactNode } from "react";
+import { useId, useRef, useState, type ReactNode } from "react";
 import {
   ApproveBar,
   Banner,
@@ -10,7 +10,8 @@ import {
   EvidenceItem,
   EvidenceMark,
   FieldReview,
-  FabPanel,
+  HeaderPanel,
+  HeaderPanelButton,
   IconButton,
   Logo,
   Menu,
@@ -44,43 +45,33 @@ const demoBlockers = approveBlockers({
 });
 const excerpt = firstScreen.body.split("\n\n").slice(1, 4).join("\n\n");
 
-function FabPanelDemo() {
-  const [shown, setShown] = useState(false);
+function HeaderPanelDemo() {
   const [open, setOpen] = useState(false);
+  const id = useId();
+  const button = useRef<HTMLButtonElement>(null);
   return (
-    <div className={styles.inline}>
-      <Button
-        size="small"
-        onClick={() => {
-          setOpen(false);
-          setShown((s) => !s);
-        }}
-      >
-        {shown ? "Hide the FAB" : "Show the FAB"}
-      </Button>
-      {shown && (
-        <p className={`text-small ${styles.muted}`}>
-          It&apos;s at the bottom right of this page, collapsed because the page is scrolled. Scroll to the very top to see it extend.
-        </p>
-      )}
-      {shown && (
-        <FabPanel open={open} onOpenChange={setOpen} title="Queue" icon="inbox">
-          <div className={styles.queue}>
-            {tickets.slice(0, 12).map((t) => (
-              <QueueItem
-                key={t.id}
-                sender={t.from.name}
-                company={t.account?.company}
-                subject={t.subject || "(No subject)"}
-                preview={preview(t)}
-                receivedAt={t.receivedAt}
-                onClick={() => setOpen(false)}
-              />
-            ))}
-          </div>
-        </FabPanel>
-      )}
-    </div>
+    // A stand-in header row: the panel opens 8px below it, as wide as it.
+    <header className={styles.panelDemoHeader}>
+      <span className={`text-small ${styles.muted}`}>A header row. The panel opens below it, as wide as it.</span>
+      <span className={styles.panelDemoSlot}>
+        <HeaderPanelButton ref={button} open={open} onOpenChange={setOpen} title="Queue" icon="inbox" controls={id} />
+      </span>
+      <HeaderPanel open={open} onOpenChange={setOpen} title="Queue" id={id} button={button}>
+        <div className={styles.queue}>
+          {tickets.slice(0, 12).map((t) => (
+            <QueueItem
+              key={t.id}
+              sender={t.from.name}
+              company={t.account?.company}
+              subject={t.subject || "(No subject)"}
+              preview={preview(t)}
+              receivedAt={t.receivedAt}
+              onClick={() => setOpen(false)}
+            />
+          ))}
+        </div>
+      </HeaderPanel>
+    </header>
   );
 }
 
@@ -247,7 +238,7 @@ export function ComponentsSection({ theme }: { theme: string }) {
       <Demo
         name="IconButton"
         props="icon: inbox | close | pencil · aria-label · size: default | small · tooltip"
-        intro="A round secondary button holding one icon, with Button's chrome. Never Petrol: the queue's floating button is FabPanel. The name is required, since the icon has no words. Default is 32px with an 18px icon; small is 28px with a 14px icon (FieldReview's Change, last here). tooltip shows the name to its right on hover and keyboard focus: hover or tab to the pencil."
+        intro="A round secondary button holding one icon, with Button's chrome. Never Petrol: the queue's header button is HeaderPanelButton. The name is required, since the icon has no words. Default is 32px with an 18px icon; small is 28px with a 14px icon (FieldReview's Change, last here). tooltip shows the name to its right on hover and keyboard focus: hover or tab to the pencil."
       >
         <div className={styles.inline}>
           <IconButton icon="inbox" aria-label="Open queue" />
@@ -537,11 +528,11 @@ export function ComponentsSection({ theme }: { theme: string }) {
       </Demo>
 
       <Demo
-        name="FabPanel"
-        props="open · onOpenChange · title · icon · onOpened? · id? · navButton? (FabPanelHeaderButton: ref · open · onOpenChange · title · icon · controls)"
-        intro="The queue's entry point below 1200px: a 44px round Petrol button fixed 16px from the bottom right, and the panel it opens 12px above it. At the very top of the page it's extended, the inbox icon and Queue; any scroll down collapses it to the icon, the label sweeping out right to left before the width shrinks; back at the top it widens and the label fades in. Opening, it collapses, the icon turns into a ×, and the panel grows from its bottom-right corner (340ms) over a scrim; closing, it simply fades out (180ms). The one button stays on top and is the close; a scrim tap, Escape or a pick closes it too. Focus moves into the panel and back to the button. On phones the panel is as wide as the panes; from 768px it's 380px and up to 640px tall. In the inbox, tablets use a 32px header button instead (FabPanelHeaderButton), with the panel opening below the header across both panes."
+        name="HeaderPanel and HeaderPanelButton"
+        props="HeaderPanel: open · onOpenChange · title · id? · button · onOpened? — HeaderPanelButton: ref · open · onOpenChange · title · icon · controls"
+        intro="The inbox's queue below 1200px, on phones and tablets alike: a round 32px Petrol button in the sticky app header, to the right of the theme toggle, and a panel that opens 8px below the header, exactly as wide as it, down to 16px from the bottom of the viewport. The panel grows from its top-right corner, under the button (340ms), and closes back into it (240ms) as it fades. The one button stays above the scrim and is the close, its icon turning into a ×; a scrim tap, Escape or a pick closes it too. Focus moves into the panel and back to the button. Try it here: this demo's header row stands in for the app header."
       >
-        <FabPanelDemo />
+        <HeaderPanelDemo />
       </Demo>
 
       <Demo
