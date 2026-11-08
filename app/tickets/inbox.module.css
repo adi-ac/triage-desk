@@ -88,37 +88,58 @@
   /* The bar behind it: full width, from the top of the viewport to 12px
      below the header. Invisible until the panes pass under it (data-stuck,
      set by the shell); then they scroll under a 72% page-colored, blurred
-     bar with a bottom border in the panes' own outline color (--pane-ring,
-     var(--hairline) wide). The border is drawn like the panes' outline, as
-     a box-shadow, because browsers round a 0.5px border up to 1px but not
-     a 0.5px shadow. It fades in and out with the stuck state. */
-  .header::before {
+     bar with a bottom border in the panes' own outline color.
+
+     The bar (::before) always has its background and backdrop-filter, and
+     is shown and hidden with opacity only. Adding and removing
+     backdrop-filter makes iOS Safari create and destroy a compositing
+     layer, which repaints the header for a frame (a blink, the logo
+     especially). The border is its own layer (::after), with the same
+     box, so it can fade out while the queue is open without touching the
+     bar. It's drawn like the panes' outline, as a box-shadow (--pane-ring,
+     var(--hairline)), because browsers round a 0.5px border up to 1px but
+     not a 0.5px shadow. */
+  .header::before,
+  .header::after {
     content: "";
     position: absolute;
     inset-block: calc(-1 * var(--shell-pad)) -12px;
     inset-inline: calc(50% - 50vw);
     z-index: -1;
+    pointer-events: none;
+  }
+
+  .header::before {
+    background: color-mix(in oklch, var(--page) 72%, transparent);
+    -webkit-backdrop-filter: blur(10px) saturate(1.4);
+    backdrop-filter: blur(10px) saturate(1.4);
+    opacity: 0;
+    transition: opacity var(--duration-header-edge) var(--ease-header-edge);
+  }
+
+  .header[data-stuck]::before {
+    opacity: 1;
+  }
+
+  .header::after {
     box-shadow: 0 var(--hairline) 0 0 transparent;
     transition: box-shadow var(--duration-header-edge) var(--ease-header-edge);
   }
 
-  .header[data-stuck]::before {
-    background: color-mix(in oklch, var(--page) 72%, transparent);
-    -webkit-backdrop-filter: blur(10px) saturate(1.4);
-    backdrop-filter: blur(10px) saturate(1.4);
+  .header[data-stuck]::after {
     box-shadow: 0 var(--hairline) 0 0 var(--pane-ring);
   }
 
   /* While the queue panel is open (it opens 8px below the header, over
-     this line), the border fades out, and back on close. The background
-     and blur stay. */
-  .header[data-stuck][data-queue-open]::before {
+     this line), the border fades out, and back on close. The bar stays. */
+  .header[data-stuck][data-queue-open]::after {
     box-shadow: 0 var(--hairline) 0 0 transparent;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .header::before {
+  .header::before,
+  .header::after {
     transition: none;
   }
 }

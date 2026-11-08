@@ -372,6 +372,8 @@ type PageLock = { release: () => void; scrollToTop: () => void };
  * CSS). Not overflow: hidden on <body>: that makes body a scroll container
  * and the sticky header would stop sticking and jump. The scroll position
  * is kept, and set back exactly on release, unless scrollToTop moved it.
+ * Never lift and re-apply the overflow lock while it's held (see
+ * scrollToTop).
  */
 function lockPage(keep: Element[], scrollable: Element): PageLock {
   const html = document.documentElement;
@@ -393,11 +395,11 @@ function lockPage(keep: Element[], scrollable: Element): PageLock {
   const restoreInert = inertOthers(keep);
   return {
     scrollToTop() {
-      // Lifted for the moment it takes, in case the lock would block it.
-      // "instant" overrides any CSS scroll-behavior.
-      lift();
+      // The lock stays on: overflow: hidden doesn't block a scripted scroll,
+      // and lifting and re-applying it makes iOS Safari rebuild its
+      // scrolling layers, which repaints the sticky header for a frame (a
+      // visible blink). "instant" overrides any CSS scroll-behavior.
       window.scrollTo({ top: 0, left: 0, behavior: "instant" });
-      apply();
       target = 0;
     },
     release() {
