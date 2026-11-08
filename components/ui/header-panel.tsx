@@ -624,7 +624,10 @@ function revealFocused(panel: HTMLElement) {
       delta = Math.min(rect.bottom - (area.bottom - margin), top - (area.top + margin));
     }
     if (Math.abs(delta) >= 1) {
-      box.scrollBy({ top: delta, behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth" });
+      box.scrollBy({
+        top: delta,
+        behavior: matchMedia("(prefers-reduced-motion: reduce)").matches ? "instant" : "smooth",
+      });
     }
     return;
   }
