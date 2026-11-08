@@ -138,6 +138,8 @@ export function HeaderPanel({
 
   // The close animation while it runs (or runs back, after a reopen).
   const exit = useRef<Exit | null>(null);
+  // The entrance while it runs (paused if a close starts during it).
+  const entrance = useRef<Animation[]>([]);
   // Where the last press on the scrim started, so a drag doesn't close it.
   const scrimPress = useRef<{ x: number; y: number } | null>(null);
   // The page lock (inert, no scrolling) from open until the close finishes.
@@ -185,6 +187,8 @@ export function HeaderPanel({
       // starts from the CSS entrance again.
       exit.current?.animations.forEach((a) => a.cancel());
       exit.current = null;
+      entrance.current.forEach((a) => a.cancel());
+      entrance.current = [];
       panel.inert = false;
       if (trigger.matches(":popover-open")) trigger.hidePopover();
       trigger.style.removeProperty("--button-top");
@@ -220,6 +224,10 @@ export function HeaderPanel({
       let frame = 0;
       const startClose = () => {
         const run = {};
+        // Closed during the entrance: hold it where it is, so the close
+        // starts from the panel's current clip and opacity (its implicit
+        // "from" keyframes read them); it's cancelled when the close ends.
+        entrance.current.forEach((a) => a.pause());
         if (exit.current) {
           // Reopened and closed again while it was running back: run it
           // forward again from where it is.
@@ -249,6 +257,8 @@ export function HeaderPanel({
       reopening.run = run;
       panel.inert = false;
       reopening.animations.forEach((a) => a.reverse());
+      // An entrance paused by the close carries on, under the reversing close.
+      entrance.current.forEach((a) => a.play());
       Promise.allSettled(reopening.animations.map((a) => a.finished)).then(() => {
         if (exit.current !== reopening || reopening.run !== run) return;
         reopening.animations.forEach((a) => a.cancel());
@@ -270,7 +280,7 @@ export function HeaderPanel({
         const viewport = document.documentElement.clientWidth;
         const width = narrow ? Math.min(narrowTo, viewport - 32) : h.width;
         const left = narrow ? (viewport - width) / 2 : h.left;
-        if (instant) panel.style.transitionProperty = "clip-path";
+        if (instant) panel.style.transitionProperty = "none";
         panel.style.setProperty("--panel-top", `${h.bottom + 8}px`);
         panel.style.setProperty("--panel-left", `${left}px`);
         panel.style.setProperty("--panel-width", `${width}px`);
@@ -333,6 +343,21 @@ export function HeaderPanel({
     // Not shown yet, or still playing its exit (reopened mid-close).
     if (!scrim.matches(":popover-open")) scrim.showPopover();
     if (!panel.matches(":popover-open")) panel.showPopover();
+    // A fresh open: the entrance, with the Web Animations API, so it always
+    // plays (a CSS transition from @starting-style can be skipped, and the
+    // panel then appeared full size, blank, for a couple of frames). A
+    // reopen during the close instead runs the close back, above.
+    if (!reopening) {
+      entrance.current.forEach((a) => a.cancel());
+      entrance.current = reducedMotion() ? [] : entranceAnimations(panel, scrim);
+      const current = entrance.current;
+      // Then drop it, so the CSS open state takes over.
+      Promise.allSettled(current.map((a) => a.finished)).then(() => {
+        if (entrance.current !== current || current.some((a) => a.playState !== "finished")) return;
+        current.forEach((a) => a.cancel());
+        entrance.current = [];
+      });
+    }
     // The panel joined the top layer above the button; re-show the button
     // so it's on top. Its display is set in CSS, so it never flickers.
     if (trigger.matches(":popover-open")) trigger.hidePopover();
@@ -506,6 +531,31 @@ export function HeaderPanelButton({ ref, open, onOpenChange, title, icon, contro
 
 /** The running close: its animations, and which run (close or reopen) owns them now. */
 type Exit = { animations: Animation[]; run: object };
+
+/**
+ * The entrance, with the Web Animations API (DESIGN.md, Motion): the panel
+ * grows from its top-right corner (a clip from a point there to the whole
+ * panel), its content fades in after a fifth of it, and the scrim fades in.
+ * The content is held invisible during its delay (fill: backwards).
+ */
+function entranceAnimations(panel: HTMLElement, scrim: HTMLElement) {
+  const content = [...panel.children] as HTMLElement[];
+  return [
+    panel.animate(
+      [{ clipPath: "inset(0 0 100% 100% round 20px)" }, { clipPath: "inset(-40px -40px -64px -40px round 20px)" }],
+      { duration: ms("--duration-panel-in"), easing: token("--ease-panel-in") },
+    ),
+    ...content.map((el) =>
+      el.animate([{ opacity: 0 }, { opacity: 1 }], {
+        duration: ms("--duration-panel-content-in"),
+        easing: token("--ease-out-quart"),
+        delay: ms("--delay-panel-content-in"),
+        fill: "backwards",
+      }),
+    ),
+    scrim.animate([{ opacity: 0 }, { opacity: 1 }], { duration: ms("--duration-scrim-in"), easing: "ease-out" }),
+  ];
+}
 
 /**
  * The close, with the Web Animations API (DESIGN.md, Motion): the panel

@@ -109,17 +109,10 @@
   touch-action: none;
 }
 
-/* Fades in with the panel's entrance. Its fade out is part of the close,
-   run by the component (see .panel). */
+/* Fades in with the panel's entrance and out with its close, both run by
+   the component (see .panel). */
 .scrim:popover-open {
   opacity: 1;
-  transition: opacity var(--duration-scrim-in) ease-out;
-}
-
-@starting-style {
-  .scrim:popover-open {
-    opacity: 0;
-  }
 }
 
 /* Panel
@@ -130,10 +123,16 @@
  * viewport. The component measures the header on open and on resize.
  * 20px corners, surface-raised and the dialog shadow.
  *
- * It grows diagonally from its top-right corner, under the button: a CSS
- * transition from @starting-style, a clip-path from a point at that corner
- * to the whole panel (the open clip reaches past the edges so the shadow
- * isn't cut off), its content fading in a fifth of the way in.
+ * It grows diagonally from its top-right corner, under the button: a
+ * clip-path from a point at that corner to the whole panel (the open clip
+ * reaches past the edges so the shadow isn't cut off), its content fading
+ * in a fifth of the way in, and the scrim fading in. The component runs
+ * this entrance with the Web Animations API, not as a CSS transition from
+ * @starting-style: the browser can skip a @starting-style transition
+ * depending on how styles were last flushed (the panel is measured and
+ * placed just before it's shown), and then the panel appeared full size,
+ * blank, for a couple of frames, with only its content fading in. Don't add
+ * @starting-style or clip-path, opacity or scrim transitions here.
  *
  * The close is NOT a CSS exit transition. Exit transitions on a popover
  * need display and overlay to transition (allow-discrete) so it stays in
@@ -164,32 +163,16 @@
   clip-path: inset(0 0 100% 100% round 20px);
 }
 
-/* Its left edge and width transition together when it narrows for the
-   subview on tablets and widens back (the component turns them off while
-   the window resizes). */
+/* Open: the whole panel (the entrance is run by the component). Its left
+   edge and width transition together when it narrows for the subview on
+   tablets and widens back (the component turns them off while the window
+   resizes). */
 .panel:popover-open {
   display: flex;
   clip-path: inset(-40px -40px -64px -40px round 20px);
   transition:
-    clip-path var(--duration-panel-in) var(--ease-panel-in),
     left var(--duration-panel-resize) var(--ease-panel-resize),
     width var(--duration-panel-resize) var(--ease-panel-resize);
-}
-
-@starting-style {
-  .panel:popover-open {
-    clip-path: inset(0 0 100% 100% round 20px);
-  }
-}
-
-.panel:popover-open > * {
-  transition: opacity var(--duration-panel-content-in) var(--ease-out-quart) var(--delay-panel-content-in);
-}
-
-@starting-style {
-  .panel:popover-open > * {
-    opacity: 0;
-  }
 }
 
 /* The panel takes focus on open (so a tap shows no ring); it's a container,
