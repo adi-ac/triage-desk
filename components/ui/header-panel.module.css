@@ -250,9 +250,11 @@
      below scrolls on its own, overscroll contained). */
   touch-action: none;
   /* The title starts at 16px, where the list's rows start their text (4px
-     inset + 12px row padding). */
+     inset + 12px row padding). Even padding above and below (13px each,
+     the same total height as before), so the title line sits on the bar's
+     centre, where the action and the back button are centred too. */
   position: relative;
-  padding: 16px 16px 10px;
+  padding: 13px 16px;
   border-block-end: var(--hairline) solid var(--line);
 }
 
