@@ -11,7 +11,7 @@
 
 .tag[data-tone="neutral"] {
   color: var(--ink-2);
-  background: var(--surface-2);
+  background: var(--tag-fill);
   border-color: var(--line);
 }
 

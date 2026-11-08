@@ -356,7 +356,8 @@ What it can't claim is real-world use, so it gets tested with support agents and
 
 **Queue row hover in dark mode** (2026-11-08)
 - In dark mode, hovering an unselected queue row showed nothing on phones and tablets: its hover fill was `--surface-2` (gray-950), the same colour as the queue panel (`--surface-raised`). A new token, `--hover-fill`, is `--surface-2` in light (unchanged) and ink at 4%, translucent, in dark, so it shows on the panel and on the desktop pane card alike. The selected (Petrol) row is unchanged.
-- Audited the other hovers: no other hover fill uses `--surface-2`. Menu items hover with `--button-bg-hover` (12% ink in dark), already visible on popovers; every other hover changes text colour only. Not a hover, so left alone: Tags and Banners use `--surface-2` as their fill, so in dark mode a neutral Tag on the queue panel has no visible fill (its text still reads).
+- Audited the other hovers: no other hover fill uses `--surface-2`. Menu items hover with `--button-bg-hover` (12% ink in dark), already visible on popovers; every other hover changes text colour only.
+- Then, on request, neutral Tags too: their `--surface-2` fill had no visible fill on the dark queue panel. A new `--tag-fill` is `--surface-2` in light and ink at 4% in dark, lighter than an AI tag's 7%, so the two stay distinct. Checked with a neutral tag next to "Sent by rule" (none is in the queue today, so one was cloned in the page for the check): visible on the dark panel (768px) and the dark pane (1280px), light unchanged. Banners keep `--surface-2` (they sit in panes, where it shows).
 - Checked in headless Chrome: dark at 768px (panel open) and 1280px (pane), the hovered row shows a subtle lighter fill; light at both widths computes the same colour as before.
 
 **Focus ring** (decided 2026-11-03): the accent, 2px with a 2px offset, set globally on `:focus-visible` via a `--focus-ring` role. It is at least 6.59:1 on `surface` and `bg` in both themes.

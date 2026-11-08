@@ -92,6 +92,8 @@ Is it a soft status fill?                    → --warning-soft, --critical-soft
 
 **Hover fill:** a hoverable row's hover (QueueItem) uses `--hover-fill`, never `--surface-2`. Light: `--surface-2`, as before. Dark: `color-mix(in oklch, var(--ink) 4%, transparent)`, translucent, because in dark `--surface-2` (gray-950) is the same colour as `--surface-raised`, so on the queue panel a `--surface-2` hover was invisible (it only showed on the desktop pane card, gray-975). A translucent fill shows on any surface. Buttons keep `--button-bg-hover`, and menu items already use it (12% ink in dark), which shows on popovers. Only on devices that can hover.
 
+**Tag fill:** a neutral Tag's fill is `--tag-fill`, for the same reason: `--surface-2` in light, ink at 4% (translucent) in dark, where a gray-950 tag had no visible fill on the queue panel. It stays lighter than a suggestion's 7% (`--suggested-fill`), so a neutral tag never reads as an AI one. Banners keep `--surface-2`: they sit inside panes, where it shows.
+
 **Text**
 
 ```
