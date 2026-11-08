@@ -79,15 +79,16 @@
   --text-mono-small-size: 12px;
   --text-mono-small-leading: 1.4;
 
-  /* Text inputs: 16px on phones, or iOS Safari zooms the page when one is
-     focused. Body size from tablet width up. The draft reply doesn't use
-     it: it matches the email at 14px and accepts the zoom (DESIGN.md). */
-  --text-input-size: 16px;
+  /* Text inputs: body size, and 16px on touch devices (phones and tablets
+     alike), or iOS Safari zooms the page when one is focused. The draft
+     reply doesn't use it: it matches the email at 14px and accepts the
+     zoom (DESIGN.md). */
+  --text-input-size: var(--text-body-size);
 }
 
-@media (min-width: 768px) {
+@media (pointer: coarse) {
   :root {
-    --text-input-size: var(--text-body-size);
+    --text-input-size: 16px;
   }
 }
 

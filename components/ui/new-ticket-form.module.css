@@ -1,0 +1,132 @@
+/*
+ * NewTicketForm (DESIGN.md, NewTicketForm and Text fields). The fields,
+ * then a footer with the two buttons, a hairline above it.
+ */
+
+.form {
+  display: flex;
+  flex-direction: column;
+  min-block-size: 0;
+}
+
+/* The panel's New ticket view: the form fills the view, the fields scroll
+   and the footer stays at the bottom. */
+.form[data-variant="panel"] {
+  flex: 1;
+}
+
+.fields {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 16px 20px 20px;
+}
+
+.form[data-variant="panel"] .fields {
+  flex: 1;
+  min-block-size: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 16px;
+}
+
+/* Customer name and Company: side by side from 768px, stacked on phones. */
+.pair {
+  display: grid;
+  gap: 14px;
+}
+
+@media (min-width: 768px) {
+  .pair {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  }
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-inline-size: 0;
+}
+
+/* Message in the panel: takes the height the other fields leave, never
+   less than about five lines (then the fields scroll). */
+.form[data-variant="panel"] .field[data-grow] {
+  flex: 1;
+  min-block-size: 0;
+}
+
+.label {
+  color: var(--ink-2);
+}
+
+/* Right after the label, 2px away. The required attribute carries it for
+   screen readers; the asterisk is hidden from them. */
+.required {
+  margin-inline-start: 2px;
+  color: var(--critical);
+}
+
+/*
+ * Text fields. The resting border is the divider color and the
+ * placeholder is light: both are below WCAG's 3:1 and 4.5:1 on purpose
+ * (DESIGN.md, Text fields), since the labels carry the meaning and focus
+ * is strong: the focus color for the border and a 3px ring of it at 22%.
+ * 14px text, 16px on touch devices (--text-input-size), so iOS Safari
+ * doesn't zoom in on focus.
+ */
+.input {
+  display: block;
+  inline-size: 100%;
+  margin: 0;
+  padding: 7px 11px;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  font-family: var(--font-body);
+  font-size: var(--text-input-size);
+  line-height: var(--text-body-leading);
+  color: var(--ink);
+  background: var(--surface);
+  appearance: none;
+}
+
+.input::placeholder {
+  color: var(--placeholder);
+  opacity: 1;
+}
+
+.input:focus,
+.input:focus-visible {
+  outline: none;
+  border-color: var(--focus-ring);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--focus-ring) 22%, transparent);
+}
+
+.message {
+  resize: none;
+}
+
+.form[data-variant="panel"] .message {
+  flex: 1;
+  min-block-size: 5lh;
+}
+
+/* Desktop: the person can make the message taller. */
+@media (min-width: 1200px) {
+  .message {
+    resize: vertical;
+  }
+}
+
+.footer {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 12px 20px;
+  border-block-start: var(--hairline) solid var(--line);
+}
+
+.form[data-variant="panel"] .footer {
+  padding: 12px 16px;
+}

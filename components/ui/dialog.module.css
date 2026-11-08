@@ -1,0 +1,51 @@
+/*
+ * Dialog (DESIGN.md, Dialog): 560px wide, at most the viewport minus 48px,
+ * centered (the UA's modal positioning), 14px corners, surface-raised and
+ * the dialog shadow, over the scrim. Its entrance and exit run in the
+ * component (Web Animations API), so there are no transitions here.
+ */
+
+.dialog {
+  inline-size: min(560px, 100vw - 48px);
+  max-inline-size: none;
+  max-block-size: calc(100dvh - 48px);
+  margin: auto;
+  padding: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border: 0;
+  border-radius: 14px;
+  color: var(--ink);
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-dialog);
+}
+
+.dialog::backdrop {
+  background: var(--scrim);
+}
+
+/* The page behind doesn't scroll while it's open. */
+:root:has(.dialog[open]) {
+  overflow: hidden;
+}
+
+/* The title, then the × on the right edge; 12px above and below, 20px on
+   the left (where the content's text starts), 14px on the right. */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 14px 12px 20px;
+  border-block-end: var(--hairline) solid var(--line);
+}
+
+/* Takes focus on open on touch devices (no keyboard pops up); a
+   container, not a control, so no ring. */
+.title {
+  margin: 0;
+}
+
+.title:focus {
+  outline: none;
+}

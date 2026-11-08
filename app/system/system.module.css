@@ -687,3 +687,12 @@
   inline-size: 32px;
   block-size: 32px;
 }
+
+/* NewTicketForm shown on its own, in a stand-in for the dialog's surface. */
+.formDemo {
+  max-inline-size: 560px;
+  overflow: hidden;
+  border-radius: 14px;
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-dialog);
+}

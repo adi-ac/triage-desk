@@ -1,8 +1,33 @@
 "use client";
 
 import { useEffect, useId, useLayoutEffect, useRef, type ReactNode, type Ref, type RefObject } from "react";
+import { initialFocus, moveFocus, ms, reducedMotion, token, useLastInputWasPointer } from "./focus";
 import { Icon, type IconName } from "./icon";
+import { IconButton } from "./icon-button";
 import styles from "./header-panel.module.css";
+
+/**
+ * HeaderPanel's second view: its own header (a back button and a title)
+ * and content, which the panel switches to from the main view (the queue's
+ * New ticket form).
+ */
+export type HeaderPanelSubview = {
+  /** Whether it's the view showing. */
+  open: boolean;
+  /** Its heading ("New ticket"). */
+  title: string;
+  /** The back button's name ("Back to queue"). */
+  backLabel: string;
+  /** Called on the back button and on Escape: show the main view again. */
+  onBack: () => void;
+  /**
+   * From 768px (tablets), the panel narrows to this width, centered in the
+   * viewport, while this view shows. Phones keep the panel's size.
+   */
+  narrowTo?: number;
+  /** Its content, filling the view: it handles its own scrolling. */
+  children: ReactNode;
+};
 
 export type HeaderPanelProps = {
   open: boolean;
@@ -29,6 +54,10 @@ export type HeaderPanelProps = {
    * page exactly where it was.
    */
   scrollTopOnClose?: boolean;
+  /** A second view, with a back button to the main one (DESIGN.md, HeaderPanel). */
+  subview?: HeaderPanelSubview;
+  /** Called once the panel has fully closed (after its exit): e.g. to reset its view and clear a form. */
+  onClosed?: () => void;
 };
 
 /**
@@ -59,27 +88,26 @@ export function HeaderPanel({
   children,
   onOpened,
   scrollTopOnClose = false,
+  subview,
+  onClosed,
 }: HeaderPanelProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const scrimRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const scrollerRef = useRef<HTMLDivElement>(null);
+  const actionRef = useRef<HTMLDivElement>(null);
+  const subviewRef = useRef<HTMLDivElement>(null);
+  const subHeadingRef = useRef<HTMLHeadingElement>(null);
   const ownId = useId();
   const panelId = id ?? ownId;
+  const subOpen = subview?.open ?? false;
 
   // Whether the last input was a pointer (tap or click) or a key, so focus
   // moves without a ring after a tap even if the keyboard was used before.
-  const pointerInput = useRef(false);
-  useEffect(() => {
-    const onPointer = () => (pointerInput.current = true);
-    const onKey = () => (pointerInput.current = false);
-    document.addEventListener("pointerdown", onPointer, true);
-    document.addEventListener("keydown", onKey, true);
-    return () => {
-      document.removeEventListener("pointerdown", onPointer, true);
-      document.removeEventListener("keydown", onKey, true);
-    };
-  }, []);
+  const pointerInput = useLastInputWasPointer();
+  // Places the panel (set while it's open): under the header, or narrowed
+  // for the subview on tablets.
+  const placeRef = useRef<((instant: boolean) => void) | null>(null);
 
   // The close animation while it runs (or runs back, after a reopen).
   const exit = useRef<Exit | null>(null);
@@ -97,9 +125,9 @@ export function HeaderPanel({
   );
   // A layout effect declared before the main one, so the main effect reads
   // this render's values.
-  const latest = useRef({ onOpenChange, onOpened, scrollTopOnClose });
+  const latest = useRef({ onOpenChange, onOpened, scrollTopOnClose, subview, onClosed });
   useLayoutEffect(() => {
-    latest.current = { onOpenChange, onOpened, scrollTopOnClose };
+    latest.current = { onOpenChange, onOpened, scrollTopOnClose, subview, onClosed };
   });
 
   useLayoutEffect(() => {
@@ -128,6 +156,8 @@ export function HeaderPanel({
       trigger.style.removeProperty("--button-left");
       lock.current?.release();
       lock.current = null;
+      placeRef.current = null;
+      latest.current.onClosed?.();
     };
 
     if (!open) {
@@ -142,7 +172,7 @@ export function HeaderPanel({
       // The browser shows the ring only after keyboard use (Escape, Enter
       // on a ticket), not after a tap or click.
       if (document.activeElement !== trigger) moveFocus(trigger, pointerInput.current);
-      if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      if (reducedMotion()) {
         finishClose();
         return;
       }
@@ -190,21 +220,57 @@ export function HeaderPanel({
         exit.current = null;
       });
     }
-    // Place the panel under the header row, and pin the button where it
-    // is, before either joins the top layer; again on resize.
-    const place = () => {
+    // Place the panel under the header row, as wide as it, and pin the
+    // button where it is, before either joins the top layer; again on
+    // resize. With the subview showing on a tablet, the panel is narrowed
+    // instead: centered in the viewport, at the same height. Its left edge
+    // and width transition (CSS), except on resize (instant), so it stays
+    // put while the window changes.
+    const place = (instant: boolean) => {
       const header = slot.closest("header");
       if (header) {
         const h = header.getBoundingClientRect();
+        const narrowTo = latest.current.subview?.open ? latest.current.subview.narrowTo : undefined;
+        const narrow = narrowTo !== undefined && matchMedia("(min-width: 768px)").matches;
+        const viewport = document.documentElement.clientWidth;
+        const width = narrow ? Math.min(narrowTo, viewport - 32) : h.width;
+        const left = narrow ? (viewport - width) / 2 : h.left;
+        if (instant) panel.style.transitionProperty = "clip-path";
         panel.style.setProperty("--panel-top", `${h.bottom + 8}px`);
-        panel.style.setProperty("--panel-left", `${h.left}px`);
-        panel.style.setProperty("--panel-width", `${h.width}px`);
+        panel.style.setProperty("--panel-left", `${left}px`);
+        panel.style.setProperty("--panel-width", `${width}px`);
+        if (instant) {
+          // Apply the new place untransitioned, then allow the transitions again.
+          void panel.offsetWidth;
+          panel.style.removeProperty("transition-property");
+        }
       }
       const b = slot.getBoundingClientRect();
       trigger.style.setProperty("--button-top", `${b.top}px`);
       trigger.style.setProperty("--button-left", `${b.left}px`);
     };
-    place();
+    const onResize = () => place(true);
+    placeRef.current = place;
+    place(true);
+    // iOS with the on-screen keyboard open: the layout viewport keeps its
+    // height and the keyboard covers its bottom, so the panel ends that far
+    // up instead, keeping its footer (the New ticket form's buttons) above
+    // the keyboard. Zero otherwise. iOS also scrolls the page to reveal the
+    // focused field, lock or not, which would push the panel's header off
+    // the top: the page goes back where it was, and the focused field is
+    // brought into view inside the panel instead.
+    const viewport = window.visualViewport;
+    let keyboard = 0;
+    const fitKeyboard = () => {
+      if (!viewport) return;
+      const covered = Math.abs(viewport.scale - 1) < 0.01 ? innerHeight - (viewport.offsetTop + viewport.height) : 0;
+      const next = Math.max(0, Math.round(covered));
+      panel.style.setProperty("--panel-keyboard", `${next}px`);
+      if (next !== keyboard || next > 0) lock.current?.restore();
+      if (next > 0 && next !== keyboard) revealFocused(panel);
+      keyboard = next;
+    };
+    fitKeyboard();
     // Not shown yet, or still playing its exit (reopened mid-close).
     if (!scrim.matches(":popover-open")) scrim.showPopover();
     if (!panel.matches(":popover-open")) panel.showPopover();
@@ -217,20 +283,46 @@ export function HeaderPanel({
     moveFocus(panel, pointerInput.current);
 
     // Still held from before if this reopens during a close.
-    lock.current ??= lockPage([root, trigger], scrollerRef.current ?? panel);
+    lock.current ??= lockPage([root, trigger], panel);
+    // Escape goes back from the subview, and closes the panel from the main view.
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") {
-        e.preventDefault();
-        latest.current.onOpenChange(false);
-      }
+      if (e.key !== "Escape") return;
+      e.preventDefault();
+      const sub = latest.current.subview;
+      if (sub?.open) sub.onBack();
+      else latest.current.onOpenChange(false);
     };
     document.addEventListener("keydown", onKeyDown);
-    addEventListener("resize", place);
+    addEventListener("resize", onResize);
+    viewport?.addEventListener("resize", fitKeyboard);
+    viewport?.addEventListener("scroll", fitKeyboard);
     return () => {
       document.removeEventListener("keydown", onKeyDown);
-      removeEventListener("resize", place);
+      removeEventListener("resize", onResize);
+      viewport?.removeEventListener("resize", fitKeyboard);
+      viewport?.removeEventListener("scroll", fitKeyboard);
     };
-  }, [open, button]);
+  }, [open, button, pointerInput]);
+
+  // Switching views while open: the panel narrows or widens (tablets), and
+  // focus moves. Into the subview: its first field, or its heading on touch
+  // devices (no keyboard pops up). Back: to the main header's action (New
+  // ticket), which opened it. The views' fade and slide are CSS
+  // transitions on data-active.
+  const shownSub = useRef(subOpen);
+  useLayoutEffect(() => {
+    if (shownSub.current === subOpen) return;
+    shownSub.current = subOpen;
+    const place = placeRef.current;
+    if (!place) return;
+    place(reducedMotion());
+    const target = subOpen
+      ? subviewRef.current && subHeadingRef.current
+        ? initialFocus(subviewRef.current, subHeadingRef.current)
+        : null
+      : (actionRef.current?.querySelector<HTMLElement>("button, a[href]") ?? panelRef.current);
+    if (target) moveFocus(target, pointerInput.current);
+  }, [subOpen, pointerInput]);
 
   return (
     <div ref={rootRef} className={styles.root}>
@@ -260,15 +352,40 @@ export function HeaderPanel({
         tabIndex={-1}
         className={styles.panel}
       >
-        <div className={styles.header}>
-          <div className={styles.heading}>
-            <h2 className={`text-heading ${styles.title}`}>{title}</h2>
-            {count !== undefined && <span className={`text-small ${styles.count}`}>{count}</span>}
+        <div className={styles.views}>
+          <div className={styles.view} data-view="main" data-active={subOpen ? undefined : ""} inert={subOpen}>
+            <div className={styles.header}>
+              <div className={styles.heading}>
+                <h2 className={`text-heading ${styles.title}`}>{title}</h2>
+                {count !== undefined && <span className={`text-small ${styles.count}`}>{count}</span>}
+              </div>
+              {action && (
+                <div ref={actionRef} className={styles.action}>
+                  {action}
+                </div>
+              )}
+            </div>
+            <div ref={scrollerRef} className={styles.content}>
+              {children}
+            </div>
           </div>
-          {action && <div className={styles.action}>{action}</div>}
-        </div>
-        <div ref={scrollerRef} className={styles.content}>
-          {children}
+          {subview && (
+            <div
+              ref={subviewRef}
+              className={styles.view}
+              data-view="sub"
+              data-active={subOpen ? "" : undefined}
+              inert={!subOpen}
+            >
+              <div className={`${styles.header} ${styles.subHeader}`}>
+                <IconButton icon="chevron-left" size="small" aria-label={subview.backLabel} onClick={subview.onBack} />
+                <h2 ref={subHeadingRef} tabIndex={-1} className={`text-heading ${styles.title}`}>
+                  {subview.title}
+                </h2>
+              </div>
+              <div className={styles.subContent}>{subview.children}</div>
+            </div>
+          )}
         </div>
       </div>
     </div>
@@ -323,14 +440,6 @@ export function HeaderPanelButton({ ref, open, onOpenChange, title, icon, contro
 /** The running close: its animations, and which run (close or reopen) owns them now. */
 type Exit = { animations: Animation[]; run: object };
 
-/** A motion token from styles/motion.css: a duration or delay in ms, or an easing. */
-function token(name: string) {
-  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
-}
-const ms = (name: string) => {
-  const value = token(name);
-  return value.endsWith("ms") ? parseFloat(value) : parseFloat(value) * 1000;
-};
 
 /**
  * The close, with the Web Animations API (DESIGN.md, Motion): the panel
@@ -360,27 +469,16 @@ function closeAnimations(panel: HTMLElement, scrim: HTMLElement) {
   ];
 }
 
-/**
- * Focuses `el`, with a ring only after keyboard use. The browser's own
- * guess carries a ring over from the element losing focus, even after a
- * tap, so the component says which: no ring after a tap or click, the
- * usual ring after a key (Escape, Enter on an item).
- */
-function moveFocus(el: HTMLElement, afterPointer: boolean) {
-  // focusVisible isn't in TypeScript's DOM types yet; browsers without it
-  // ignore it and fall back to their own guess.
-  const options = { preventScroll: true, focusVisible: !afterPointer };
-  el.focus(options);
-}
 
-type PageLock = { release: () => void; scrollToTop: () => void };
+type PageLock = { release: () => void; scrollToTop: () => void; restore: () => void };
 
 /**
  * Locks the page while the panel is open: everything outside `keep` is
  * inert, and the page can't scroll or rubber-band, in iOS Safari too. The
  * root gets overflow: hidden and no overscroll; on iOS that alone doesn't
- * stop a touch drag, so a drag that doesn't start in a scrollable part of
- * `scrollable` (the panel's list) is cancelled (touchmove, not passive),
+ * stop a touch drag, so a drag that doesn't start in something that can
+ * scroll inside `panel` (the queue's list, the New ticket form's fields or
+ * its message) is cancelled (touchmove, not passive),
  * and the scrim and the panel's header refuse to pan (touch-action, in the
  * CSS). Not overflow: hidden on <body>: that makes body a scroll container
  * and the sticky header would stop sticking and jump. The scroll position
@@ -388,7 +486,7 @@ type PageLock = { release: () => void; scrollToTop: () => void };
  * Never lift and re-apply the overflow lock while it's held (see
  * scrollToTop).
  */
-function lockPage(keep: Element[], scrollable: Element): PageLock {
+function lockPage(keep: Element[], panel: Element): PageLock {
   const html = document.documentElement;
   let target = window.scrollY;
   const before = [html.style.overflow, html.style.overscrollBehavior];
@@ -400,8 +498,7 @@ function lockPage(keep: Element[], scrollable: Element): PageLock {
     [html.style.overflow, html.style.overscrollBehavior] = before;
   };
   const onTouchMove = (e: TouchEvent) => {
-    const inList = e.target instanceof Node && scrollable.contains(e.target);
-    if (!inList || scrollable.scrollHeight <= scrollable.clientHeight) e.preventDefault();
+    if (!canScroll(e.target, panel)) e.preventDefault();
   };
   apply();
   document.addEventListener("touchmove", onTouchMove, { passive: false });
@@ -414,6 +511,11 @@ function lockPage(keep: Element[], scrollable: Element): PageLock {
       // visible blink). "instant" overrides any CSS scroll-behavior.
       window.scrollTo({ top: 0, left: 0, behavior: "instant" });
       target = 0;
+    },
+    // Back to where the page is meant to be, if something scrolled it while
+    // locked (iOS revealing a focused field).
+    restore() {
+      if (Math.abs(window.scrollY - target) >= 1) window.scrollTo({ top: target, left: 0, behavior: "instant" });
     },
     release() {
       lift();
@@ -442,4 +544,38 @@ function inertOthers(keep: Element[]) {
     }
   }
   return () => changed.forEach((el) => el.removeAttribute("inert"));
+}
+
+/** Whether `target` is in something inside `panel` that can scroll vertically. */
+function canScroll(target: EventTarget | null, panel: Element) {
+  for (let el = target instanceof Element ? target : null; el && el !== panel; el = el.parentElement) {
+    const overflow = getComputedStyle(el).overflowY;
+    if ((overflow === "auto" || overflow === "scroll") && el.scrollHeight > el.clientHeight) return true;
+  }
+  return false;
+}
+
+/**
+ * Scrolls the focused field into view inside the panel's scrolling area,
+ * without scrolling the page: its label and top edge in view, so a tall
+ * field (the message) shows where the caret starts.
+ */
+function revealFocused(panel: HTMLElement) {
+  const field = document.activeElement;
+  if (!(field instanceof HTMLElement) || !panel.contains(field)) return;
+  for (let box = field.parentElement; box && box !== panel; box = box.parentElement) {
+    const overflow = getComputedStyle(box).overflowY;
+    if ((overflow !== "auto" && overflow !== "scroll") || box.scrollHeight <= box.clientHeight) continue;
+    const area = box.getBoundingClientRect();
+    const rect = field.getBoundingClientRect();
+    // Its label too, when it has one above it.
+    const label = "labels" in field ? (field as HTMLInputElement).labels?.[0] : undefined;
+    const top = Math.min(rect.top, label?.getBoundingClientRect().top ?? rect.top);
+    const margin = 8;
+    if (top < area.top + margin) box.scrollTop -= area.top + margin - top;
+    else if (rect.bottom > area.bottom - margin) {
+      box.scrollTop += Math.min(rect.bottom - (area.bottom - margin), top - (area.top + margin));
+    }
+    return;
+  }
 }

@@ -2,7 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
-import { AppHeader, Button, HeaderPanel, HeaderPanelButton, Pane } from "@/components/ui";
+import { AppHeader, Button, Dialog, HeaderPanel, HeaderPanelButton, NewTicketForm, Pane } from "@/components/ui";
 import { tickets } from "@/fixtures/tickets";
 import { InboxProvider } from "./inbox-state";
 import { QueueList } from "./queue-list";
@@ -41,6 +41,13 @@ function Shell({ id, children }: { id: string; children: ReactNode }) {
   // Below 1200px: the queue's header button (HeaderPanel's button).
   const queueId = useId();
   const queueButton = useRef<HTMLButtonElement>(null);
+
+  // New ticket: a dialog from 1200px; below, the queue panel's second view.
+  // The form is cleared (remounted with a new key) when either closes.
+  const [newTicketOpen, setNewTicketOpen] = useState(false);
+  const [queueView, setQueueView] = useState<"queue" | "new-ticket">("queue");
+  const [formKey, setFormKey] = useState(0);
+  const clearForm = () => setFormKey((k) => k + 1);
 
   // Picking a ticket in the queue panel, in this order, so the page never
   // visibly jumps and the header never blinks: put the page at the top
@@ -153,7 +160,12 @@ function Shell({ id, children }: { id: string; children: ReactNode }) {
       <h1 className="visually-hidden">Inbox</h1>
 
       <div className={styles.queuePane}>
-        <Pane title="Queue" count={tickets.length} action={<NewTicketButton />} inset="list">
+        <Pane
+          title="Queue"
+          count={tickets.length}
+          action={<NewTicketButton onClick={() => setNewTicketOpen(true)} />}
+          inset="list"
+        >
           <QueueList currentId={id} onOpen={open} />
         </Pane>
       </div>
@@ -168,25 +180,40 @@ function Shell({ id, children }: { id: string; children: ReactNode }) {
           onOpenChange={setQueueOpen}
           title="Queue"
           count={tickets.length}
-          action={<NewTicketButton />}
+          action={<NewTicketButton onClick={() => setQueueView("new-ticket")} />}
           id={queueId}
           button={queueButton}
           onOpened={centerCurrent}
           scrollTopOnClose={queue.toTop}
+          subview={{
+            open: queueView === "new-ticket",
+            title: "New ticket",
+            backLabel: "Back to queue",
+            onBack: () => setQueueView("queue"),
+            narrowTo: 520,
+            children: <NewTicketForm key={formKey} variant="panel" />,
+          }}
+          // Closed from either view: back to the queue, and the form is cleared.
+          onClosed={() => {
+            setQueueView("queue");
+            clearForm();
+          }}
         >
           <QueueList currentId={id} onOpen={open} />
         </HeaderPanel>
       </div>
+
+      <Dialog open={newTicketOpen} onOpenChange={setNewTicketOpen} title="New ticket" onClosed={clearForm}>
+        <NewTicketForm key={formKey} variant="dialog" />
+      </Dialog>
     </main>
   );
 }
 
-/** The queue header's action, in the pane from 1200px and in the panel below. */
-function NewTicketButton() {
-  // TODO: open the compose flow. Look only for now: no click handler and no
-  // disabled state until there's a flow to open.
+/** The queue header's action: opens the New ticket form (a dialog from 1200px, the panel's New ticket view below). */
+function NewTicketButton({ onClick }: { onClick: () => void }) {
   return (
-    <Button size="small" icon="plus">
+    <Button size="small" icon="plus" onClick={onClick}>
       New ticket
     </Button>
   );

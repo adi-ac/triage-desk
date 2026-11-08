@@ -15,16 +15,24 @@ export {
   type ConfidenceLevel,
   type ConfidenceMeterProps,
 } from "./confidence-meter";
+export { Dialog, type DialogProps } from "./dialog";
 export { DraftEditor, type DraftEditorProps, type DraftState } from "./draft-editor";
 export { EmailBody, type EmailBodyProps } from "./email-body";
 export { EvidenceItem, type EvidenceItemProps } from "./evidence-item";
 export { EvidenceMark, type EvidenceMarkProps } from "./evidence-mark";
-export { HeaderPanel, HeaderPanelButton, type HeaderPanelButtonProps, type HeaderPanelProps } from "./header-panel";
+export {
+  HeaderPanel,
+  HeaderPanelButton,
+  type HeaderPanelButtonProps,
+  type HeaderPanelProps,
+  type HeaderPanelSubview,
+} from "./header-panel";
 export { FieldReview, type FieldReviewProps } from "./field-review";
 export { type IconName } from "./icon";
 export { IconButton, type IconButtonProps } from "./icon-button";
 export { Logo } from "./logo";
 export { Menu, type MenuItem, type MenuProps } from "./menu";
+export { NewTicketForm, type NewTicketFormProps } from "./new-ticket-form";
 export { NoActionReview, type NoActionReviewProps } from "./no-action-review";
 export { Pane, type PaneProps } from "./pane";
 export { QueueItem, type QueueItemProps } from "./queue-item";

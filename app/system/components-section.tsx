@@ -5,6 +5,7 @@ import {
   Button,
   Chip,
   ConfidenceMeter,
+  Dialog,
   DraftEditor,
   EmailBody,
   EvidenceItem,
@@ -15,6 +16,7 @@ import {
   IconButton,
   Logo,
   Menu,
+  NewTicketForm,
   NoActionReview,
   Pane,
   QueueItem,
@@ -45,8 +47,25 @@ const demoBlockers = approveBlockers({
 });
 const excerpt = firstScreen.body.split("\n\n").slice(1, 4).join("\n\n");
 
+function DialogDemo() {
+  const [open, setOpen] = useState(false);
+  const [key, setKey] = useState(0);
+  return (
+    <div className={styles.inline}>
+      <Button size="small" icon="plus" onClick={() => setOpen(true)}>
+        New ticket
+      </Button>
+      <Dialog open={open} onOpenChange={setOpen} title="New ticket" onClosed={() => setKey((k) => k + 1)}>
+        <NewTicketForm key={key} variant="dialog" />
+      </Dialog>
+    </div>
+  );
+}
+
 function HeaderPanelDemo() {
   const [open, setOpen] = useState(false);
+  const [view, setView] = useState<"queue" | "new-ticket">("queue");
+  const [key, setKey] = useState(0);
   const id = useId();
   const button = useRef<HTMLButtonElement>(null);
   return (
@@ -62,12 +81,24 @@ function HeaderPanelDemo() {
         title="Queue"
         count={12}
         action={
-          <Button size="small" icon="plus">
+          <Button size="small" icon="plus" onClick={() => setView("new-ticket")}>
             New ticket
           </Button>
         }
         id={id}
         button={button}
+        subview={{
+          open: view === "new-ticket",
+          title: "New ticket",
+          backLabel: "Back to queue",
+          onBack: () => setView("queue"),
+          narrowTo: 520,
+          children: <NewTicketForm key={key} variant="panel" />,
+        }}
+        onClosed={() => {
+          setView("queue");
+          setKey((k) => k + 1);
+        }}
       >
         <div className={styles.queue}>
           {tickets.slice(0, 12).map((t) => (
@@ -254,14 +285,15 @@ export function ComponentsSection({ theme }: { theme: string }) {
 
       <Demo
         name="IconButton"
-        props="icon: inbox | close | pencil | plus · aria-label · size: default | small · tooltip"
-        intro="A round secondary button holding one icon, with Button's chrome. Never Petrol: the queue's header button is HeaderPanelButton. The name is required, since the icon has no words. Default is 32px with an 18px icon; small is 28px with a 14px icon (FieldReview's Change, last here). tooltip shows the name to its right on hover and keyboard focus: hover or tab to the pencil."
+        props="icon: inbox | close | pencil | plus | chevron-left · aria-label · size: default | small · tooltip"
+        intro="A round secondary button holding one icon, with Button's chrome. Never Petrol: the queue's header button is HeaderPanelButton. The name is required, since the icon has no words. Default is 32px with an 18px icon; small is 28px with a 16px icon (FieldReview's Change, last here; the Dialog's × and the queue panel's back button). tooltip shows the name to its right on hover and keyboard focus: hover or tab to the pencil."
       >
         <div className={styles.inline}>
           <IconButton icon="inbox" aria-label="Open queue" />
           <IconButton icon="close" aria-label="Close queue" />
           <IconButton icon="inbox" aria-label="Open queue" disabled />
           <IconButton icon="pencil" size="small" tooltip aria-label="Change category" />
+          <IconButton icon="chevron-left" size="small" aria-label="Back to queue" />
         </div>
       </Demo>
 
@@ -556,9 +588,27 @@ export function ComponentsSection({ theme }: { theme: string }) {
       </Demo>
 
       <Demo
+        name="Dialog"
+        props="open · onOpenChange · title · onClosed?"
+        intro="A modal dialog from 1200px (the queue pane's New ticket): 560px wide, centred over the scrim, 14px corners, a header with the title and a small ×. Focus goes to the first field (the heading on touch devices) and back to what opened it. Escape and the × close it; a click on the scrim only when every field is empty, so a pasted email is never lost. It scales up from 0.97 as it fades in (200ms) and goes back the same way (150ms). Try it."
+      >
+        <DialogDemo />
+      </Demo>
+
+      <Demo
+        name="NewTicketForm"
+        props="variant: dialog | panel"
+        intro="Customer name and Message are required (a red asterisk, never “(optional)”); Add and triage is disabled until both have text, and does nothing yet. Use a sample email fills a fictional SSO outage. Fields: surface fill, 8px corners, a divider-colored border and a light placeholder (a documented contrast exception: the labels carry the meaning), and a strong focus ring. Enter, or Cmd+Enter in Message, submits once it's enabled."
+      >
+        <div className={styles.formDemo}>
+          <NewTicketForm variant="dialog" />
+        </div>
+      </Demo>
+
+      <Demo
         name="HeaderPanel and HeaderPanelButton"
-        props="HeaderPanel: open · onOpenChange · title · count? · action? · id? · button · onOpened? — HeaderPanelButton: ref · open · onOpenChange · title · icon · controls"
-        intro="The inbox's queue below 1200px, on phones and tablets alike: a round 32px Petrol button in the sticky app header, to the right of the theme toggle, and a panel that opens 8px below the header, exactly as wide as it, down to 16px from the bottom of the viewport. The panel grows from its top-right corner, under the button (340ms), and closes back into it (240ms) as it fades. The one button stays above the scrim and is the close, its icon turning into a ×; a scrim tap, Escape or a pick closes it too. Focus moves into the panel and back to the button. Try it here: this demo's header row stands in for the app header."
+        props="HeaderPanel: open · onOpenChange · title · count? · action? · id? · button · onOpened? · subview? · onClosed? — HeaderPanelButton: ref · open · onOpenChange · title · icon · controls"
+        intro="The inbox's queue below 1200px, on phones and tablets alike: a round 32px Petrol button in the sticky app header, to the right of the theme toggle, and a panel that opens 8px below the header, exactly as wide as it, down to 16px from the bottom of the viewport. The panel grows from its top-right corner, under the button (340ms), and closes back into it (240ms) as it fades. The one button stays above the scrim and is the close, its icon turning into a ×; a scrim tap, Escape or a pick closes it too. Focus moves into the panel and back to the button. Its New ticket button switches to a second view (subview) with a back button; the views slide 16px and cross-fade, and on tablets the panel narrows to 520px, centred. Try it here: this demo's header row stands in for the app header."
       >
         <HeaderPanelDemo />
       </Demo>

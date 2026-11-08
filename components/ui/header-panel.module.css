@@ -146,7 +146,10 @@
  */
 .panel {
   position: fixed;
-  inset: var(--panel-top, 56px) auto calc(16px + env(safe-area-inset-bottom, 0px)) var(--panel-left, 16px);
+  /* The bottom: 16px above the safe area, or above the on-screen keyboard
+     on iOS (--panel-keyboard, set by the component). */
+  inset: var(--panel-top, 56px) auto
+    calc(16px + max(env(safe-area-inset-bottom, 0px), var(--panel-keyboard, 0px))) var(--panel-left, 16px);
   inline-size: var(--panel-width, calc(100vw - 32px));
   block-size: auto;
   margin: 0;
@@ -161,10 +164,16 @@
   clip-path: inset(0 0 100% 100% round 20px);
 }
 
+/* Its left edge and width transition together when it narrows for the
+   subview on tablets and widens back (the component turns them off while
+   the window resizes). */
 .panel:popover-open {
   display: flex;
   clip-path: inset(-40px -40px -64px -40px round 20px);
-  transition: clip-path var(--duration-panel-in) var(--ease-panel-in);
+  transition:
+    clip-path var(--duration-panel-in) var(--ease-panel-in),
+    left var(--duration-panel-resize) var(--ease-panel-resize),
+    width var(--duration-panel-resize) var(--ease-panel-resize);
 }
 
 @starting-style {
@@ -188,6 +197,52 @@
 .panel:focus,
 .panel:focus-visible {
   outline: none;
+}
+
+/*
+ * Views: the main one (the Queue) and the subview (New ticket), stacked in
+ * one grid cell. Switching, the outgoing view fades and moves 16px toward
+ * the side it leaves from, and the incoming one fades in from 16px on the
+ * other side, a little later. The main view always leaves to the left and
+ * the subview to the right, so each view's resting offset is fixed and the
+ * direction follows. CSS transitions, so a quick back-and-forth reverses
+ * smoothly. The inactive view is inert and turns hidden once it has faded
+ * (visibility, delayed by the fade-out).
+ */
+.views {
+  flex: 1;
+  display: grid;
+  grid-template: minmax(0, 1fr) / minmax(0, 1fr);
+  min-block-size: 0;
+}
+
+.view {
+  grid-area: 1 / 1;
+  display: flex;
+  flex-direction: column;
+  min-block-size: 0;
+  min-inline-size: 0;
+  visibility: hidden;
+  opacity: 0;
+  translate: calc(-1 * var(--distance-view)) 0;
+  transition:
+    opacity var(--duration-view-out) var(--ease-view-out),
+    translate var(--duration-view-out) var(--ease-view-out),
+    visibility 0s linear var(--duration-view-out);
+}
+
+.view[data-view="sub"] {
+  translate: var(--distance-view) 0;
+}
+
+.view[data-active] {
+  visibility: visible;
+  opacity: 1;
+  translate: 0 0;
+  transition:
+    opacity var(--duration-view-in) var(--ease-view-in) var(--delay-view-in),
+    translate var(--duration-view-in) var(--ease-view-in) var(--delay-view-in),
+    visibility 0s;
 }
 
 .header {
@@ -215,6 +270,9 @@
 .count {
   color: var(--ink-3);
   font-variant-numeric: tabular-nums;
+  /* Inside the title's line box, so the header is the title's height and
+     the New ticket view's header (no count) matches it exactly. */
+  line-height: 1;
 }
 
 /* The header's one action: out of the flow, so it never makes the header
@@ -226,6 +284,34 @@
   inset-inline-end: 16px;
   display: flex;
   translate: 0 -50%;
+}
+
+/* The subview's header: the back button 10px from the panel's edge, the
+   title 6px after it. The button's negative margins keep the header the
+   main header's height (it centers on the title's line). */
+.subHeader {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding-inline-start: 10px;
+}
+
+.subHeader > button {
+  flex: none;
+  margin-block: -4px;
+}
+
+/* Takes focus on touch devices when the subview opens: a container, not a
+   control, so no ring. */
+.subHeader .title:focus {
+  outline: none;
+}
+
+.subContent {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  min-block-size: 0;
 }
 
 .content {
@@ -243,7 +329,8 @@
   .button *,
   .scrim,
   .panel,
-  .panel > * {
+  .panel > *,
+  .view {
     transition: none !important;
   }
 }

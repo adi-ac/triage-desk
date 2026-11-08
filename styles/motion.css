@@ -43,6 +43,28 @@
   /* The scrim behind the panel: in with its entrance, out with its close. */
   --duration-scrim-in: 220ms;
   --duration-scrim-out: var(--duration-panel-out);
+
+  /* Something arriving and settling: a dialog's entrance (and its exit,
+     run back), and a panel view coming in. */
+  --ease-enter: cubic-bezier(0.32, 0.72, 0, 1);
+  /* Dialog: opacity 0 to 1 and scale 0.97 to 1, its scrim fading with it;
+     the exit runs the same way back, faster. */
+  --duration-dialog-in: 200ms;
+  --duration-dialog-out: 150ms;
+  --scale-dialog-from: 0.97;
+  /* HeaderPanel switching views (Queue and New ticket): the outgoing view
+     fades and moves 16px toward the side it leaves from; the incoming one
+     fades in from 16px on the other side, a little later. */
+  --distance-view: 16px;
+  --duration-view-out: 150ms;
+  --ease-view-out: ease-out;
+  --duration-view-in: 220ms;
+  --ease-view-in: var(--ease-enter);
+  --delay-view-in: 40ms;
+  /* Tablets: the panel narrowing to the New ticket view's width and back,
+     its left edge and width together, while the views cross-fade. */
+  --duration-panel-resize: 300ms;
+  --ease-panel-resize: cubic-bezier(0.65, 0, 0.35, 1);
 }
 
 /* Switching theme shouldn't animate every color on the page: ThemeToggle

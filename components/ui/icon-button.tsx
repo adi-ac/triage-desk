@@ -6,7 +6,7 @@ export type IconButtonProps = Omit<ComponentProps<"button">, "className" | "styl
   icon: IconName;
   /** The button's name. Required: the icon has no words. */
   "aria-label": string;
-  /** default: 32px, 18px icon. small: 28px, 14px icon (inline, beside a value). */
+  /** default: 32px, 18px icon. small: 28px, 16px icon (beside a value, or in a dialog or panel header). */
   size?: "default" | "small";
   /**
    * Show the aria-label as a tooltip to the button's right on hover and
@@ -24,7 +24,7 @@ export type IconButtonProps = Omit<ComponentProps<"button">, "className" | "styl
 export function IconButton({ icon, size = "default", tooltip = false, type = "button", ...props }: IconButtonProps) {
   return (
     <button type={type} {...props} className={styles.button} data-variant="secondary" data-shape="icon" data-size={size}>
-      <Icon name={icon} size={size === "small" ? 14 : 18} />
+      <Icon name={icon} size={size === "small" ? 16 : 18} />
       {tooltip && (
         // The same words as the aria-label, so it's hidden from screen readers to avoid reading them twice.
         <span className={`text-small ${styles.tooltip}`} aria-hidden>

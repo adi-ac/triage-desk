@@ -41,6 +41,9 @@
   --surface-2: var(--gray-25);
   --line: var(--gray-100);
   --line-strong: var(--gray-500);
+  /* A text field's placeholder. Below 4.5:1 on purpose (DESIGN.md, Text
+     fields): the label above carries the meaning. */
+  --placeholder: var(--gray-400);
   --scrim: rgb(0 0 0 / 0.18);
 
   --ink: var(--gray-900);
@@ -77,6 +80,7 @@
     --surface-2: var(--gray-950);
     --line: var(--gray-900);
     --line-strong: var(--gray-500);
+    --placeholder: var(--gray-500);
     --scrim: rgb(0 0 0 / 0.5);
 
     --ink: var(--gray-50);
@@ -114,6 +118,7 @@
   --surface-2: var(--gray-950);
   --line: var(--gray-900);
   --line-strong: var(--gray-500);
+  --placeholder: var(--gray-500);
   --scrim: rgb(0 0 0 / 0.5);
 
   --ink: var(--gray-50);
