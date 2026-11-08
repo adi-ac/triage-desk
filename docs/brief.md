@@ -350,6 +350,10 @@ What it can't claim is real-world use, so it gets tested with support agents and
 **Known issue: the queue panel's entrance** (2026-11-08, left for now)
 - Rarely, the queue panel opens without its corner-grow entrance (full size, content fading in). Two fixes were tried and reverted, since one changed the animation and the other didn't fix it.
 
+**New ticket full width on tablets** (decided 2026-11-08)
+- On tablets (768–1199px) the queue panel's New ticket view is now the same size as the Queue view: the header row's left edge and width (the email pane's left edge to the triage pane's right edge), at every tablet width. It used to narrow to 520px, centred, with its left edge and width animating. Removed: HeaderPanel's `narrowTo` option, the narrowing in its placement code (which also toggled the transitions with a forced reflow on every placement), the panel's left/width transitions and the `--duration-panel-resize` / `--ease-panel-resize` tokens. The clip-path entrance, the views' slide and fade, phones and the desktop Dialog are unchanged.
+- Checked in headless Chrome at 768×1024, 1024×1366 and 1150×820 (and 375 for phones): opening the queue, New ticket, then Back, the panel's box was identical on every frame and matched the header row, and the views still slid and faded.
+
 **Focus ring** (decided 2026-11-03): the accent, 2px with a 2px offset, set globally on `:focus-visible` via a `--focus-ring` role. It is at least 6.59:1 on `surface` and `bg` in both themes.
 - The one documented exception to the Petrol rule (Petrol is only for decisions, high confidence, the selected queue item and Approve), confirmed 2026-11-04. My reason: keyboard focus must always be clearly visible, and it only appears while tabbing, so it never competes with Approve.
 

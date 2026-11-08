@@ -92,7 +92,6 @@ function HeaderPanelDemo() {
           title: "New ticket",
           backLabel: "Back to queue",
           onBack: () => setView("queue"),
-          narrowTo: 520,
           children: <NewTicketForm key={key} variant="panel" />,
         }}
         onClosed={() => {
@@ -608,7 +607,7 @@ export function ComponentsSection({ theme }: { theme: string }) {
       <Demo
         name="HeaderPanel and HeaderPanelButton"
         props="HeaderPanel: open · onOpenChange · title · count? · action? · id? · button · onOpened? · subview? · onClosed? — HeaderPanelButton: ref · open · onOpenChange · title · icon · controls"
-        intro="The inbox's queue below 1200px, on phones and tablets alike: a round 32px Petrol button in the sticky app header, to the right of the theme toggle, and a panel that opens 8px below the header, exactly as wide as it, down to 16px from the bottom of the viewport. The panel grows from its top-right corner, under the button (340ms), and closes back into it (240ms) as it fades. The one button stays above the scrim and is the close, its icon turning into a ×; a scrim tap, Escape or a pick closes it too. Focus moves into the panel and back to the button. Its New ticket button switches to a second view (subview) with a back button; the views slide 16px and cross-fade, and on tablets the panel narrows to 520px, centred. Try it here: this demo's header row stands in for the app header."
+        intro="The inbox's queue below 1200px, on phones and tablets alike: a round 32px Petrol button in the sticky app header, to the right of the theme toggle, and a panel that opens 8px below the header, exactly as wide as it, down to 16px from the bottom of the viewport. The panel grows from its top-right corner, under the button (340ms), and closes back into it (240ms) as it fades. The one button stays above the scrim and is the close, its icon turning into a ×; a scrim tap, Escape or a pick closes it too. Focus moves into the panel and back to the button. Its New ticket button switches to a second view (subview) with a back button; the views slide 16px and cross-fade, and the panel keeps its size. Try it here: this demo's header row stands in for the app header."
       >
         <HeaderPanelDemo />
       </Demo>

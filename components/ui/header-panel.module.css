@@ -164,16 +164,10 @@
   clip-path: inset(0 0 100% 100% round 20px);
 }
 
-/* Its left edge and width transition together when it narrows for the
-   subview on tablets and widens back (the component turns them off while
-   the window resizes). */
 .panel:popover-open {
   display: flex;
   clip-path: inset(-40px -40px -64px -40px round 20px);
-  transition:
-    clip-path var(--duration-panel-in) var(--ease-panel-in),
-    left var(--duration-panel-resize) var(--ease-panel-resize),
-    width var(--duration-panel-resize) var(--ease-panel-resize);
+  transition: clip-path var(--duration-panel-in) var(--ease-panel-in);
 }
 
 @starting-style {

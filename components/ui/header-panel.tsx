@@ -31,11 +31,6 @@ export type HeaderPanelSubview = {
   /** Called on the back button and on Escape: show the main view again. */
   onBack: () => void;
   /**
-   * From 768px (tablets), the panel narrows to this width, centered in the
-   * viewport, while this view shows. Phones keep the panel's size.
-   */
-  narrowTo?: number;
-  /**
    * Its content, filling the view: it handles its own scrolling. Going back
    * resets it: HeaderPanel remounts it (a form comes back empty, scrolled
    * to the top) once the view has finished sliding out, or at once if it's
@@ -132,10 +127,6 @@ export function HeaderPanel({
       open: subOpen,
     });
   }
-  // Places the panel (set while it's open): under the header, or narrowed
-  // for the subview on tablets.
-  const placeRef = useRef<((instant: boolean) => void) | null>(null);
-
   // The close animation while it runs (or runs back, after a reopen).
   const exit = useRef<Exit | null>(null);
   // Where the last press on the scrim started, so a drag doesn't close it.
@@ -191,7 +182,6 @@ export function HeaderPanel({
       trigger.style.removeProperty("--button-left");
       lock.current?.release();
       lock.current = null;
-      placeRef.current = null;
       latest.current.onClosed?.();
     };
 
@@ -255,38 +245,23 @@ export function HeaderPanel({
         exit.current = null;
       });
     }
-    // Place the panel under the header row, as wide as it, and pin the
-    // button where it is, before either joins the top layer; again on
-    // resize. With the subview showing on a tablet, the panel is narrowed
-    // instead: centered in the viewport, at the same height. Its left edge
-    // and width transition (CSS), except on resize (instant), so it stays
-    // put while the window changes.
-    const place = (instant: boolean) => {
+    // Place the panel under the header row, as wide as it (in both views),
+    // and pin the button where it is, before either joins the top layer;
+    // again on resize.
+    const place = () => {
       const header = slot.closest("header");
       if (header) {
         const h = header.getBoundingClientRect();
-        const narrowTo = latest.current.subview?.open ? latest.current.subview.narrowTo : undefined;
-        const narrow = narrowTo !== undefined && matchMedia("(min-width: 768px)").matches;
-        const viewport = document.documentElement.clientWidth;
-        const width = narrow ? Math.min(narrowTo, viewport - 32) : h.width;
-        const left = narrow ? (viewport - width) / 2 : h.left;
-        if (instant) panel.style.transitionProperty = "clip-path";
         panel.style.setProperty("--panel-top", `${h.bottom + 8}px`);
-        panel.style.setProperty("--panel-left", `${left}px`);
-        panel.style.setProperty("--panel-width", `${width}px`);
-        if (instant) {
-          // Apply the new place untransitioned, then allow the transitions again.
-          void panel.offsetWidth;
-          panel.style.removeProperty("transition-property");
-        }
+        panel.style.setProperty("--panel-left", `${h.left}px`);
+        panel.style.setProperty("--panel-width", `${h.width}px`);
       }
       const b = slot.getBoundingClientRect();
       trigger.style.setProperty("--button-top", `${b.top}px`);
       trigger.style.setProperty("--button-left", `${b.left}px`);
     };
-    const onResize = () => place(true);
-    placeRef.current = place;
-    place(true);
+    const onResize = () => place();
+    place();
     // iOS with the on-screen keyboard open: the layout viewport keeps its
     // height and the keyboard covers the bottom of the panel. The panel
     // never shrinks or moves; how much of it is covered goes to
@@ -364,8 +339,8 @@ export function HeaderPanel({
     };
   }, [open, button, pointerInput]);
 
-  // Switching views while open: the panel narrows or widens (tablets), and
-  // focus moves. Into the subview: its first field, or its heading on touch
+  // Switching views while open: focus moves (the panel keeps its size and
+  // place). Into the subview: its first field, or its heading on touch
   // devices (no keyboard pops up). Back: to the main header's action (New
   // ticket), which opened it. The views' fade and slide are CSS
   // transitions on data-active.
@@ -373,9 +348,7 @@ export function HeaderPanel({
   useLayoutEffect(() => {
     if (shownSub.current === subOpen) return;
     shownSub.current = subOpen;
-    const place = placeRef.current;
-    if (!place) return;
-    place(reducedMotion());
+    if (!panelRef.current?.matches(":popover-open")) return;
     const target = subOpen
       ? subviewRef.current && subHeadingRef.current
         ? initialFocus(subviewRef.current, subHeadingRef.current)

@@ -191,7 +191,6 @@ function Shell({ id, children }: { id: string; children: ReactNode }) {
             title: "New ticket",
             backLabel: "Back to queue",
             onBack: () => setQueueView("queue"),
-            narrowTo: 520,
             children: <NewTicketForm key={formKey} variant="panel" />,
           }}
           // Closed from either view: back to the queue, and the form is cleared.

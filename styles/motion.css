@@ -61,10 +61,6 @@
   --duration-view-in: 220ms;
   --ease-view-in: var(--ease-enter);
   --delay-view-in: 40ms;
-  /* Tablets: the panel narrowing to the New ticket view's width and back,
-     its left edge and width together, while the views cross-fade. */
-  --duration-panel-resize: 300ms;
-  --ease-panel-resize: cubic-bezier(0.65, 0, 0.35, 1);
 }
 
 /* Switching theme shouldn't animate every color on the page: ThemeToggle
