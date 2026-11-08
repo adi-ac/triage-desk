@@ -332,7 +332,43 @@ export function HeaderPanel({
     fitKeyboard();
     // Not shown yet, or still playing its exit (reopened mid-close).
     if (!scrim.matches(":popover-open")) scrim.showPopover();
-    if (!panel.matches(":popover-open")) panel.showPopover();
+    if (!panel.matches(":popover-open")) {
+      // A fresh open. The entrance is the CSS transitions from
+      // @starting-style (the panel's clip-path from the top-right corner,
+      // its content's fade). Two things could skip them, leaving the panel
+      // full size and blank for a couple of frames, or its content there
+      // at once:
+      // - Transitions left from the last open (closed before its content
+      //   had finished fading in): Safari keeps them across the panel being
+      //   hidden. They're cancelled first.
+      // - @starting-style alone can be skipped, depending on how styles
+      //   were last flushed (place() just forced a reflow). So the
+      //   starting values (the closed clip, the content at opacity 0) are
+      //   set inline before it's shown, read once it's shown (the browser
+      //   registers them), and removed, so the same CSS transitions run
+      //   from them every time.
+      // - After a fade that was interrupted, Safari keeps it as a completed
+      //   transition to opacity 1 and won't start another to the same
+      //   value. Turning the content's transition off for the read clears
+      //   that record (as the spec says it must).
+      // A reopen during the close never gets here: it runs the close back
+      // instead (above).
+      const content = [...panel.children] as HTMLElement[];
+      for (const el of [panel, ...content]) el.getAnimations().forEach((a) => a.cancel());
+      panel.style.clipPath = "inset(0 0 100% 100% round 20px)";
+      content.forEach((el) => {
+        el.style.transition = "none";
+        el.style.opacity = "0";
+      });
+      panel.showPopover();
+      void getComputedStyle(panel).clipPath;
+      content.forEach((el) => void getComputedStyle(el).opacity);
+      panel.style.removeProperty("clip-path");
+      content.forEach((el) => {
+        el.style.removeProperty("transition");
+        el.style.removeProperty("opacity");
+      });
+    }
     // The panel joined the top layer above the button; re-show the button
     // so it's on top. Its display is set in CSS, so it never flickers.
     if (trigger.matches(":popover-open")) trigger.hidePopover();

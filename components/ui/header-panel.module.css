@@ -133,7 +133,12 @@
  * It grows diagonally from its top-right corner, under the button: a CSS
  * transition from @starting-style, a clip-path from a point at that corner
  * to the whole panel (the open clip reaches past the edges so the shadow
- * isn't cut off), its content fading in a fifth of the way in.
+ * isn't cut off), its content fading in a fifth of the way in. On a fresh
+ * open the component first cancels transitions left from the last open,
+ * and sets the starting values (the closed clip, the content at opacity 0)
+ * inline before showing it, reads them and removes them, so neither
+ * transition is skipped (they were, occasionally: the panel full size and
+ * blank for two frames, or in Safari its content there at once).
  *
  * The close is NOT a CSS exit transition. Exit transitions on a popover
  * need display and overlay to transition (allow-discrete) so it stays in
