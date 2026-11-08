@@ -347,6 +347,9 @@ What it can't claim is real-world use, so it gets tested with support agents and
 - Built into HeaderPanel: its second view's content is remounted after Back, so the inbox and the /system demo needed no changes.
 - Checked in headless Chrome at 375 and 768px, with and without reduced motion: filled with "Use a sample email" and scrolled down, then Back by the button and by Escape: still filled 40ms in (while sliding out), then empty, Add and triage disabled, scroll 0, focus on New ticket; New ticket again opens empty with focus on Customer name; New ticket 30ms after Back also opens empty; closing from the New ticket view and reopening is empty.
 
+**Known issue: the queue panel's entrance** (2026-11-08, left for now)
+- Rarely, the queue panel opens without its corner-grow entrance (full size, content fading in). Two fixes were tried and reverted, since one changed the animation and the other didn't fix it.
+
 **Focus ring** (decided 2026-11-03): the accent, 2px with a 2px offset, set globally on `:focus-visible` via a `--focus-ring` role. It is at least 6.59:1 on `surface` and `bg` in both themes.
 - The one documented exception to the Petrol rule (Petrol is only for decisions, high confidence, the selected queue item and Approve), confirmed 2026-11-04. My reason: keyboard focus must always be clearly visible, and it only appears while tabbing, so it never competes with Approve.
 
