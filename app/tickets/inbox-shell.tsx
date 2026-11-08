@@ -25,15 +25,60 @@ export function InboxShell({ children }: { children: ReactNode }) {
 
 function Shell({ id, children }: { id: string; children: ReactNode }) {
   const router = useRouter();
-  const [queueOpen, setQueueOpen] = useState(false);
+  // A ticket picked in the queue panel that hasn't opened yet (see open below).
+  const pending = useRef<{ id: string; timer: number; late: boolean } | null>(null);
+  // Whether the queue is open, and whether its next close should first put
+  // the page at the top (after a pick).
+  const [queue, setQueue] = useState({ open: false, toTop: false });
+  const queueOpen = queue.open;
+  const setQueueOpen = (open: boolean) => {
+    // Closed before a picked ticket opened: it opens at the top, like any navigation.
+    if (!open && pending.current) pending.current.late = true;
+    setQueue({ open, toTop: false });
+  };
   // Below 1200px: the queue's header button (HeaderPanel's button).
   const queueId = useId();
   const queueButton = useRef<HTMLButtonElement>(null);
 
+  // Picking a ticket in the queue panel, in this order, so the page never
+  // visibly jumps: navigate without the router's scroll, keeping the panel
+  // and scrim open; once the new ticket has rendered (the route change has
+  // committed, then one frame), close the panel with toTop, which puts the
+  // page at the top instantly while the panel still covers it and only
+  // then runs the close. From 1200px the queue is a pane and nothing
+  // covers the page, so the router scrolls as usual.
   const open = (ticketId: string) => {
-    setQueueOpen(false);
-    router.push(`/tickets/${ticketId}`);
+    if (!queueOpen) {
+      router.push(`/tickets/${ticketId}`);
+      return;
+    }
+    if (ticketId === id) {
+      setQueueOpen(false);
+      return;
+    }
+    if (pending.current) clearTimeout(pending.current.timer);
+    // If the ticket is slow to open, don't hold the panel open: close it in
+    // place after 3 seconds; when the ticket does open, it goes to the top
+    // like any navigation.
+    const timer = window.setTimeout(() => {
+      if (pending.current) pending.current.late = true;
+      setQueueOpen(false);
+    }, 3000);
+    pending.current = { id: ticketId, timer, late: false };
+    router.push(`/tickets/${ticketId}`, { scroll: false });
   };
+  useEffect(() => {
+    const pick = pending.current;
+    if (pick?.id !== id) return;
+    clearTimeout(pick.timer);
+    pending.current = null;
+    if (pick.late) {
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+      return;
+    }
+    const frame = requestAnimationFrame(() => setQueue({ open: false, toTop: true }));
+    return () => cancelAnimationFrame(frame);
+  }, [id]);
 
   // From 1200px the queue is a pane and the header button is hidden, so a
   // panel left open by resizing past 1200px closes.
@@ -119,6 +164,7 @@ function Shell({ id, children }: { id: string; children: ReactNode }) {
           id={queueId}
           button={queueButton}
           onOpened={centerCurrent}
+          scrollTopOnClose={queue.toTop}
         >
           <QueueList currentId={id} onOpen={open} />
         </HeaderPanel>

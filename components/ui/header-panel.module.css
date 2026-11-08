@@ -105,6 +105,8 @@
   border: 0;
   background: var(--scrim);
   opacity: 0;
+  /* Part of the scroll lock: a drag on the scrim never pans the page. */
+  touch-action: none;
 }
 
 /* Fades in with the panel's entrance. Its fade out is part of the close,
@@ -189,6 +191,9 @@
 }
 
 .header {
+  /* Not scrollable, so a drag here never chains to the page (the list
+     below scrolls on its own, overscroll contained). */
+  touch-action: none;
   /* The title starts at 16px, where the list's rows start their text (4px
      inset + 12px row padding). */
   padding: 16px 16px 10px;

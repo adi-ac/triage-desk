@@ -18,6 +18,13 @@ export type HeaderPanelProps = {
   children: ReactNode;
   /** Called after the panel opens, with its scrolling element, e.g. to bring the current item into view. */
   onOpened?: (scroller: HTMLDivElement) => void;
+  /**
+   * Read when a close starts: put the page at the top first, instantly,
+   * while the panel and scrim still cover it, then run the close. The inbox
+   * sets it when a picked ticket has opened. Any other close leaves the
+   * page exactly where it was.
+   */
+  scrollTopOnClose?: boolean;
 };
 
 /**
@@ -37,7 +44,16 @@ export type HeaderPanelProps = {
  * and back to the button on close, Escape and a scrim tap close it, and
  * everything except the button and the panel is inert.
  */
-export function HeaderPanel({ open, onOpenChange, title, id, button, children, onOpened }: HeaderPanelProps) {
+export function HeaderPanel({
+  open,
+  onOpenChange,
+  title,
+  id,
+  button,
+  children,
+  onOpened,
+  scrollTopOnClose = false,
+}: HeaderPanelProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const scrimRef = useRef<HTMLDivElement>(null);
   const panelRef = useRef<HTMLDivElement>(null);
@@ -59,12 +75,25 @@ export function HeaderPanel({ open, onOpenChange, title, id, button, children, o
     };
   }, []);
 
-  const opened = useRef(false);
   // The close animation while it runs (or runs back, after a reopen).
   const exit = useRef<Exit | null>(null);
-  const callbacks = useRef({ onOpenChange, onOpened });
-  useEffect(() => {
-    callbacks.current = { onOpenChange, onOpened };
+  // Where the last press on the scrim started, so a drag doesn't close it.
+  const scrimPress = useRef<{ x: number; y: number } | null>(null);
+  // The page lock (inert, no scrolling) from open until the close finishes.
+  const lock = useRef<PageLock | null>(null);
+  // Never leave the page locked if this unmounts while open or closing.
+  useEffect(
+    () => () => {
+      lock.current?.release();
+      lock.current = null;
+    },
+    [],
+  );
+  // A layout effect declared before the main one, so the main effect reads
+  // this render's values.
+  const latest = useRef({ onOpenChange, onOpened, scrollTopOnClose });
+  useLayoutEffect(() => {
+    latest.current = { onOpenChange, onOpened, scrollTopOnClose };
   });
 
   useLayoutEffect(() => {
@@ -77,8 +106,9 @@ export function HeaderPanel({ open, onOpenChange, title, id, button, children, o
     const slot = trigger?.parentElement;
     if (!root || !scrim || !panel || !trigger || !slot) return;
 
-    // The button leaves the top layer, and the panel and scrim close,
-    // once the close animation has finished, never before.
+    // Once the close animation has finished, never before: the panel and
+    // scrim close, the button leaves the top layer, and the page is let go
+    // (no longer inert, scrollable again, at the position it's meant to be).
     const finishClose = () => {
       if (panel.matches(":popover-open")) panel.hidePopover();
       if (scrim.matches(":popover-open")) scrim.hidePopover();
@@ -90,10 +120,18 @@ export function HeaderPanel({ open, onOpenChange, title, id, button, children, o
       if (trigger.matches(":popover-open")) trigger.hidePopover();
       trigger.style.removeProperty("--button-top");
       trigger.style.removeProperty("--button-left");
+      lock.current?.release();
+      lock.current = null;
     };
 
     if (!open) {
       if (!panel.matches(":popover-open")) return;
+      // A picked ticket has opened: put the page at the top now, instantly,
+      // while the panel and scrim still cover it, and let at least one frame
+      // paint there, fully covered, before the close starts (Safari can
+      // otherwise paint the jump and the close's first frame together).
+      const toTop = latest.current.scrollTopOnClose && !exit.current;
+      if (toTop) lock.current?.scrollToTop();
       // Back to the button, unless it already has focus (it was the close).
       // The browser shows the ring only after keyboard use (Escape, Enter
       // on a ticket), not after a tap or click.
@@ -108,23 +146,31 @@ export function HeaderPanel({ open, onOpenChange, title, id, button, children, o
       // so hidePopover() would drop them from the top layer at once and
       // the exit would never be seen.
       panel.inert = true;
-      const run = {};
-      if (exit.current) {
-        // Reopened and closed again while it was running back: run it
-        // forward again from where it is.
-        exit.current.animations.forEach((a) => a.reverse());
-      } else {
-        exit.current = { animations: closeAnimations(panel, scrim), run };
+      let frame = 0;
+      const startClose = () => {
+        const run = {};
+        if (exit.current) {
+          // Reopened and closed again while it was running back: run it
+          // forward again from where it is.
+          exit.current.animations.forEach((a) => a.reverse());
+        } else {
+          exit.current = { animations: closeAnimations(panel, scrim), run };
+        }
+        exit.current.run = run;
+        const current = exit.current;
+        Promise.allSettled(current.animations.map((a) => a.finished)).then(() => {
+          if (exit.current === current && current.run === run) finishClose();
+        });
+      };
+      if (!toTop) {
+        startClose();
+        return;
       }
-      exit.current.run = run;
-      const current = exit.current;
-      Promise.allSettled(current.animations.map((a) => a.finished)).then(() => {
-        if (exit.current === current && current.run === run) finishClose();
-      });
-      return;
+      frame = requestAnimationFrame(() => (frame = requestAnimationFrame(startClose)));
+      // Reopened before it started: it never starts.
+      return () => cancelAnimationFrame(frame);
     }
 
-    opened.current = true;
     // Reopened during the close: run the close back to open, then drop it.
     const reopening = exit.current;
     if (reopening) {
@@ -160,25 +206,21 @@ export function HeaderPanel({ open, onOpenChange, title, id, button, children, o
     // so it's on top. Its display is set in CSS, so it never flickers.
     if (trigger.matches(":popover-open")) trigger.hidePopover();
     trigger.showPopover();
-    if (!reopening && scrollerRef.current) callbacks.current.onOpened?.(scrollerRef.current);
+    if (!reopening && scrollerRef.current) latest.current.onOpened?.(scrollerRef.current);
     // Into the panel itself, not its first control, so a tap shows no ring.
     moveFocus(panel, pointerInput.current);
 
-    const restoreInert = inertOthers([root, trigger]);
-    const html = document.documentElement;
-    const overflow = html.style.overflow;
-    html.style.overflow = "hidden";
+    // Still held from before if this reopens during a close.
+    lock.current ??= lockPage([root, trigger], scrollerRef.current ?? panel);
     const onKeyDown = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
         e.preventDefault();
-        callbacks.current.onOpenChange(false);
+        latest.current.onOpenChange(false);
       }
     };
     document.addEventListener("keydown", onKeyDown);
     addEventListener("resize", place);
     return () => {
-      restoreInert();
-      html.style.overflow = overflow;
       document.removeEventListener("keydown", onKeyDown);
       removeEventListener("resize", place);
     };
@@ -194,7 +236,14 @@ export function HeaderPanel({ open, onOpenChange, title, id, button, children, o
         // land on the page), including taps during the close, which are
         // ignored.
         onMouseDown={(e) => e.preventDefault()}
-        onClick={() => onOpenChange(false)}
+        onPointerDown={(e) => (scrimPress.current = { x: e.clientX, y: e.clientY })}
+        // Only a tap closes it. The scrim can't pan (it's part of the scroll
+        // lock), so on iOS a drag across it would otherwise end in a click.
+        onClick={(e) => {
+          const press = scrimPress.current;
+          if (press && Math.hypot(e.clientX - press.x, e.clientY - press.y) > 10) return;
+          onOpenChange(false);
+        }}
       />
       <div
         ref={panelRef}
@@ -309,6 +358,55 @@ function moveFocus(el: HTMLElement, afterPointer: boolean) {
   // ignore it and fall back to their own guess.
   const options = { preventScroll: true, focusVisible: !afterPointer };
   el.focus(options);
+}
+
+type PageLock = { release: () => void; scrollToTop: () => void };
+
+/**
+ * Locks the page while the panel is open: everything outside `keep` is
+ * inert, and the page can't scroll or rubber-band, in iOS Safari too. The
+ * root gets overflow: hidden and no overscroll; on iOS that alone doesn't
+ * stop a touch drag, so a drag that doesn't start in a scrollable part of
+ * `scrollable` (the panel's list) is cancelled (touchmove, not passive),
+ * and the scrim and the panel's header refuse to pan (touch-action, in the
+ * CSS). Not overflow: hidden on <body>: that makes body a scroll container
+ * and the sticky header would stop sticking and jump. The scroll position
+ * is kept, and set back exactly on release, unless scrollToTop moved it.
+ */
+function lockPage(keep: Element[], scrollable: Element): PageLock {
+  const html = document.documentElement;
+  let target = window.scrollY;
+  const before = [html.style.overflow, html.style.overscrollBehavior];
+  const apply = () => {
+    html.style.overflow = "hidden";
+    html.style.overscrollBehavior = "none";
+  };
+  const lift = () => {
+    [html.style.overflow, html.style.overscrollBehavior] = before;
+  };
+  const onTouchMove = (e: TouchEvent) => {
+    const inList = e.target instanceof Node && scrollable.contains(e.target);
+    if (!inList || scrollable.scrollHeight <= scrollable.clientHeight) e.preventDefault();
+  };
+  apply();
+  document.addEventListener("touchmove", onTouchMove, { passive: false });
+  const restoreInert = inertOthers(keep);
+  return {
+    scrollToTop() {
+      // Lifted for the moment it takes, in case the lock would block it.
+      // "instant" overrides any CSS scroll-behavior.
+      lift();
+      window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+      apply();
+      target = 0;
+    },
+    release() {
+      lift();
+      document.removeEventListener("touchmove", onTouchMove);
+      restoreInert();
+      if (Math.abs(window.scrollY - target) >= 1) window.scrollTo({ top: target, left: 0, behavior: "instant" });
+    },
+  };
 }
 
 /**
