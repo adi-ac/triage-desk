@@ -68,19 +68,35 @@
 }
 
 @media (max-width: 1199px) {
-  /* The header is sticky, so the queue button is always in reach. It
-     sticks exactly where it rests at the top of the page (the shell's
-     padding), so it never moves: not when it sticks, and not when a
-     picked ticket opens at the top. */
+  /* The header stays in reach: it's position: fixed, exactly where it
+     rests at the top of the page, so it never moves, scrolled or not.
+     Fixed, not sticky: after a scripted scroll (a picked ticket opening at
+     the top behind the queue panel) iOS Safari updates a sticky element's
+     position a few frames late, so the header was drawn at its old place
+     on the page, hidden behind the panel, and its contents vanished for
+     2-3 frames. A fixed element doesn't depend on the scroll position.
+
+     .header is the grid row's placeholder: it keeps the header's 32px (the
+     AppHeader's height) so the panes start where they always did.
+     .headerBar is the header itself, fixed at the shell's padding from the
+     top, with the header row's left edge and width at every width: the
+     shell's columns (488px + 16px + 360px from 768px, centered), or the
+     viewport less the padding, whichever is narrower. */
   .header {
-    position: sticky;
+    block-size: 32px;
+  }
+
+  .headerBar {
+    position: fixed;
     inset-block-start: var(--shell-pad);
+    inset-inline: 0;
     z-index: 5;
+    inline-size: min(var(--email-column) + 16px + 360px, 100% - 2 * var(--shell-pad));
+    margin-inline: auto;
   }
 
   /* The bar below is 100vw wide, which includes a classic scrollbar;
-     clipping (not a scroll container, so the header still sticks) keeps
-     it from ever scrolling the page sideways. */
+     clipping keeps it from ever scrolling the page sideways. */
   .shell {
     overflow-x: clip;
   }
@@ -99,8 +115,8 @@
      bar. It's drawn like the panes' outline, as a box-shadow (--pane-ring,
      var(--hairline)), because browsers round a 0.5px border up to 1px but
      not a 0.5px shadow. */
-  .header::before,
-  .header::after {
+  .headerBar::before,
+  .headerBar::after {
     content: "";
     position: absolute;
     inset-block: calc(-1 * var(--shell-pad)) -12px;
@@ -109,7 +125,7 @@
     pointer-events: none;
   }
 
-  .header::before {
+  .headerBar::before {
     background: color-mix(in oklch, var(--page) 72%, transparent);
     -webkit-backdrop-filter: blur(10px) saturate(1.4);
     backdrop-filter: blur(10px) saturate(1.4);
@@ -117,29 +133,29 @@
     transition: opacity var(--duration-header-edge) var(--ease-header-edge);
   }
 
-  .header[data-stuck]::before {
+  .headerBar[data-stuck]::before {
     opacity: 1;
   }
 
-  .header::after {
+  .headerBar::after {
     box-shadow: 0 var(--hairline) 0 0 transparent;
     transition: box-shadow var(--duration-header-edge) var(--ease-header-edge);
   }
 
-  .header[data-stuck]::after {
+  .headerBar[data-stuck]::after {
     box-shadow: 0 var(--hairline) 0 0 var(--pane-ring);
   }
 
   /* While the queue panel is open (it opens 8px below the header, over
      this line), the border fades out, and back on close. The bar stays. */
-  .header[data-stuck][data-queue-open]::after {
+  .headerBar[data-stuck][data-queue-open]::after {
     box-shadow: 0 var(--hairline) 0 0 transparent;
   }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .header::before,
-  .header::after {
+  .headerBar::before,
+  .headerBar::after {
     transition: none;
   }
 }

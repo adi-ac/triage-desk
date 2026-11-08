@@ -32,21 +32,26 @@ function Shell({ id, children }: { id: string; children: ReactNode }) {
   const [queue, setQueue] = useState({ open: false, toTop: false });
   const queueOpen = queue.open;
   const setQueueOpen = (open: boolean) => {
-    // Closed before a picked ticket opened: it opens at the top, like any navigation.
-    if (!open && pending.current) pending.current.late = true;
-    setQueue({ open, toTop: false });
+    // Closed before a picked ticket opened: the page is already at the top
+    // (see open below), so it stays there, and the ticket opens there.
+    const picking = !open && pending.current !== null;
+    if (picking) pending.current!.late = true;
+    setQueue({ open, toTop: picking });
   };
   // Below 1200px: the queue's header button (HeaderPanel's button).
   const queueId = useId();
   const queueButton = useRef<HTMLButtonElement>(null);
 
   // Picking a ticket in the queue panel, in this order, so the page never
-  // visibly jumps: navigate without the router's scroll, keeping the panel
-  // and scrim open; once the new ticket has rendered (the route change has
-  // committed, then one frame), close the panel with toTop, which puts the
-  // page at the top instantly while the panel still covers it and only
-  // then runs the close. From 1200px the queue is a pane and nothing
-  // covers the page, so the router scrolls as usual.
+  // visibly jumps and the header never blinks: put the page at the top
+  // instantly while the panel and scrim still cover it; a frame later,
+  // navigate without the router's scroll; once the new ticket has rendered
+  // (the route change has committed, then one frame), close the panel
+  // (toTop keeps the page at the top when the lock is released). The scroll
+  // and the new ticket's render land in separate frames: in iOS Safari,
+  // the two in back-to-back frames left the header's logo and wordmark
+  // (and the panel's list) unpainted for a frame. From 1200px the queue is
+  // a pane and nothing covers the page, so the router scrolls as usual.
   const open = (ticketId: string) => {
     if (!queueOpen) {
       router.push(`/tickets/${ticketId}`);
@@ -57,15 +62,13 @@ function Shell({ id, children }: { id: string; children: ReactNode }) {
       return;
     }
     if (pending.current) clearTimeout(pending.current.timer);
-    // If the ticket is slow to open, don't hold the panel open: close it in
-    // place after 3 seconds; when the ticket does open, it goes to the top
-    // like any navigation.
-    const timer = window.setTimeout(() => {
-      if (pending.current) pending.current.late = true;
-      setQueueOpen(false);
-    }, 3000);
+    // If the ticket is slow to open, don't hold the panel open: close it
+    // after 3 seconds (the page is already at the top); the ticket opens
+    // there when it arrives.
+    const timer = window.setTimeout(() => setQueueOpen(false), 3000);
     pending.current = { id: ticketId, timer, late: false };
-    router.push(`/tickets/${ticketId}`, { scroll: false });
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    requestAnimationFrame(() => router.push(`/tickets/${ticketId}`, { scroll: false }));
   };
   useEffect(() => {
     const pick = pending.current;
@@ -91,7 +94,7 @@ function Shell({ id, children }: { id: string; children: ReactNode }) {
     return () => desktop.removeEventListener("change", onChange);
   }, []);
 
-  // Below 1200px: whether the panes have passed under the sticky header's
+  // Below 1200px: whether the panes have passed under the fixed header's
   // bar (the header's bottom + 12px), which shows the bar. Read at most
   // once a frame.
   const headerRef = useRef<HTMLDivElement>(null);
@@ -105,8 +108,8 @@ function Shell({ id, children }: { id: string; children: ReactNode }) {
       // The first pane (the ticket wrapper is display: contents).
       const pane = [...(ticketRef.current?.children ?? [])].find((el) => el.getClientRects().length > 0);
       if (!header || !pane) return;
-      const sticky = getComputedStyle(header).position === "sticky";
-      setStuck(sticky && pane.getBoundingClientRect().top < header.getBoundingClientRect().bottom + 12);
+      const fixed = getComputedStyle(header).position === "fixed";
+      setStuck(fixed && pane.getBoundingClientRect().top < header.getBoundingClientRect().bottom + 12);
     };
     const onChange = () => {
       if (!frame) frame = requestAnimationFrame(check);
@@ -123,26 +126,29 @@ function Shell({ id, children }: { id: string; children: ReactNode }) {
 
   return (
     <main className={styles.shell}>
-      <div
-        ref={headerRef}
-        className={styles.header}
-        data-stuck={stuck ? "" : undefined}
-        data-queue-open={queueOpen ? "" : undefined}
-      >
-        <AppHeader
-          actions={
-            <span className={styles.navSlot}>
-              <HeaderPanelButton
-                ref={queueButton}
-                open={queueOpen}
-                onOpenChange={setQueueOpen}
-                title="Queue"
-                icon="inbox"
-                controls={queueId}
-              />
-            </span>
-          }
-        />
+      {/* The grid row's placeholder; below 1200px the header bar inside is fixed. */}
+      <div className={styles.header}>
+        <div
+          ref={headerRef}
+          className={styles.headerBar}
+          data-stuck={stuck ? "" : undefined}
+          data-queue-open={queueOpen ? "" : undefined}
+        >
+          <AppHeader
+            actions={
+              <span className={styles.navSlot}>
+                <HeaderPanelButton
+                  ref={queueButton}
+                  open={queueOpen}
+                  onOpenChange={setQueueOpen}
+                  title="Queue"
+                  icon="inbox"
+                  controls={queueId}
+                />
+              </span>
+            }
+          />
+        </div>
       </div>
       <h1 className="visually-hidden">Inbox</h1>
 
