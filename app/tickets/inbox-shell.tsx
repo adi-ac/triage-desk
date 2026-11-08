@@ -43,7 +43,8 @@ function Shell({ id, children }: { id: string; children: ReactNode }) {
   const queueButton = useRef<HTMLButtonElement>(null);
 
   // New ticket: a dialog from 1200px; below, the queue panel's second view.
-  // The form is cleared (remounted with a new key) when either closes.
+  // The form is cleared (remounted with a new key) when either closes; in
+  // the panel, Back clears it too (HeaderPanel remounts its subview).
   const [newTicketOpen, setNewTicketOpen] = useState(false);
   const [queueView, setQueueView] = useState<"queue" | "new-ticket">("queue");
   const [formKey, setFormKey] = useState(0);

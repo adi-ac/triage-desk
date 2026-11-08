@@ -1,6 +1,16 @@
 "use client";
 
-import { useEffect, useId, useLayoutEffect, useRef, type ReactNode, type Ref, type RefObject } from "react";
+import {
+  Fragment,
+  useEffect,
+  useId,
+  useLayoutEffect,
+  useRef,
+  useState,
+  type ReactNode,
+  type Ref,
+  type RefObject,
+} from "react";
 import { initialFocus, moveFocus, ms, reducedMotion, token, useLastInputWasPointer } from "./focus";
 import { Icon, type IconName } from "./icon";
 import { IconButton } from "./icon-button";
@@ -25,7 +35,12 @@ export type HeaderPanelSubview = {
    * viewport, while this view shows. Phones keep the panel's size.
    */
   narrowTo?: number;
-  /** Its content, filling the view: it handles its own scrolling. */
+  /**
+   * Its content, filling the view: it handles its own scrolling. Going back
+   * resets it: HeaderPanel remounts it (a form comes back empty, scrolled
+   * to the top) once the view has finished sliding out, or at once if it's
+   * opened again before then.
+   */
   children: ReactNode;
 };
 
@@ -105,6 +120,18 @@ export function HeaderPanel({
   // Whether the last input was a pointer (tap or click) or a key, so focus
   // moves without a ring after a tap even if the keyboard was used before.
   const pointerInput = useLastInputWasPointer();
+  // The subview's content is remounted (a new key) to reset it after Back.
+  // pending: Back was taken and the reset waits for the slide out to end.
+  // If the subview opens again first, its key changes here, during the
+  // render that opens it, so the old content never paints again.
+  const [sub, setSub] = useState({ key: 0, pending: false, open: subOpen });
+  if (sub.open !== subOpen) {
+    setSub({
+      key: subOpen && sub.pending ? sub.key + 1 : sub.key,
+      pending: subOpen ? false : sub.pending,
+      open: subOpen,
+    });
+  }
   // Places the panel (set while it's open): under the header, or narrowed
   // for the subview on tablets.
   const placeRef = useRef<((instant: boolean) => void) | null>(null);
@@ -125,9 +152,17 @@ export function HeaderPanel({
   );
   // A layout effect declared before the main one, so the main effect reads
   // this render's values.
-  const latest = useRef({ onOpenChange, onOpened, scrollTopOnClose, subview, onClosed });
+  const latest = useRef({ onOpenChange, onOpened, scrollTopOnClose, subview, onClosed, goBack: () => {} });
+  // Back (the back button and Escape): the screen shows the main view, and
+  // the subview's content is reset once it has slid out (onTransitionEnd
+  // below), so the fields don't visibly empty while it leaves; at once
+  // under reduced motion.
+  const goBack = () => {
+    setSub((s) => (reducedMotion() ? { ...s, key: s.key + 1, pending: false } : { ...s, pending: true }));
+    subview?.onBack();
+  };
   useLayoutEffect(() => {
-    latest.current = { onOpenChange, onOpened, scrollTopOnClose, subview, onClosed };
+    latest.current = { onOpenChange, onOpened, scrollTopOnClose, subview, onClosed, goBack };
   });
 
   useLayoutEffect(() => {
@@ -313,7 +348,7 @@ export function HeaderPanel({
       if (e.key !== "Escape") return;
       e.preventDefault();
       const sub = latest.current.subview;
-      if (sub?.open) sub.onBack();
+      if (sub?.open) latest.current.goBack();
       else latest.current.onOpenChange(false);
     };
     document.addEventListener("keydown", onKeyDown);
@@ -401,14 +436,21 @@ export function HeaderPanel({
               data-view="sub"
               data-active={subOpen ? "" : undefined}
               inert={!subOpen}
+              // Its fade out after Back has finished: reset its content now.
+              onTransitionEnd={(e) => {
+                if (e.target !== e.currentTarget || e.propertyName !== "opacity") return;
+                if (!subOpen && sub.pending) setSub((s) => ({ ...s, key: s.key + 1, pending: false }));
+              }}
             >
               <div className={`${styles.header} ${styles.subHeader}`}>
-                <IconButton icon="chevron-left" size="small" aria-label={subview.backLabel} onClick={subview.onBack} />
+                <IconButton icon="chevron-left" size="small" aria-label={subview.backLabel} onClick={goBack} />
                 <h2 ref={subHeadingRef} tabIndex={-1} className={`text-heading ${styles.title}`}>
                   {subview.title}
                 </h2>
               </div>
-              <div className={styles.subContent}>{subview.children}</div>
+              <div className={styles.subContent}>
+                <Fragment key={sub.key}>{subview.children}</Fragment>
+              </div>
             </div>
           )}
         </div>
@@ -465,7 +507,6 @@ export function HeaderPanelButton({ ref, open, onOpenChange, title, icon, contro
 /** The running close: its animations, and which run (close or reopen) owns them now. */
 type Exit = { animations: Animation[]; run: object };
 
-
 /**
  * The close, with the Web Animations API (DESIGN.md, Motion): the panel
  * clips back to its top-right corner (the reverse of the opening clip)
@@ -493,7 +534,6 @@ function closeAnimations(panel: HTMLElement, scrim: HTMLElement) {
     scrim.animate([{ opacity: 0 }], options("--duration-scrim-out", "--ease-panel-out")),
   ];
 }
-
 
 type PageLock = { release: () => void; scrollToTop: () => void; restore: () => void };
 
