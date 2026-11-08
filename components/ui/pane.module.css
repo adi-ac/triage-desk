@@ -21,7 +21,13 @@
   align-items: baseline;
   justify-content: space-between;
   gap: 12px;
-  padding: 8px 16px 10px;
+  /* About even above and below (18px in all, the same height as before),
+     so the title sits on the header's centre, where its action is centred.
+     Half a pixel more on top: the title and the smaller count share a
+     baseline, and the count's line hangs about 1px below the title's, so
+     with equal padding the title's letters sat 0.5px above the action's
+     centre. */
+  padding: 9.5px 16px 8.5px;
 }
 
 /* The title and its count, on one baseline. */
