@@ -39,6 +39,11 @@
   --surface: var(--gray-0);
   --surface-raised: var(--gray-0);
   --surface-2: var(--gray-25);
+  /* A hoverable row's hover fill (QueueItem). Light: surface-2. Dark: ink
+     at 4%, translucent, because there surface-2 (gray-950) is the same as
+     surface-raised, so on the queue panel the hover was invisible; a
+     translucent fill shows on any surface. */
+  --hover-fill: var(--surface-2);
   --line: var(--gray-100);
   --line-strong: var(--gray-500);
   /* A text field's placeholder. Below 4.5:1 on purpose (DESIGN.md, Text
@@ -78,6 +83,7 @@
     --surface: var(--gray-975);
     --surface-raised: var(--gray-950);
     --surface-2: var(--gray-950);
+    --hover-fill: color-mix(in oklch, var(--ink) 4%, transparent);
     --line: var(--gray-900);
     --line-strong: var(--gray-500);
     --placeholder: var(--gray-500);
@@ -116,6 +122,7 @@
   --surface: var(--gray-975);
   --surface-raised: var(--gray-950);
   --surface-2: var(--gray-950);
+  --hover-fill: color-mix(in oklch, var(--ink) 4%, transparent);
   --line: var(--gray-900);
   --line-strong: var(--gray-500);
   --placeholder: var(--gray-500);

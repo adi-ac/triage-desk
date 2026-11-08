@@ -90,6 +90,8 @@ Is it a soft status fill?                    → --warning-soft, --critical-soft
                                                 (--accent-soft only under rule 4)
 ```
 
+**Hover fill:** a hoverable row's hover (QueueItem) uses `--hover-fill`, never `--surface-2`. Light: `--surface-2`, as before. Dark: `color-mix(in oklch, var(--ink) 4%, transparent)`, translucent, because in dark `--surface-2` (gray-950) is the same colour as `--surface-raised`, so on the queue panel a `--surface-2` hover was invisible (it only showed on the desktop pane card, gray-975). A translucent fill shows on any surface. Buttons keep `--button-bg-hover`, and menu items already use it (12% ink in dark), which shows on popovers. Only on devices that can hover.
+
 **Text**
 
 ```
