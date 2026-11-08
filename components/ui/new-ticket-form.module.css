@@ -9,10 +9,34 @@
   min-block-size: 0;
 }
 
-/* The panel's New ticket view: the form fills the view, the fields scroll
-   and the footer stays at the bottom. */
+/* The panel's New ticket view: the form fills the view and is its scroll
+   container. The fields and the footer scroll together, in a column at
+   least the form's height, so with nothing to scroll Message fills the
+   space and the footer sits at the panel's bottom. With the iOS keyboard
+   open, a spacer after the column (as tall as the part of the panel the
+   keyboard covers, --panel-keyboard, set by HeaderPanel) adds scroll room,
+   so the footer can be scrolled fully above the keyboard while the fields
+   keep their size; scroll-padding keeps a focused field above it too. */
 .form[data-variant="panel"] {
   flex: 1;
+  min-block-size: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  scroll-padding-block-end: var(--panel-keyboard, 0px);
+}
+
+.column {
+  display: flex;
+  flex-direction: column;
+}
+
+.form[data-variant="panel"] .column {
+  min-block-size: 100%;
+}
+
+.keyboardSpace {
+  flex: none;
+  block-size: var(--panel-keyboard, 0px);
 }
 
 .fields {
@@ -24,9 +48,6 @@
 
 .form[data-variant="panel"] .fields {
   flex: 1;
-  min-block-size: 0;
-  overflow-y: auto;
-  overscroll-behavior: contain;
   padding: 16px;
 }
 
@@ -53,7 +74,6 @@
    less than about five lines (then the fields scroll). */
 .form[data-variant="panel"] .field[data-grow] {
   flex: 1;
-  min-block-size: 0;
 }
 
 .label {
@@ -72,8 +92,8 @@
  * placeholder is light: both are below WCAG's 3:1 and 4.5:1 on purpose
  * (DESIGN.md, Text fields), since the labels carry the meaning and focus
  * is strong: the focus color for the border and a 3px ring of it at 22%.
- * 14px text, 16px on touch devices (--text-input-size), so iOS Safari
- * doesn't zoom in on focus.
+ * 14px text at every width (--text-input-size); on iOS the viewport meta
+ * tag stops Safari zooming in on focus (lib/viewport.ts).
  */
 .input {
   display: block;

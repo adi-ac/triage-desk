@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { themeScript } from "@/lib/theme";
 import { timeScript } from "@/lib/time-format";
+import { viewportScript } from "@/lib/viewport";
 import { Geist, Geist_Mono, Schibsted_Grotesk } from "next/font/google";
 import "@/styles/tokens.css";
 import "@/styles/theme.css";
@@ -29,6 +30,8 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
         {/* Lets each Time write local time before the first paint (lib/time-format.ts). */}
         <script dangerouslySetInnerHTML={{ __html: timeScript }} />
+        {/* iOS and iPadOS only: no zoom when a 14px field is tapped (lib/viewport.ts). */}
+        <script dangerouslySetInnerHTML={{ __html: viewportScript }} />
       </head>
       <body>{children}</body>
     </html>

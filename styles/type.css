@@ -79,17 +79,11 @@
   --text-mono-small-size: 12px;
   --text-mono-small-leading: 1.4;
 
-  /* Text inputs: body size, and 16px on touch devices (phones and tablets
-     alike), or iOS Safari zooms the page when one is focused. The draft
-     reply doesn't use it: it matches the email at 14px and accepts the
-     zoom (DESIGN.md). */
+  /* Text inputs (NewTicketForm's fields): body size, 14px at every width,
+     touch devices included. iOS Safari would zoom the page when a field
+     under 16px is tapped; lib/viewport.ts stops that on iOS and iPadOS
+     only (DESIGN.md, Tokens, Text fields). */
   --text-input-size: var(--text-body-size);
-}
-
-@media (pointer: coarse) {
-  :root {
-    --text-input-size: 16px;
-  }
 }
 
 /* Desktop (1200px and up): the email body is 15px with 1.65 leading and a

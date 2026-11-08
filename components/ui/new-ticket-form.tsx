@@ -8,8 +8,9 @@ export type NewTicketFormProps = {
   /**
    * Where it sits. dialog: the desktop Dialog, 20px side padding, the
    * fields at their own height. panel: HeaderPanel's New ticket view, 16px
-   * padding, filling the panel: the fields scroll, Message grows to fill
-   * the height, and the footer is pinned to the bottom.
+   * padding, filling the panel: Message grows to fill the height, the
+   * footer sits at the bottom, and the fields and footer scroll together
+   * (with extra room while the iOS keyboard is open).
    */
   variant: "dialog" | "panel";
 };
@@ -65,61 +66,65 @@ export function NewTicketForm({ variant }: NewTicketFormProps) {
         // per-visitor limit and the daily spend cap first (docs/brief.md).
       }}
     >
-      <div className={styles.fields}>
-        <div className={styles.pair}>
-          <Field id={`${id}-name`} label="Customer name" required>
+      <div className={styles.column}>
+        <div className={styles.fields}>
+          <div className={styles.pair}>
+            <Field id={`${id}-name`} label="Customer name" required>
+              <input
+                {...bind("name")}
+                className={styles.input}
+                type="text"
+                required
+                autoComplete="name"
+                placeholder="e.g. Dana Okafor"
+                data-autofocus
+              />
+            </Field>
+            <Field id={`${id}-company`} label="Company">
+              <input
+                {...bind("company")}
+                className={styles.input}
+                type="text"
+                autoComplete="organization"
+                placeholder="e.g. Tidewater Co-op"
+              />
+            </Field>
+          </div>
+          <Field id={`${id}-subject`} label="Subject">
             <input
-              {...bind("name")}
+              {...bind("subject")}
               className={styles.input}
               type="text"
-              required
-              autoComplete="name"
-              placeholder="e.g. Dana Okafor"
-              data-autofocus
+              autoComplete="off"
+              spellCheck={false}
+              placeholder="e.g. Can't log in after our SSO switch"
             />
           </Field>
-          <Field id={`${id}-company`} label="Company">
-            <input
-              {...bind("company")}
-              className={styles.input}
-              type="text"
-              autoComplete="organization"
-              placeholder="e.g. Tidewater Co-op"
+          <Field id={`${id}-message`} label="Message" required grow>
+            <textarea
+              {...bind("message")}
+              className={`${styles.input} ${styles.message}`}
+              required
+              rows={variant === "dialog" ? 7 : 5}
+              placeholder="Paste the email here"
+              onKeyDown={(e) => {
+                // Cmd+Enter (Ctrl+Enter off the Mac) submits from the message.
+                if (e.key !== "Enter" || !(e.metaKey || e.ctrlKey)) return;
+                e.preventDefault();
+                if (ready) e.currentTarget.form?.requestSubmit();
+              }}
             />
           </Field>
         </div>
-        <Field id={`${id}-subject`} label="Subject">
-          <input
-            {...bind("subject")}
-            className={styles.input}
-            type="text"
-            autoComplete="off"
-            spellCheck={false}
-            placeholder="e.g. Can't log in after our SSO switch"
-          />
-        </Field>
-        <Field id={`${id}-message`} label="Message" required grow>
-          <textarea
-            {...bind("message")}
-            className={`${styles.input} ${styles.message}`}
-            required
-            rows={variant === "dialog" ? 7 : 5}
-            placeholder="Paste the email here"
-            onKeyDown={(e) => {
-              // Cmd+Enter (Ctrl+Enter off the Mac) submits from the message.
-              if (e.key !== "Enter" || !(e.metaKey || e.ctrlKey)) return;
-              e.preventDefault();
-              if (ready) e.currentTarget.form?.requestSubmit();
-            }}
-          />
-        </Field>
+        <div className={styles.footer}>
+          <Button onClick={() => setValues(sample)}>Use a sample email</Button>
+          <Button type="submit" variant="primary" disabled={!ready}>
+            Add and triage
+          </Button>
+        </div>
       </div>
-      <div className={styles.footer}>
-        <Button onClick={() => setValues(sample)}>Use a sample email</Button>
-        <Button type="submit" variant="primary" disabled={!ready}>
-          Add and triage
-        </Button>
-      </div>
+      {/* Scroll room under the footer while the iOS keyboard covers the panel (panel only). */}
+      {variant === "panel" && <div className={styles.keyboardSpace} aria-hidden />}
     </form>
   );
 }

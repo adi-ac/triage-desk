@@ -146,10 +146,10 @@
  */
 .panel {
   position: fixed;
-  /* The bottom: 16px above the safe area, or above the on-screen keyboard
-     on iOS (--panel-keyboard, set by the component). */
-  inset: var(--panel-top, 56px) auto
-    calc(16px + max(env(safe-area-inset-bottom, 0px), var(--panel-keyboard, 0px))) var(--panel-left, 16px);
+  /* The bottom: 16px above the safe area. It never moves for the on-screen
+     keyboard: the panel keeps its size, and its content gets scroll room
+     instead (--panel-keyboard, NewTicketForm). */
+  inset: var(--panel-top, 56px) auto calc(16px + env(safe-area-inset-bottom, 0px)) var(--panel-left, 16px);
   inline-size: var(--panel-width, calc(100vw - 32px));
   block-size: auto;
   margin: 0;
@@ -287,12 +287,12 @@
 }
 
 /* The subview's header: the back button 10px from the panel's edge, the
-   title 6px after it. The button's negative margins keep the header the
+   title 10px after it. The button's negative margins keep the header the
    main header's height (it centers on the title's line). */
 .subHeader {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 10px;
   padding-inline-start: 10px;
 }
 

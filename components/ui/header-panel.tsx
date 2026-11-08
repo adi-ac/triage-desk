@@ -253,23 +253,35 @@ export function HeaderPanel({
     placeRef.current = place;
     place(true);
     // iOS with the on-screen keyboard open: the layout viewport keeps its
-    // height and the keyboard covers its bottom, so the panel ends that far
-    // up instead, keeping its footer (the New ticket form's buttons) above
-    // the keyboard. Zero otherwise. iOS also scrolls the page to reveal the
-    // focused field, lock or not, which would push the panel's header off
-    // the top: the page goes back where it was, and the focused field is
-    // brought into view inside the panel instead.
+    // height and the keyboard covers the bottom of the panel. The panel
+    // never shrinks or moves; how much of it is covered goes to
+    // --panel-keyboard (zero otherwise), which the New ticket form turns
+    // into extra scroll room, so its footer can be scrolled above the
+    // keyboard. iOS also scrolls the page to reveal the focused field, lock
+    // or not, which would push the panel's header off the top: the page
+    // goes back where it was, and the focused field is brought into view
+    // inside the panel, above the keyboard, instead.
     const viewport = window.visualViewport;
     let keyboard = 0;
     const fitKeyboard = () => {
       if (!viewport) return;
-      const covered = Math.abs(viewport.scale - 1) < 0.01 ? innerHeight - (viewport.offsetTop + viewport.height) : 0;
+      // Open: the visual viewport is shorter than the window (not zoomed).
+      const open = Math.abs(viewport.scale - 1) < 0.01 && viewport.height < innerHeight - 1;
+      // Put the page back first (it fires another visualViewport scroll,
+      // so this runs again with fresh values), then measure.
+      if (open || keyboard > 0) lock.current?.restore();
+      const covered = open ? panel.getBoundingClientRect().bottom - (viewport.offsetTop + viewport.height) : 0;
       const next = Math.max(0, Math.round(covered));
       panel.style.setProperty("--panel-keyboard", `${next}px`);
-      if (next !== keyboard || next > 0) lock.current?.restore();
       if (next > 0 && next !== keyboard) revealFocused(panel);
       keyboard = next;
     };
+    // A field focused while the keyboard is already open (tapping from one
+    // field to the next).
+    const onFocusIn = () => {
+      if (keyboard > 0) requestAnimationFrame(() => revealFocused(panel));
+    };
+    panel.addEventListener("focusin", onFocusIn);
     fitKeyboard();
     // Not shown yet, or still playing its exit (reopened mid-close).
     if (!scrim.matches(":popover-open")) scrim.showPopover();
@@ -297,6 +309,7 @@ export function HeaderPanel({
     viewport?.addEventListener("resize", fitKeyboard);
     viewport?.addEventListener("scroll", fitKeyboard);
     return () => {
+      panel.removeEventListener("focusin", onFocusIn);
       document.removeEventListener("keydown", onKeyDown);
       removeEventListener("resize", onResize);
       viewport?.removeEventListener("resize", fitKeyboard);
@@ -557,8 +570,9 @@ function canScroll(target: EventTarget | null, panel: Element) {
 
 /**
  * Scrolls the focused field into view inside the panel's scrolling area,
- * without scrolling the page: its label and top edge in view, so a tall
- * field (the message) shows where the caret starts.
+ * within the part above the on-screen keyboard, without scrolling the
+ * page: its label and top edge in view, so a tall field (the message)
+ * shows where the caret starts.
  */
 function revealFocused(panel: HTMLElement) {
   const field = document.activeElement;
@@ -566,7 +580,10 @@ function revealFocused(panel: HTMLElement) {
   for (let box = field.parentElement; box && box !== panel; box = box.parentElement) {
     const overflow = getComputedStyle(box).overflowY;
     if ((overflow !== "auto" && overflow !== "scroll") || box.scrollHeight <= box.clientHeight) continue;
-    const area = box.getBoundingClientRect();
+    const rect0 = box.getBoundingClientRect();
+    const viewport = window.visualViewport;
+    const visibleBottom = viewport ? viewport.offsetTop + viewport.height : innerHeight;
+    const area = { top: rect0.top, bottom: Math.min(rect0.bottom, visibleBottom) };
     const rect = field.getBoundingClientRect();
     // Its label too, when it has one above it.
     const label = "labels" in field ? (field as HTMLInputElement).labels?.[0] : undefined;
