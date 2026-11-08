@@ -10,6 +10,10 @@ export type HeaderPanelProps = {
   onOpenChange: (open: boolean) => void;
   /** One word: the panel's heading and name ("Queue"). */
   title: string;
+  /** How many items the panel holds, right after the title ("Queue 40"). */
+  count?: number;
+  /** One small secondary Button on the header's right edge, e.g. the queue's New ticket. */
+  action?: ReactNode;
   /** The panel's id, for the HeaderPanelButton's `controls`. */
   id?: string;
   /** The HeaderPanelButton that opens it, in the AppHeader. */
@@ -48,6 +52,8 @@ export function HeaderPanel({
   open,
   onOpenChange,
   title,
+  count,
+  action,
   id,
   button,
   children,
@@ -255,7 +261,11 @@ export function HeaderPanel({
         className={styles.panel}
       >
         <div className={styles.header}>
-          <h2 className={`text-heading ${styles.title}`}>{title}</h2>
+          <div className={styles.heading}>
+            <h2 className={`text-heading ${styles.title}`}>{title}</h2>
+            {count !== undefined && <span className={`text-small ${styles.count}`}>{count}</span>}
+          </div>
+          {action && <div className={styles.action}>{action}</div>}
         </div>
         <div ref={scrollerRef} className={styles.content}>
           {children}
@@ -338,7 +348,10 @@ function closeAnimations(panel: HTMLElement, scrim: HTMLElement) {
     fill: "forwards",
   });
   return [
-    panel.animate([{ clipPath: "inset(0 0 100% 100% round 20px)" }], options("--duration-panel-out", "--ease-panel-out")),
+    panel.animate(
+      [{ clipPath: "inset(0 0 100% 100% round 20px)" }],
+      options("--duration-panel-out", "--ease-panel-out"),
+    ),
     panel.animate(
       [{ opacity: 0 }],
       options("--duration-panel-fade-out", "--ease-panel-fade-out", "--delay-panel-fade-out"),

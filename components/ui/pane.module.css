@@ -16,6 +16,7 @@
 }
 
 .header {
+  position: relative;
   display: flex;
   align-items: baseline;
   justify-content: space-between;
@@ -23,12 +24,38 @@
   padding: 8px 16px 10px;
 }
 
+/* The title and its count, on one baseline. */
+.heading {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  min-inline-size: 0;
+}
+
 .title {
   margin: 0;
 }
 
+.count,
 .meta {
   color: var(--ink-3);
+}
+
+.count {
+  font-variant-numeric: tabular-nums;
+}
+
+/* The header's one action: out of the flow, so a 28px button never makes
+   the header taller. Centered in the header, and 6px from the pane's edge
+   (the tray's 4px padding + 2px). On the tray, a button takes the softer
+   --shadow-button-on-tray. */
+.action {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-end: 2px;
+  display: flex;
+  translate: 0 -50%;
+  --shadow-button: var(--shadow-button-on-tray);
 }
 
 .card {

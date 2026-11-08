@@ -196,12 +196,36 @@
   touch-action: none;
   /* The title starts at 16px, where the list's rows start their text (4px
      inset + 12px row padding). */
+  position: relative;
   padding: 16px 16px 10px;
   border-block-end: var(--hairline) solid var(--line);
 }
 
+/* The title and its count, on one baseline, as in a Pane header. */
+.heading {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
 .title {
   margin: 0;
+}
+
+.count {
+  color: var(--ink-3);
+  font-variant-numeric: tabular-nums;
+}
+
+/* The header's one action: out of the flow, so it never makes the header
+   taller; centered in it, at the header's 16px padding. The panel is
+   white, so a button keeps --shadow-button. */
+.action {
+  position: absolute;
+  inset-block-start: 50%;
+  inset-inline-end: 16px;
+  display: flex;
+  translate: 0 -50%;
 }
 
 .content {

@@ -56,7 +56,19 @@ function HeaderPanelDemo() {
       <span className={styles.panelDemoSlot}>
         <HeaderPanelButton ref={button} open={open} onOpenChange={setOpen} title="Queue" icon="inbox" controls={id} />
       </span>
-      <HeaderPanel open={open} onOpenChange={setOpen} title="Queue" id={id} button={button}>
+      <HeaderPanel
+        open={open}
+        onOpenChange={setOpen}
+        title="Queue"
+        count={12}
+        action={
+          <Button size="small" icon="plus">
+            New ticket
+          </Button>
+        }
+        id={id}
+        button={button}
+      >
         <div className={styles.queue}>
           {tickets.slice(0, 12).map((t) => (
             <QueueItem
@@ -216,8 +228,8 @@ export function ComponentsSection({ theme }: { theme: string }) {
 
       <Demo
         name="Button"
-        props="variant: primary | secondary | danger · size: default | small"
-        intro="Secondary is the default. Danger keeps the secondary chrome with red text, so it never outweighs Approve. Disabled is flat in every variant. Every button is fully rounded, from one token (--button-radius: 999px), as are IconButton and SegmentedControl."
+        props="variant: primary | secondary | danger · size: default | small · icon"
+        intro="Secondary is the default. Danger keeps the secondary chrome with red text, so it never outweighs Approve. Disabled is flat in every variant. Every button is fully rounded, from one token (--button-radius: 999px), as are IconButton and SegmentedControl. icon puts a 16px icon before a small button's label: 28px tall, 8px padding on the icon side and 12px on the label side, 4px between them (a Pane header's action, last here)."
       >
         {(["default", "small"] as const).map((size) => (
           <div key={size} className={styles.inline}>
@@ -233,11 +245,16 @@ export function ComponentsSection({ theme }: { theme: string }) {
             </Button>
           </div>
         ))}
+        <div className={styles.inline}>
+          <Button size="small" icon="plus">
+            New ticket
+          </Button>
+        </div>
       </Demo>
 
       <Demo
         name="IconButton"
-        props="icon: inbox | close | pencil · aria-label · size: default | small · tooltip"
+        props="icon: inbox | close | pencil | plus · aria-label · size: default | small · tooltip"
         intro="A round secondary button holding one icon, with Button's chrome. Never Petrol: the queue's header button is HeaderPanelButton. The name is required, since the icon has no words. Default is 32px with an 18px icon; small is 28px with a 14px icon (FieldReview's Change, last here). tooltip shows the name to its right on hover and keyboard focus: hover or tab to the pencil."
       >
         <div className={styles.inline}>
@@ -435,7 +452,7 @@ export function ComponentsSection({ theme }: { theme: string }) {
         name="QueueItem"
         intro="Content props only. 12px inline padding, in a Pane with inset=list (4px), so item text and group headings start where the Queue title does and the fill has 4px on each side. The open ticket has a petrol tint, with its secondary text stepped up to ink-2. A tag that repeats its group's heading is left out (no Needs review under Needs review); Sent by rule and Closed always stay."
       >
-        <Pane title="Queue" meta="2 tickets" inset="list">
+        <Pane title="Queue" count={2} inset="list">
           <div className={styles.queue}>
             <p className={`text-overline ${styles.muted} ${styles.groupTitle}`}>Needs review</p>
             <QueueItem
@@ -488,11 +505,22 @@ export function ComponentsSection({ theme }: { theme: string }) {
 
       <Demo
         name="Pane"
-        props="title · meta · footer · inset: default | list"
-        intro="A gray tray holding the header and wrapping a white card, with concentric corners (14px tray, 10px card). The title starts exactly where the content does, 20px from the tray's edge. The footer stays pinned at the bottom of the card while the content scrolls. inset=list (the queue) insets the content 4px for rows that carry their own 12px padding. Screens never build their own."
+        props="title · count · meta · action · footer · inset: default | list"
+        intro="A gray tray holding the header and wrapping a white card, with concentric corners (14px tray, 10px card). The title starts exactly where the content does, 20px from the tray's edge. The footer stays pinned at the bottom of the card while the content scrolls. inset=list (the queue) insets the content 4px for rows that carry their own 12px padding. count follows the title on its baseline; action is one small secondary Button on the header's right edge, 6px from the pane's edge, with the softer --shadow-button-on-tray. Screens never build their own."
       >
         <Pane title="Email" meta={<span className="text-mono-small">LL-5040</span>}>
           <p className="text-reading">Could you tell me how to export everything we have in Ledgerline?</p>
+        </Pane>
+        <Pane
+          title="Queue"
+          count={40}
+          action={
+            <Button size="small" icon="plus">
+              New ticket
+            </Button>
+          }
+        >
+          <p className={`text-small ${styles.muted}`}>The queue&apos;s header: a count after the title, and one action.</p>
         </Pane>
         <Pane
           title="Triage"
@@ -529,7 +557,7 @@ export function ComponentsSection({ theme }: { theme: string }) {
 
       <Demo
         name="HeaderPanel and HeaderPanelButton"
-        props="HeaderPanel: open · onOpenChange · title · id? · button · onOpened? — HeaderPanelButton: ref · open · onOpenChange · title · icon · controls"
+        props="HeaderPanel: open · onOpenChange · title · count? · action? · id? · button · onOpened? — HeaderPanelButton: ref · open · onOpenChange · title · icon · controls"
         intro="The inbox's queue below 1200px, on phones and tablets alike: a round 32px Petrol button in the sticky app header, to the right of the theme toggle, and a panel that opens 8px below the header, exactly as wide as it, down to 16px from the bottom of the viewport. The panel grows from its top-right corner, under the button (340ms), and closes back into it (240ms) as it fades. The one button stays above the scrim and is the close, its icon turning into a ×; a scrim tap, Escape or a pick closes it too. Focus moves into the panel and back to the button. Try it here: this demo's header row stands in for the app header."
       >
         <HeaderPanelDemo />

@@ -2,7 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
-import { AppHeader, HeaderPanel, HeaderPanelButton, Pane } from "@/components/ui";
+import { AppHeader, Button, HeaderPanel, HeaderPanelButton, Pane } from "@/components/ui";
 import { tickets } from "@/fixtures/tickets";
 import { InboxProvider } from "./inbox-state";
 import { QueueList } from "./queue-list";
@@ -153,7 +153,7 @@ function Shell({ id, children }: { id: string; children: ReactNode }) {
       <h1 className="visually-hidden">Inbox</h1>
 
       <div className={styles.queuePane}>
-        <Pane title="Queue" meta={`${tickets.length} tickets`} inset="list">
+        <Pane title="Queue" count={tickets.length} action={<NewTicketButton />} inset="list">
           <QueueList currentId={id} onOpen={open} />
         </Pane>
       </div>
@@ -167,6 +167,8 @@ function Shell({ id, children }: { id: string; children: ReactNode }) {
           open={queueOpen}
           onOpenChange={setQueueOpen}
           title="Queue"
+          count={tickets.length}
+          action={<NewTicketButton />}
           id={queueId}
           button={queueButton}
           onOpened={centerCurrent}
@@ -176,6 +178,17 @@ function Shell({ id, children }: { id: string; children: ReactNode }) {
         </HeaderPanel>
       </div>
     </main>
+  );
+}
+
+/** The queue header's action, in the pane from 1200px and in the panel below. */
+function NewTicketButton() {
+  // TODO: open the compose flow. Look only for now: no click handler and no
+  // disabled state until there's a flow to open.
+  return (
+    <Button size="small" icon="plus">
+      New ticket
+    </Button>
   );
 }
 

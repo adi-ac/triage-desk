@@ -23,6 +23,21 @@
   padding: 2px 10px;
 }
 
+/* Small with a leading icon (a Pane header's action): 28px tall, like a
+   small IconButton. The icon side is tighter (8px against the label side's
+   12px) because the + has its own space inside its 24-unit grid; 4px
+   between the icon and the label. */
+.button[data-size="small"][data-icon] {
+  block-size: 28px;
+  padding-block: 0;
+  padding-inline: 8px 12px;
+  gap: 4px;
+}
+
+.button > svg {
+  flex: none;
+}
+
 /* IconButton: a round button holding one icon, the same height as a
    default Button's line. */
 .button[data-shape="icon"] {

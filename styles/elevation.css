@@ -72,6 +72,15 @@
   --shadow-button:
     0 0 0 var(--hairline) rgb(0 0 0 / 0.12),
     var(--shadow-button-soft);
+  /* A secondary button on the gray tray (a Pane header's action): a softer
+     edge and shadow than on white, so it doesn't stand out more than the
+     card below it. The pane's own outline, and the button's soft shadow at
+     70% strength. Only on the tray: on white surfaces (FieldReview's Keep,
+     the HeaderPanel's header) buttons keep --shadow-button. */
+  --shadow-button-on-tray:
+    0 0 0 var(--hairline) var(--pane-ring),
+    0 1px 1.4px rgb(0 0 0 / 0.0315),
+    0 4px 8.4px -2.8px rgb(0 0 0 / 0.0441);
   --shadow-button-primary:
     inset 0 1px 0 rgb(255 255 255 / 0.22),
     0 0 0 var(--hairline) color-mix(in oklch, var(--accent) 75%, black),
@@ -97,6 +106,10 @@
     --shadow-button:
       inset 0 1px 0 rgb(255 255 255 / 0.06),
       0 0 0 var(--hairline) rgb(255 255 255 / 0.12);
+    /* The button's own inset highlight, with the pane's 7% ring. */
+    --shadow-button-on-tray:
+      inset 0 1px 0 rgb(255 255 255 / 0.06),
+      0 0 0 var(--hairline) var(--pane-ring);
     --shadow-button-primary:
       inset 0 1px 0 rgb(255 255 255 / 0.4),
       0 0 0 var(--hairline) color-mix(in oklch, var(--accent) 75%, black);
@@ -114,6 +127,9 @@
   --shadow-button:
     inset 0 1px 0 rgb(255 255 255 / 0.06),
     0 0 0 var(--hairline) rgb(255 255 255 / 0.12);
+  --shadow-button-on-tray:
+    inset 0 1px 0 rgb(255 255 255 / 0.06),
+    0 0 0 var(--hairline) var(--pane-ring);
   --shadow-button-primary:
     inset 0 1px 0 rgb(255 255 255 / 0.4),
     0 0 0 var(--hairline) color-mix(in oklch, var(--accent) 75%, black);

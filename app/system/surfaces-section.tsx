@@ -68,7 +68,9 @@ export function SurfacesSection({ theme }: { theme: string }) {
         <h3 className={`text-heading ${styles.cardTitle}`}>Buttons</h3>
         <p className={`text-body ${styles.muted} ${styles.cardIntro}`}>
           Buttons are raised, because they can be pressed. A disabled button goes flat and sinks to
-          bg, so a blocked Approve doesn&apos;t look pressable.
+          bg, so a blocked Approve doesn&apos;t look pressable. On the gray tray (a Pane
+          header&apos;s action) a button takes <span className="text-mono">--shadow-button-on-tray</span>,
+          a softer edge and shadow: the pane&apos;s own outline and the soft shadow at 70%.
         </p>
         <div className={styles.buttons}>
           <button type="button" className={`text-body-strong ${styles.button}`}>
