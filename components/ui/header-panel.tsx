@@ -60,6 +60,8 @@ export function HeaderPanel({ open, onOpenChange, title, id, button, children, o
   }, []);
 
   const opened = useRef(false);
+  // The close animation while it runs (or runs back, after a reopen).
+  const exit = useRef<Exit | null>(null);
   const callbacks = useRef({ onOpenChange, onOpened });
   useEffect(() => {
     callbacks.current = { onOpenChange, onOpened };
@@ -75,30 +77,67 @@ export function HeaderPanel({ open, onOpenChange, title, id, button, children, o
     const slot = trigger?.parentElement;
     if (!root || !scrim || !panel || !trigger || !slot) return;
 
-    if (!open) {
+    // The button leaves the top layer, and the panel and scrim close,
+    // once the close animation has finished, never before.
+    const finishClose = () => {
       if (panel.matches(":popover-open")) panel.hidePopover();
       if (scrim.matches(":popover-open")) scrim.hidePopover();
+      // Drop the animations' end state only once hidden, so the next open
+      // starts from the CSS entrance again.
+      exit.current?.animations.forEach((a) => a.cancel());
+      exit.current = null;
+      panel.inert = false;
+      if (trigger.matches(":popover-open")) trigger.hidePopover();
+      trigger.style.removeProperty("--button-top");
+      trigger.style.removeProperty("--button-left");
+    };
+
+    if (!open) {
+      if (!panel.matches(":popover-open")) return;
       // Back to the button, unless it already has focus (it was the close).
       // The browser shows the ring only after keyboard use (Escape, Enter
       // on a ticket), not after a tap or click.
-      if (opened.current && document.activeElement !== trigger) moveFocus(trigger, pointerInput.current);
-      // The button leaves the top layer once the scrim and panel have
-      // closed (at once under reduced motion), not before.
-      if (!trigger.matches(":popover-open")) return;
-      let cancelled = false;
-      const exits = [...panel.getAnimations(), ...scrim.getAnimations()].map((a) => a.finished);
-      Promise.allSettled(exits).then(() => {
-        if (cancelled) return;
-        trigger.hidePopover();
-        trigger.style.removeProperty("--button-top");
-        trigger.style.removeProperty("--button-left");
+      if (document.activeElement !== trigger) moveFocus(trigger, pointerInput.current);
+      if (matchMedia("(prefers-reduced-motion: reduce)").matches) {
+        finishClose();
+        return;
+      }
+      // The panel and scrim stay open (in the top layer) while the exit
+      // runs, and close when it finishes. Not with CSS exit transitions on
+      // display and overlay: Safari doesn't support transitioning overlay,
+      // so hidePopover() would drop them from the top layer at once and
+      // the exit would never be seen.
+      panel.inert = true;
+      const run = {};
+      if (exit.current) {
+        // Reopened and closed again while it was running back: run it
+        // forward again from where it is.
+        exit.current.animations.forEach((a) => a.reverse());
+      } else {
+        exit.current = { animations: closeAnimations(panel, scrim), run };
+      }
+      exit.current.run = run;
+      const current = exit.current;
+      Promise.allSettled(current.animations.map((a) => a.finished)).then(() => {
+        if (exit.current === current && current.run === run) finishClose();
       });
-      return () => {
-        cancelled = true;
-      };
+      return;
     }
 
     opened.current = true;
+    // Reopened during the close: run the close back to open, then drop it.
+    const reopening = exit.current;
+    if (reopening) {
+      const run = {};
+      reopening.run = run;
+      panel.inert = false;
+      reopening.animations.forEach((a) => a.reverse());
+      Promise.allSettled(reopening.animations.map((a) => a.finished)).then(() => {
+        if (exit.current !== reopening || reopening.run !== run) return;
+        reopening.animations.forEach((a) => a.cancel());
+        exit.current = null;
+      });
+    }
     // Place the panel under the header row, and pin the button where it
     // is, before either joins the top layer; again on resize.
     const place = () => {
@@ -121,7 +160,7 @@ export function HeaderPanel({ open, onOpenChange, title, id, button, children, o
     // so it's on top. Its display is set in CSS, so it never flickers.
     if (trigger.matches(":popover-open")) trigger.hidePopover();
     trigger.showPopover();
-    if (scrollerRef.current) callbacks.current.onOpened?.(scrollerRef.current);
+    if (!reopening && scrollerRef.current) callbacks.current.onOpened?.(scrollerRef.current);
     // Into the panel itself, not its first control, so a tap shows no ring.
     moveFocus(panel, pointerInput.current);
 
@@ -147,7 +186,16 @@ export function HeaderPanel({ open, onOpenChange, title, id, button, children, o
 
   return (
     <div ref={rootRef} className={styles.root}>
-      <div ref={scrimRef} popover="manual" className={styles.scrim} onClick={() => onOpenChange(false)} />
+      <div
+        ref={scrimRef}
+        popover="manual"
+        className={styles.scrim}
+        // A tap on the scrim shouldn't take focus off the button (it would
+        // land on the page), including taps during the close, which are
+        // ignored.
+        onMouseDown={(e) => e.preventDefault()}
+        onClick={() => onOpenChange(false)}
+      />
       <div
         ref={panelRef}
         id={panelId}
@@ -211,6 +259,43 @@ export function HeaderPanelButton({ ref, open, onOpenChange, title, icon, contro
       </span>
     </button>
   );
+}
+
+/** The running close: its animations, and which run (close or reopen) owns them now. */
+type Exit = { animations: Animation[]; run: object };
+
+/** A motion token from styles/motion.css: a duration or delay in ms, or an easing. */
+function token(name: string) {
+  return getComputedStyle(document.documentElement).getPropertyValue(name).trim();
+}
+const ms = (name: string) => {
+  const value = token(name);
+  return value.endsWith("ms") ? parseFloat(value) : parseFloat(value) * 1000;
+};
+
+/**
+ * The close, with the Web Animations API (DESIGN.md, Motion): the panel
+ * clips back to its top-right corner (the reverse of the opening clip)
+ * while it fades out, starting a little later, and the scrim fades out.
+ * Each starts from its current value, so a close during the opening runs
+ * from wherever the opening had reached. They hold their end state until
+ * the component hides the popovers.
+ */
+function closeAnimations(panel: HTMLElement, scrim: HTMLElement) {
+  const options = (duration: string, easing: string, delay?: string): KeyframeAnimationOptions => ({
+    duration: ms(duration),
+    easing: token(easing),
+    delay: delay ? ms(delay) : 0,
+    fill: "forwards",
+  });
+  return [
+    panel.animate([{ clipPath: "inset(0 0 100% 100% round 20px)" }], options("--duration-panel-out", "--ease-panel-out")),
+    panel.animate(
+      [{ opacity: 0 }],
+      options("--duration-panel-fade-out", "--ease-panel-fade-out", "--delay-panel-fade-out"),
+    ),
+    scrim.animate([{ opacity: 0 }], options("--duration-scrim-out", "--ease-panel-out")),
+  ];
 }
 
 /**

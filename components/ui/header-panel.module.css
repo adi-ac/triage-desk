@@ -105,18 +105,13 @@
   border: 0;
   background: var(--scrim);
   opacity: 0;
-  transition:
-    opacity var(--duration-scrim-out) var(--ease-panel-out),
-    display var(--duration-scrim-out) allow-discrete,
-    overlay var(--duration-scrim-out) allow-discrete;
 }
 
+/* Fades in with the panel's entrance. Its fade out is part of the close,
+   run by the component (see .panel). */
 .scrim:popover-open {
   opacity: 1;
-  transition:
-    opacity var(--duration-scrim-in) ease-out,
-    display var(--duration-scrim-in) allow-discrete,
-    overlay var(--duration-scrim-in) allow-discrete;
+  transition: opacity var(--duration-scrim-in) ease-out;
 }
 
 @starting-style {
@@ -133,14 +128,19 @@
  * viewport. The component measures the header on open and on resize.
  * 20px corners, surface-raised and the dialog shadow.
  *
- * It grows diagonally from its top-right corner, under the button: a
- * clip-path from a point at that corner to the whole panel (the open clip
- * reaches past the edges so the shadow isn't cut off), its content fading
- * in a fifth of the way in. Closing, it clips back into that corner while
- * the whole panel, content still visible, fades out a little later; display
- * and overlay transition discretely over the close, so it stays rendered
- * until it's done. Transitions, not keyframes, so reversing mid-way is
- * smooth.
+ * It grows diagonally from its top-right corner, under the button: a CSS
+ * transition from @starting-style, a clip-path from a point at that corner
+ * to the whole panel (the open clip reaches past the edges so the shadow
+ * isn't cut off), its content fading in a fifth of the way in.
+ *
+ * The close is NOT a CSS exit transition. Exit transitions on a popover
+ * need display and overlay to transition (allow-discrete) so it stays in
+ * the top layer while it animates, and Safari doesn't support transitioning
+ * overlay: hidePopover() drops it at once and the close never shows. So the
+ * component keeps the panel and scrim open, runs the close with the Web
+ * Animations API (clip back to the top-right corner, a delayed fade, the
+ * scrim fading), and hides them when it finishes. Don't add display,
+ * overlay or exit transitions here: they would fight that.
  */
 .panel {
   position: fixed;
@@ -157,22 +157,12 @@
   background: var(--surface-raised);
   box-shadow: var(--shadow-dialog);
   clip-path: inset(0 0 100% 100% round 20px);
-  opacity: 0;
-  transition:
-    clip-path var(--duration-panel-out) var(--ease-panel-out),
-    opacity var(--duration-panel-fade-out) var(--ease-panel-fade-out) var(--delay-panel-fade-out),
-    display var(--duration-panel-out) allow-discrete,
-    overlay var(--duration-panel-out) allow-discrete;
 }
 
 .panel:popover-open {
   display: flex;
   clip-path: inset(-40px -40px -64px -40px round 20px);
-  opacity: 1;
-  transition:
-    clip-path var(--duration-panel-in) var(--ease-panel-in),
-    display var(--duration-panel-in) allow-discrete,
-    overlay var(--duration-panel-in) allow-discrete;
+  transition: clip-path var(--duration-panel-in) var(--ease-panel-in);
 }
 
 @starting-style {
