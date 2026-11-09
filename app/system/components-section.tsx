@@ -221,12 +221,41 @@ function FieldReviewDemo() {
 }
 const autoSent = tickets.find((t) => t.id === autoSendTicketId)!;
 
+/**
+ * The queue's tags: text on its own fill, on the card, on the selected row's
+ * petrol tint, and on the queue panel (--surface-raised) below 1200px.
+ */
+function queueTagPairs(): Pair[] {
+  const tags = [
+    { name: "Sent", fg: "--success", bg: "--success-soft" },
+    { name: "Needs review", fg: "--warning", bg: "--warning-soft" },
+    { name: "AI (Sent by rule, Not a request)", fg: "--ink-2", bg: "--suggested-fill" },
+    { name: "Neutral (Closed, Not triaged)", fg: "--ink-2", bg: "--tag-fill" },
+  ];
+  const places = [
+    { where: "", under: undefined },
+    { where: ", selected row", under: "--accent-soft" },
+    { where: ", queue panel", under: "--surface-raised" },
+  ];
+  return places.flatMap(({ where, under }) =>
+    tags.map((t) => ({
+      label: `${t.name} tag text on its fill${where}`,
+      fg: t.fg,
+      bg: t.bg,
+      under,
+      kind: "text" as const,
+    })),
+  );
+}
+
 /** Pairs the components add on top of the ones theme.css and trust.css already check. */
 const pairs: Pair[] = [
   { label: "Secondary button text on hover", fg: "--ink", bg: "--button-bg-hover", kind: "text" },
   { label: "Danger button text", fg: "--critical", bg: "--button-bg", kind: "text" },
   { label: "Danger button text on hover", fg: "--critical", bg: "--button-bg-hover", kind: "text" },
-  { label: "Tag and banner text on surface-2", fg: "--ink-2", bg: "--surface-2", kind: "text" },
+  { label: "Banner text on surface-2", fg: "--ink-2", bg: "--surface-2", kind: "text" },
+  ...queueTagPairs(),
+  { label: "Human tag text on its fill", fg: "--decided-text", bg: "--decided-fill", kind: "text" },
   { label: "Selected queue item text", fg: "--ink", bg: "--accent-soft", kind: "text" },
   { label: "Selected queue item company, time, preview", fg: "--ink-2", bg: "--accent-soft", kind: "text" },
   { label: "Who set it, on a decided chip", fg: "--ink-2", bg: "--decided-fill", kind: "text" },
@@ -371,13 +400,15 @@ export function ComponentsSection({ theme }: { theme: string }) {
       <Demo
         name="Tag"
         props="tone: neutral | warning | success | ai | human"
-        intro="ai is pencil (a soft gray fill, no border); human is ink (solid, petrol)."
+        intro="An 18px pill that fits a queue row's first line: 12px text, the tone's soft fill, and a 1px stroke in its own text colour at 20%. ai is pencil (the soft gray fill); human is ink (petrol). The queue's six, then a human tag."
       >
         <div className={styles.inline}>
-          <Tag>Billing</Tag>
-          <Tag tone="warning">Needs review</Tag>
           <Tag tone="success">Sent</Tag>
           <Tag tone="ai">Sent by rule</Tag>
+          <Tag>Closed</Tag>
+          <Tag tone="ai">Not a request</Tag>
+          <Tag tone="warning">Needs review</Tag>
+          <Tag>Not triaged</Tag>
           <Tag tone="human">Edited</Tag>
         </div>
       </Demo>
@@ -530,7 +561,7 @@ export function ComponentsSection({ theme }: { theme: string }) {
 
       <Demo
         name="QueueItem"
-        intro="Content props only. 12px inline padding, in a Pane with inset=list (4px), so item text and group headings start where the Queue title does and the fill has 4px on each side. The open ticket has a petrol tint, with its secondary text stepped up to ink-2. A tag that repeats its group's heading is left out (no Needs review under Needs review); Sent by rule and Closed always stay."
+        intro="Content props only. 12px inline padding, in a Pane with inset=list (4px), so item text and group headings start where the Queue title does and the fill has 4px on each side. The open ticket has a petrol tint, with its secondary text stepped up to ink-2. A tag takes the date's place at the first line's end, and the company gives way to it; a row with a tag is no taller than one without. A tag that repeats its group's heading is left out (no Needs review under Needs review); Sent by rule and Closed always stay."
       >
         <Pane title="Queue" count={2} inset="list">
           <div className={styles.queue}>

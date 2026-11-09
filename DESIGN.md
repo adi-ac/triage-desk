@@ -115,7 +115,7 @@ Never put `--ink-3` on a `*-soft` fill: it measures 4.08–4.21:1 in light and L
 
 **Trust tokens** (`styles/trust.css`) name meanings: `--suggested-*`, `--decided-*`, `--evidence-*`, `--confidence-*`, `--severity-*`. Every meaning has a component (Chip, FieldReview, EmailBody, EvidenceMark, EvidenceItem, ConfidenceMeter, Severity, DraftEditor, ApproveBar); use the component, not the tokens. A new meaning gets a new component in `components/ui`, never inline styles on a screen.
 
-**Type:** the email body has its own size tokens, `--text-email-size` and `--text-email-leading`: the same as reading text (14px / 1.6) below 1200px, and 15px / 1.65 from 1200px. That 15px is the one size outside the scale below, and only EmailBody uses it; the draft and evidence quotes stay 14px. The reading measure, `--text-reading-measure`, is 32em (448px) below 1200px, 528px from 1200px and 608px from 1536px; the email column is always derived from it, so never set an email width yourself. Use the role classes from `styles/type.css`: `text-title` (20), `text-heading` (16), `text-subheading` (14), `text-body` / `text-body-strong` (14), `text-reading` (the email), `text-small` (13), `text-overline` (12, uppercase labels), `text-mono` / `text-mono-small` (IDs, times, figures). Never set a one-off font size, and never go below 12px.
+**Type:** the email body has its own size tokens, `--text-email-size` and `--text-email-leading`: the same as reading text (14px / 1.6) below 1200px, and 15px / 1.65 from 1200px. That 15px is the one size outside the scale below, and only EmailBody uses it; the draft and evidence quotes stay 14px. The reading measure, `--text-reading-measure`, is 32em (448px) below 1200px, 528px from 1200px and 608px from 1536px; the email column is always derived from it, so never set an email width yourself. Use the role classes from `styles/type.css`: `text-title` (20), `text-heading` (16), `text-subheading` (14), `text-body` / `text-body-strong` (14), `text-reading` (the email), `text-small` (13), `text-overline` (12, uppercase labels), `text-mono` / `text-mono-small` (IDs, times, figures). Tag's label is 12px at line height 1 (`--text-tag-size`, `--text-tag-leading`), so an 18px tag fits a queue row's first line; only Tag uses them. Never set a one-off font size, and never go below 12px.
 
 **Themes:** the header's `ThemeToggle` offers System, Light and Dark. System is the default and follows the OS live, including when the OS setting changes while the page is open. Choosing Light or Dark overrides it and is remembered in `localStorage` (`lib/theme.ts`) and set as `<html data-theme>`, by an inline script in the root layout before the first paint; choosing System clears the stored choice. Read the theme on screen with `useTheme()` from `@/components/ui`; never write `data-theme` on `<html>` yourself. `data-theme="light"` or `"dark"` also works on any element, to show one theme inside the other. Set `background` and `color` on that element yourself.
 
@@ -281,13 +281,15 @@ A round secondary button holding one icon, with Button's chrome (raised, neutral
 
 ### Tag
 
-A short label inside a row. A field value is a Chip.
+A short label inside a row. A field value is a Chip. An 18px pill (`border-radius: 999px`, `box-sizing: border-box`) with 7px horizontal padding and a 12px label (`--text-tag-size`, line height 1, the strong weight, never wrapping), so it sits on a queue row's first line without making it taller. Every tone has the tone's soft fill and a 1px solid stroke in its own text colour at 20% (`color-mix(in oklch, <text colour> 20%, transparent)`); the text colours are the tone's own.
 
-- `neutral` (the default): categories and plain facts ("Billing").
-- `warning`: needs a person ("Needs review").
-- `success`: done ("Sent").
-- `ai`: the model or a team rule acted ("Sent by rule"). Pencil: the soft gray fill, no border.
-- `human`: a person acted ("Edited"). Petrol, so only under rule 4.
+- `neutral` (the default): plain facts ("Closed", "Not triaged"). `--ink-2` on `--tag-fill`.
+- `warning`: needs a person ("Needs review"). `--warning` on `--warning-soft`.
+- `success`: done ("Sent"). `--success` on `--success-soft`.
+- `ai`: the model or a team rule acted ("Sent by rule", "Not a request"). Pencil: `--ink-2` on `--suggested-fill`. Its faint stroke is the same outline every tag has, not a suggestion's border, so the pencil fill still tells it apart.
+- `human`: a person acted ("Edited"). `--decided-text` on `--decided-fill`, Petrol, so only under rule 4.
+
+Each tag's text passes 4.5:1 and Lc 60 on its own fill, on the selected row's `--accent-soft` and on the queue panel, in both themes (the checks on /system, under Components). The stroke is decoration, not the tag's boundary: the fill and the words carry it.
 
 ```tsx
 // Correct
@@ -444,7 +446,7 @@ A message about the whole view, inside a pane. Never in the header area (rule 6)
 
 ### QueueItem
 
-One ticket in the inbox list, with 12px inline padding: put the list in `Pane inset="list"` (or HeaderPanel), and give group headings the same 12px, so item text and headings start where the pane's title does (see Pane). `current` marks the ticket open beside the queue with a petrol tint (rule 4); only one item is `current`. `meta` takes Tags only, and only one that doesn't repeat its group's heading (see Queue order); leave it out otherwise.
+One ticket in the inbox list, with 12px inline padding: put the list in `Pane inset="list"` (or HeaderPanel), and give group headings the same 12px, so item text and headings start where the pane's title does (see Pane). `current` marks the ticket open beside the queue with a petrol tint (rule 4); only one item is `current`. `meta` takes one Tag, and only one that doesn't repeat its group's heading (see Queue order); leave it out otherwise. **The tag takes the date's place** at the right end of the first line, after the sender and company, centred on that line (18px in its 21px, so about 1.5px clear above and below); the date isn't shown on a row with a tag. The company takes the freed space and ends in an ellipsis when it doesn't fit; the tag never shrinks. Rows without a tag keep their date. Nothing sits below the preview, so a row with a tag is exactly as tall as one without. Why: a tag on its own line made those rows taller and broke the list's rhythm, and the tag says more than the date about a row that has one.
 
 ```tsx
 // Correct

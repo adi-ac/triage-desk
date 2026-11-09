@@ -72,9 +72,11 @@
   white-space: nowrap;
 }
 
+/* A tag, in the date's place: centred on the first line (18px in its 21px),
+   so it never makes the line taller. The company gives way to it. */
 .meta {
   display: flex;
-  flex-wrap: wrap;
-  gap: 6px;
-  margin-block-start: 4px;
+  flex: none;
+  align-self: center;
+  margin-inline-start: auto;
 }

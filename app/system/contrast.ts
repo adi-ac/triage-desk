@@ -12,6 +12,8 @@ export type Pair = {
   bg: string;
   /** Text needs 4.5:1 and Lc 60; non-text (borders, rings, meters) needs 3:1. */
   kind: "text" | "non-text";
+  /** What bg sits on, when bg is translucent and not on the surface: a selected queue row's --accent-soft, say. */
+  under?: string;
 };
 
 export type Result = Pair & { wcag: number; apca: number; pass: boolean };
@@ -69,16 +71,16 @@ function apca(text: RGB, bg: RGB) {
   return s > -0.1 ? 0 : (s + 0.027) * 100;
 }
 
-/** Background tokens may be translucent or transparent; they sit on --surface. */
+/** Background tokens may be translucent or transparent; they sit on --surface (and `under`, if given). */
 export function check(pairs: Pair[]): Result[] {
   const host = document.createElement("span");
   host.style.display = "none";
   document.body.append(host);
   const surface = computed("--surface", host);
   const results = pairs.map((p) => {
-    const bgColor = computed(p.bg, host);
-    const bg = paint([surface, bgColor]);
-    const fg = paint([surface, bgColor, computed(p.fg, host)]);
+    const layers = [surface, ...(p.under ? [computed(p.under, host)] : []), computed(p.bg, host)];
+    const bg = paint(layers);
+    const fg = paint([...layers, computed(p.fg, host)]);
     const ratio = wcag(fg, bg);
     const lc = apca(fg, bg);
     const pass = p.kind === "text" ? ratio >= 4.5 && Math.abs(lc) >= 60 : ratio >= 3;

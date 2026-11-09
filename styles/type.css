@@ -73,6 +73,11 @@
   --text-overline-weight: 500;
   --text-overline-tracking: 0.05em;
 
+  /* Tag's label: 12px on one line, so an 18px tag fits a queue row's
+     first line (Tag). */
+  --text-tag-size: 12px;
+  --text-tag-leading: 1;
+
   /* IDs, timestamps, confidence and other figures */
   --text-mono-size: 13px;
   --text-mono-leading: 1.45;

@@ -1,38 +1,45 @@
+/* Tag (DESIGN.md, Tag). An 18px pill that fits a queue row's first line:
+   the tone's soft fill, and a 1px stroke in its own text colour at 20%. */
+
 .tag {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding: 0 6px;
-  border: 1px solid transparent;
-  border-radius: 4px;
+  box-sizing: border-box;
+  block-size: 18px;
+  padding: 0 7px;
+  border: 1px solid color-mix(in oklch, var(--tone-text) 20%, transparent);
+  border-radius: 999px;
+  font-family: var(--font-body);
+  font-size: var(--text-tag-size);
+  line-height: var(--text-tag-leading);
   font-weight: var(--text-body-weight-strong);
   white-space: nowrap;
+  color: var(--tone-text);
+  background: var(--tone-fill);
 }
 
 .tag[data-tone="neutral"] {
-  color: var(--ink-2);
-  background: var(--tag-fill);
-  border-color: var(--line);
+  --tone-text: var(--ink-2);
+  --tone-fill: var(--tag-fill);
 }
 
 .tag[data-tone="warning"] {
-  color: var(--warning);
-  background: var(--warning-soft);
+  --tone-text: var(--warning);
+  --tone-fill: var(--warning-soft);
 }
 
 .tag[data-tone="success"] {
-  color: var(--success);
-  background: var(--success-soft);
+  --tone-text: var(--success);
+  --tone-fill: var(--success-soft);
 }
 
 .tag[data-tone="ai"] {
-  color: var(--ink-2);
-  background: var(--suggested-fill);
-  border: 1px var(--suggested-border-style) var(--suggested-border);
+  --tone-text: var(--ink-2);
+  --tone-fill: var(--suggested-fill);
 }
 
 .tag[data-tone="human"] {
-  color: var(--decided-text);
-  background: var(--decided-fill);
-  border: 1px var(--decided-border-style) var(--decided-border);
+  --tone-text: var(--decided-text);
+  --tone-fill: var(--decided-fill);
 }
