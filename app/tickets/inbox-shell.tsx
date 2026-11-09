@@ -266,6 +266,31 @@ function Shell({ id, children }: { id: string; children: ReactNode }) {
   );
 }
 
+/**
+ * The inbox's frame before the ticket ID is known (the App Shell for an ID
+ * that isn't prerendered): the header row and the panes, empty, in the same
+ * grid, so nothing moves when the inbox renders into it.
+ */
+export function InboxShellFallback() {
+  return (
+    <main className={styles.shell} aria-busy>
+      <div className={styles.header}>
+        <div className={styles.headerBar}>
+          <AppHeader actions={<span className={styles.navSlot} />} />
+        </div>
+      </div>
+      <h1 className="visually-hidden">Inbox</h1>
+      <div className={styles.queuePane}>
+        <Pane title="Queue" inset="list" />
+      </div>
+      <div className={styles.ticket}>
+        <Pane title="Email" />
+        <Pane title="Triage" />
+      </div>
+    </main>
+  );
+}
+
 /** The queue header's action: opens the New ticket form (a dialog from 1200px, the panel's New ticket view below). */
 function NewTicketButton({ onClick }: { onClick: () => void }) {
   return (
