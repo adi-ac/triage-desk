@@ -34,6 +34,15 @@ export type PastedEmail = {
 export const firstScreenTicketId = "LL-5040";
 
 /**
+ * A demo exception to the queue order (docs/brief.md, "The first screen
+ * leads the queue"): while nobody has decided a field on them, these lead
+ * Needs review in this order, ahead of what the stakes-and-confidence rule
+ * would give. LL-5040 is the first screen; LL-5027 (an urgent access
+ * removal) is the rule's own first pick.
+ */
+export const queueLeaders: readonly string[] = [firstScreenTicketId, "LL-5027"];
+
+/**
  * The ticket shown as "Sent by rule": a how-to question with nothing touching
  * money, contracts, access or customer data.
  */

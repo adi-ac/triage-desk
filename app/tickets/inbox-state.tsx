@@ -3,7 +3,7 @@
 import { createContext, use, useState, type ReactNode } from "react";
 import { flushSync } from "react-dom";
 import { ruleSendFor, suggestionFor } from "@/fixtures/suggestions";
-import { tickets, type Ticket } from "@/fixtures/tickets";
+import { queueLeaders, tickets, type Ticket } from "@/fixtures/tickets";
 import { orderQueue, undecided, type FieldDecisions, type Queue } from "@/lib/queue";
 import type { Category, NotARequestSuggestion, Suggestion, TriageSuggestion, Urgency } from "@/lib/suggestion";
 import { triageAdded, triageAddedAnyway, useAddedTickets, type AddedTicket } from "./added-tickets";
@@ -116,7 +116,7 @@ export function InboxProvider({ currentId, children }: { currentId: string; chil
   if (snapshot && snapshot.key === key) {
     queue = snapshot.queue;
   } else {
-    queue = orderQueue(all, effectiveFor, decisionsFor, doneAtFor);
+    queue = orderQueue(all, effectiveFor, decisionsFor, doneAtFor, queueLeaders);
     // An added ticket still waiting for the AI goes at the top of Needs
     // review, newest first, where the person will look for it; so does the
     // open one if it has no answer (it failed, even before it opened, as an

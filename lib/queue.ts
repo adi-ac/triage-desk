@@ -60,12 +60,17 @@ export type Queue = { needsReview: Ticket[]; noAction: Ticket[]; untriaged: Tick
  *
  * suggestionFor returns the suggestion in effect: after "Triage anyway",
  * the normal suggestion Claude gave instead.
+ *
+ * leaders: a documented demo exception (fixtures `queueLeaders`). Those in
+ * Needs review that nobody has decided a field on go first, in the order
+ * given; once a person decides a field, the ticket sorts by the rule.
  */
 export function orderQueue(
   tickets: readonly Ticket[],
   suggestionFor: (id: string) => Suggestion | undefined,
   decisionsFor: (id: string) => FieldDecisions,
   doneAtFor: (id: string) => string | null,
+  leaders: readonly string[] = [],
 ): Queue {
   const open = tickets.filter((t) => !doneAtFor(t.id));
   const untriaged = open.filter((t) => !suggestionFor(t.id)).sort(newestFirst);
@@ -84,7 +89,11 @@ export function orderQueue(
     if (ka.sure !== kb.sure) return ka.sure - kb.sure;
     return newestFirst(a, b);
   });
-  return { needsReview, noAction, untriaged, sent };
+  const undecidedLeaders = leaders
+    .map((id) => needsReview.find((t) => t.id === id))
+    .filter((t): t is Ticket => !!t && !decisionsFor(t.id).category && !decisionsFor(t.id).urgency);
+  const rest = needsReview.filter((t) => !undecidedLeaders.includes(t));
+  return { needsReview: [...undecidedLeaders, ...rest], noAction, untriaged, sent };
 }
 
 /** The queue top to bottom, for "Next ticket". */
