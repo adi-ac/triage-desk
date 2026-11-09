@@ -1812,46 +1812,46 @@
   {
     "ticketId": "LL-5040",
     "source": "recorded",
-    "suggestedAt": "2026-11-04T23:02:02.213Z",
+    "suggestedAt": "2026-11-09T20:34:35.078Z",
     "model": "claude-sonnet-5-5",
     "promptVersion": "p-48be27bc",
-    "agentNote": "The renewal on 15 December and the tool review by the new finance director make this a possible churn risk, so consider looping in Fernhill's account manager before replying.",
+    "agentNote": "The finance director is reviewing tools before the 15 December renewal, so this may be a cancellation risk; consider looping in Fernhill's account manager. The deadline is Wednesday, so reply today.",
     "kind": "triage",
     "category": {
-      "value": "Cancellation risk",
+      "value": "How-to",
       "confidence": 0.5,
       "runnerUp": {
-        "value": "How-to",
+        "value": "Cancellation risk",
         "confidence": 0.45
       }
     },
     "urgency": {
-      "value": "Normal",
-      "confidence": 0.5,
+      "value": "Urgent",
+      "confidence": 0.8,
       "runnerUp": {
         "value": "High",
-        "confidence": 0.4
+        "confidence": 0.18
       }
     },
     "evidence": [
       {
-        "quote": "Exporting all our invoices and client records",
+        "quote": "Could you tell me how to export everything we have in Ledgerline?",
         "supports": "category"
       },
       {
-        "quote": "before she decides on next year's tools",
+        "quote": "anything that isn't in won't be part of her decision on next year's tools",
         "supports": "category"
       },
       {
-        "quote": "Our renewal is on 15 December",
+        "quote": "our renewal is on 15 December",
         "supports": "category"
       },
       {
-        "quote": "it would help to know what's possible in the next couple of weeks",
+        "quote": "It's a hard deadline",
         "supports": "urgency"
       },
       {
-        "quote": "Our renewal is on 15 December",
+        "quote": "by Wednesday, two days from now",
         "supports": "urgency"
       },
       {
@@ -1890,6 +1890,11 @@
         "article": "Using the Ledgerline API"
       },
       {
+        "quote": "Each invoice's PDF is available from the invoice's pdf endpoint.",
+        "supports": "draft",
+        "article": "Using the Ledgerline API"
+      },
+      {
         "quote": "An account owner creates API keys in Settings → Developers.",
         "supports": "draft",
         "article": "Using the Ledgerline API"
@@ -1905,7 +1910,7 @@
         "article": "Cancelling or not renewing"
       }
     ],
-    "draft": "Hi Aisha,\n\nYou can export your invoices, clients and payments at any time, on every plan, from Settings → Data → Export. Each type downloads as its own CSV file. Tick \"Include invoice PDFs\" to add a PDF of every invoice in a zip file.\n\nFile attachments on invoices are not included in exports, so you'll need to download them from each invoice. Exports of more than 5,000 invoices are prepared in the background and emailed to you as a download link within 24 hours.\n\nThe API is available on the Growth plan, so it's an option for you as well as the CSV export. It can read your full history of invoices, clients and payments, with no date limit. An account owner creates API keys in Settings → Developers, and the API reference is at developers.ledgerline.example.\n\nSince you're reviewing your tools ahead of your 15 December renewal, your account manager can also walk you through your options.\n\nBest,\nLedgerline Support"
+    "draft": "Hi Aisha,\n\nThanks for the details, and for flagging the Wednesday deadline. You can export your invoices, clients and payments at any time, on every plan, from Settings → Data → Export. Each type downloads as its own CSV file.\n\nTicking \"Include invoice PDFs\" adds a PDF of every invoice in a zip file. File attachments on invoices are not included in exports, so those need to be downloaded from each invoice. Exports of more than 5,000 invoices are prepared in the background and emailed to you as a download link within 24 hours, so it's worth starting soon.\n\nThe CSV export isn't the only route. The API is available on the Growth and Scale plans, and it can read your full history of invoices, clients and payments with no date limit. Each invoice's PDF is available from the invoice's pdf endpoint.\n\nAn account owner creates API keys in Settings → Developers, and the API reference is at developers.ledgerline.example.\n\nSince your finance director is reviewing your tools ahead of the renewal, your account manager can also walk you through your options if that would help.\n\nBest,\nLedgerline Support"
   },
   {
     "ticketId": "vague",

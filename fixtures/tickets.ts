@@ -28,8 +28,10 @@ export type PastedEmail = {
 };
 
 /**
- * The ticket the first screen opens on. The model should be unsure between
- * How-to and Cancellation risk, and between Normal and High urgency.
+ * The ticket the first screen opens on: unsure on category, confident on
+ * urgency. The model should be unsure between How-to and Cancellation risk,
+ * and sure it's Urgent (a hard deadline two days away, written as relative
+ * time because the model isn't told the date).
  */
 export const firstScreenTicketId = "LL-5040";
 
@@ -78,7 +80,7 @@ Could you tell me how to export everything we have in Ledgerline? I mean all inv
 
 I'd also like to know whether the API can pull the same history, or whether the CSV export is the only route.
 
-For context, our new finance director starts in January and has asked every team to document how our systems fit together before she decides on next year's tools. Our renewal is on 15 December, so it would help to know what's possible in the next couple of weeks.
+For context, our new finance director joined last month and needs every team's written summary of how our systems fit together by Wednesday, two days from now. It's a hard deadline: she presents to the partners on Thursday, and anything that isn't in won't be part of her decision on next year's tools. I can't finish ours without knowing what the export and the API cover, and our renewal is on 15 December.
 
 Thanks,
 Aisha Kamara
@@ -86,7 +88,7 @@ Practice Operations Manager
 Fernhill Veterinary Partners`,
     exercises: [
       "First screen: How-to vs. Cancellation risk",
-      "Urgency hinges on a renewal date, not a stated problem",
+      "Unsure on category, confident on urgency: a hard deadline two days away",
     ],
   },
   {

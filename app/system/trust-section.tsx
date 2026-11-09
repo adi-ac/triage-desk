@@ -31,7 +31,7 @@ const pairs: Pair[] = [
   { label: "Focus ring on bg", fg: "--focus-ring", bg: "--bg", kind: "non-text" },
 ];
 
-/** LL-5040's hand-written evidence, marked the way the triage panel marks it. */
+/** LL-5040's recorded evidence, marked the way the triage panel marks it. */
 const evidence = suggestionFor(firstScreenTicketId)!.evidence;
 
 export function TrustSection({ theme }: { theme: string }) {
