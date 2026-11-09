@@ -16,6 +16,8 @@
 }
 
 .header {
+  --header-pad-top: 9.5px;
+  --header-pad-bottom: 8.5px;
   position: relative;
   display: flex;
   align-items: baseline;
@@ -27,15 +29,29 @@
      baseline, and the count's line hangs about 1px below the title's, so
      with equal padding the title's letters sat 0.5px above the action's
      centre. */
-  padding: 9.5px 16px 8.5px;
+  padding: var(--header-pad-top) 16px var(--header-pad-bottom);
 }
 
 /* The title and its count, on one baseline. */
 .heading {
+  --heading-gap: 8px;
   display: flex;
   align-items: baseline;
-  gap: 8px;
+  gap: var(--heading-gap);
   min-inline-size: 0;
+}
+
+/* Every header reserves the small text's line on the title's baseline, as
+   the count does, so a header is the same height (39.84px) with or without
+   a count, meta or status, and side-by-side panes' cards line up. A
+   zero-width space in text-small; the negative margin takes back the gap
+   it would add. */
+.heading::after {
+  content: "\200B";
+  margin-inline-start: calc(-1 * var(--heading-gap));
+  font-family: var(--font-body);
+  font-size: var(--text-small-size);
+  line-height: var(--text-small-leading);
 }
 
 .title {
@@ -55,6 +71,26 @@
    gives way, so the two never overlap. */
 .status {
   flex: none;
+}
+
+/* The meta and the status sit on the header's centre line, as the title
+   does, not on its baseline (where the smaller text sat about 1.3px low).
+   Their text is trimmed to its cap height (text-box), so centring the box
+   centres the capitals. align-self centres them in the content box, which
+   sits half the padding difference below the header's centre (9.5px above,
+   8.5px below); the margin takes that back. Without text-box support they
+   stay on the baseline. */
+@supports (text-box: trim-both cap alphabetic) {
+  .meta,
+  .status {
+    display: flex;
+    align-self: center;
+    margin-block-start: calc(var(--header-pad-bottom) - var(--header-pad-top));
+  }
+
+  .meta > * {
+    text-box: trim-both cap alphabetic;
+  }
 }
 
 /* The header's one action: out of the flow, so a 28px button never makes

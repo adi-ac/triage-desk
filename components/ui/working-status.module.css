@@ -82,6 +82,28 @@
     word-out var(--duration-status-word-out) var(--ease-status-step) forwards;
 }
 
+/* Centred on a Pane header (Pane centres the status): the dot and the box
+   centre on each other, and the box and each word are trimmed to the cap
+   height, so the dot's centre and the words' capitals share one line. A
+   trimmed word's glyphs overhang its box (ascenders above, descenders
+   below), and its shimmer only paints inside the box, so it gets padding
+   that the inset takes back: the text stays put and every glyph is painted.
+   Without text-box support it stays on the baseline, as above. */
+@supports (text-box: trim-both cap alphabetic) {
+  .status {
+    align-items: center;
+  }
+
+  .box,
+  .word {
+    text-box: trim-both cap alphabetic;
+  }
+
+  .word {
+    padding-block: 0.5em;
+    inset-block-start: -0.5em;
+  }
+}
 /* While it fades out at the end, the dot holds where it is rather than
    jump, and stays stopped while hidden. (The words' shimmer is paused in
    script.) */
