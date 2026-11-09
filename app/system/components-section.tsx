@@ -26,6 +26,7 @@ import {
   Time,
   Timeline,
   TimelineRow,
+  TRIAGE_STEPS,
   WorkingStatus,
   confidenceThresholds,
 } from "@/components/ui";
@@ -81,15 +82,27 @@ function DialogDemo() {
 
 function WorkingStatusDemo() {
   const [active, setActive] = useState(true);
+  const [run, setRun] = useState(0);
   return (
-    <div className={styles.inline}>
-      <Pane title="Triage" status={<WorkingStatus label="Triaging…" active={active} />}>
+    <>
+      <Pane title="Triage" status={<WorkingStatus key={run} steps={TRIAGE_STEPS} active={active} />}>
         <p className={`text-small ${styles.muted}`}>The pane&apos;s content.</p>
       </Pane>
-      <Button size="small" onClick={() => setActive((a) => !a)}>
-        {active ? "Done" : "Start again"}
-      </Button>
-    </div>
+      <div className={styles.inline}>
+        <Button
+          size="small"
+          onClick={() => {
+            setActive(true);
+            setRun((r) => r + 1);
+          }}
+        >
+          Replay
+        </Button>
+        <Button size="small" disabled={!active} onClick={() => setActive(false)}>
+          Done
+        </Button>
+      </div>
+    </>
   );
 }
 
@@ -599,8 +612,8 @@ export function ComponentsSection({ theme }: { theme: string }) {
 
       <Demo
         name="WorkingStatus"
-        props="label · active"
-        intro="Work in progress beside a Pane title (Pane status): “Triaging…” while the AI triages a ticket added with the New ticket form. text-small in --ink-3; a lighter band runs through the words and the sparkle turns slowly. Set active false when the work is done and it fades out over 200ms. Holds still under reduced motion. Toggle it here."
+        props="steps · active"
+        intro="Work in progress at the right end of a Pane header (Pane status), while the AI triages a ticket added with the New ticket form. text-mono-small in --ink-3, with a pulsing --accent dot. The words step through TRIAGE_STEPS every 2.2s and hold on the last; at each step they crossfade and the dot glides to the new word’s width. Timed, not real progress. Set active false when the work is done and it fades out over 200ms. Under reduced motion the words swap at once and nothing moves. Replay starts it again."
       >
         <WorkingStatusDemo />
       </Demo>

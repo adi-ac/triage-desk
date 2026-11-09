@@ -2,11 +2,9 @@
 
 .status {
   display: inline-flex;
-  align-items: center;
-  align-self: center;
-  gap: 6px;
+  align-items: baseline;
+  gap: 7px;
   color: var(--ink-3);
-  white-space: nowrap;
   opacity: 0;
   visibility: hidden;
   transition:
@@ -20,12 +18,40 @@
   transition: none;
 }
 
-.icon {
-  display: inline-flex;
+/* Pulses in place: opacity only, no scale and no movement of its own. */
+.dot {
+  flex: none;
+  align-self: center;
+  inline-size: 6px;
+  block-size: 6px;
+  border-radius: 50%;
+  background: var(--accent);
+  animation: pulse var(--duration-status-pulse) var(--ease-status-pulse) infinite;
 }
 
-/* The text in --ink-3 with a lighter band (--ink) running through it. */
-.label {
+/* The current word's width (set in script), anchored on the right; the
+   words sit on its right edge. The zero-width space gives it a line, so it
+   has the text's height and baseline. */
+.box {
+  position: relative;
+}
+
+.box::before {
+  content: "\200B";
+}
+
+.box[data-glide] {
+  transition: width var(--duration-status-width) var(--ease-status-step);
+}
+
+/* The text in --ink-3 with a lighter band (--ink) running through it. Each
+   incoming word's shimmer takes the outgoing one's start time (in script),
+   so the band keeps one phase across words. */
+.word {
+  position: absolute;
+  inset-block-start: 0;
+  inset-inline-end: 0;
+  white-space: nowrap;
   background: linear-gradient(
     90deg,
     var(--ink-3) 0%,
@@ -38,19 +64,34 @@
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
-}
-
-.status[data-active] .icon {
-  animation: turn var(--duration-status-spin) linear infinite;
-}
-
-.status[data-active] .label {
   animation: shimmer var(--duration-status-shimmer) linear infinite;
 }
 
-@keyframes turn {
-  to {
-    rotate: 360deg;
+/* The incoming word starts a little after the outgoing one, so the two
+   overlap and there's never a blank frame. The shimmer stays first in the
+   list, so it carries on when a word turns outgoing. */
+.word[data-in] {
+  animation:
+    shimmer var(--duration-status-shimmer) linear infinite,
+    word-in var(--duration-status-word-in) var(--ease-status-step) var(--delay-status-word-in) backwards;
+}
+
+.word[data-out] {
+  animation:
+    shimmer var(--duration-status-shimmer) linear infinite,
+    word-out var(--duration-status-word-out) var(--ease-status-step) forwards;
+}
+
+/* While it fades out at the end, the dot holds where it is rather than
+   jump, and stays stopped while hidden. (The words' shimmer is paused in
+   script.) */
+.status:not([data-active]) .dot {
+  animation-play-state: paused;
+}
+
+@keyframes pulse {
+  50% {
+    opacity: 0.3;
   }
 }
 
@@ -63,20 +104,40 @@
   }
 }
 
-/* Reduced motion: still, plain --ink-3 text, gone at once. */
+@keyframes word-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes word-out {
+  to {
+    opacity: 0;
+  }
+}
+
+/* Reduced motion: the words swap at once and the width snaps; the dot and
+   plain --ink-3 text hold still; it goes at once. */
 @media (prefers-reduced-motion: reduce) {
   .status,
-  .status[data-active] {
+  .status[data-active],
+  .box[data-glide] {
     transition: none;
   }
 
-  .status[data-active] .icon,
-  .status[data-active] .label {
+  .dot,
+  .word,
+  .word[data-in],
+  .word[data-out] {
     animation: none;
   }
 
-  .label {
+  .word {
     background: none;
     color: var(--ink-3);
+  }
+
+  .word[data-out] {
+    visibility: hidden;
   }
 }

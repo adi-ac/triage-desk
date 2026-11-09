@@ -9,8 +9,9 @@
  * daily spend cap (LIVE_TRIAGE_DAILY_CAP_USD, default 2), which reserves
  * each call's worst case and settles to its real cost afterwards.
  *
- * TRIAGE_FAKE=1 answers from the recordings after about 3.5s, without
- * calling the model, but with the limits counting for real.
+ * TRIAGE_FAKE=1 answers from the recordings after about 3.5s
+ * (TRIAGE_FAKE_DELAY_MS), without calling the model, but with the limits
+ * counting for real.
  * TRIAGE_FAKE_ERROR=model|visitor-limit|daily-cap forces that error.
  *
  * Never logs the email or the API key.
@@ -55,7 +56,7 @@ export const maxDuration = 120;
 const MAX_TOKENS = 8000;
 /** What the API adds around the request's bytes (role markers, the output format). Measured, with room to spare. */
 const OVERHEAD_TOKENS = 2000;
-/** Fake mode's pause, about as long as a real triage takes. */
+/** Fake mode's pause by default, about as long as a real triage takes. */
 const FAKE_DELAY_MS = 3500;
 /** No legitimate body comes near this (the fields' limits add up to under 6,000 characters). */
 const MAX_BODY_BYTES = 64 * 1024;
@@ -234,7 +235,7 @@ async function triageFake(
     Date.now(),
   );
   if (!reservation.ok) return { error: "daily-cap", resetsAt: reservation.resetsAt };
-  await new Promise((resolve) => setTimeout(resolve, FAKE_DELAY_MS));
+  await new Promise((resolve) => setTimeout(resolve, envNumber("TRIAGE_FAKE_DELAY_MS", FAKE_DELAY_MS)));
   if (failModel) {
     await reservation.settle(0);
     return { error: "model" };

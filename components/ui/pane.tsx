@@ -6,7 +6,7 @@ export type PaneProps = Omit<ComponentProps<"section">, "className" | "style" | 
   title: string;
   /** How many items the pane holds, right after the title ("Queue 40"). */
   count?: number;
-  /** Work in progress, right after the title: a WorkingStatus ("Triaging…"). */
+  /** Work in progress at the header's right end, where a meta goes: a WorkingStatus ("Reading the email…"). Not with meta or action. */
   status?: ReactNode;
   /** A short fact or a Tag at the end of the header, e.g. a ticket ID. Never a model suggestion. Not with action. */
   meta?: ReactNode;
@@ -40,8 +40,8 @@ export function Pane({ title, count, status, meta, action, footer, inset = "defa
             {title}
           </h2>
           {count !== undefined && <span className={`text-small ${styles.count}`}>{count}</span>}
-          {status}
         </div>
+        {status && <div className={styles.status}>{status}</div>}
         {meta && <div className={`text-small ${styles.meta}`}>{meta}</div>}
         {action && <div className={styles.action}>{action}</div>}
       </div>

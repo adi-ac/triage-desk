@@ -15,6 +15,7 @@ import {
   Time,
   Timeline,
   TimelineRow,
+  TRIAGE_STEPS,
   WorkingStatus,
 } from "@/components/ui";
 import { skeletonEmail, skeletonSuggestion } from "@/fixtures/skeleton-sample";
@@ -572,8 +573,9 @@ function LiveProblem({
 /**
  * The Triage pane of a ticket added with the New ticket form: a skeleton
  * while the AI works (Skullet, measured from a typical suggestion rendered
- * through the real components, here and in the footer), "Triaging…" beside
- * the title, then the suggestion crossfading in over it, or what went wrong.
+ * through the real components, here and in the footer), WorkingStatus at
+ * the header's right end stepping through what it's doing, then the
+ * suggestion crossfading in over it, or what went wrong.
  */
 function LiveTriagePane({
   ticketId,
@@ -658,7 +660,11 @@ function LiveTriagePane({
   return (
     <div className={styles.live}>
       <SkulletProvider reveal="together">
-        <Pane title="Triage" status={<WorkingStatus label="Triaging…" active={waiting} />} footer={footerSlot}>
+        <Pane
+          title="Triage"
+          status={<WorkingStatus key={ticketId} steps={TRIAGE_STEPS} active={waiting} />}
+          footer={footerSlot}
+        >
           <Skeleton loading={waiting} label="Triaging this ticket">
             {body}
           </Skeleton>

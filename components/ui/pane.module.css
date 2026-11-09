@@ -51,6 +51,12 @@
   font-variant-numeric: tabular-nums;
 }
 
+/* Work in progress, where a meta goes: it keeps its width and the title
+   gives way, so the two never overlap. */
+.status {
+  flex: none;
+}
+
 /* The header's one action: out of the flow, so a 28px button never makes
    the header taller. Centered in the header, and 6px from the pane's edge
    (the tray's 4px padding + 2px). On the tray, a button takes the softer
