@@ -7,22 +7,25 @@
     "build": "next build",
     "start": "next start",
     "lint": "eslint",
-    "record": "node --env-file=.env.local --experimental-strip-types --no-warnings scripts/record-suggestion.ts"
+    "record": "node --env-file=.env.local --conditions=react-server --experimental-strip-types --no-warnings scripts/record-suggestion.ts",
+    "test": "node --conditions=react-server --experimental-strip-types --no-warnings --test \"lib/**/*.test.ts\""
   },
   "dependencies": {
+    "@anthropic-ai/sdk": "^1.4.0",
+    "@upstash/redis": "^1.41.0",
     "next": "16.4.3",
     "react": "19.3.0",
-    "react-dom": "19.3.0"
+    "react-dom": "19.3.0",
+    "server-only": "^0.0.1",
+    "zod": "^4.6.7"
   },
   "devDependencies": {
-    "@anthropic-ai/sdk": "^1.4.0",
     "@types/node": "^20",
     "@types/react": "^19",
     "@types/react-dom": "^19",
     "eslint": "^9",
     "eslint-config-next": "16.4.3",
-    "typescript": "^5",
-    "zod": "^4.6.7"
+    "typescript": "^5"
   },
   "packageManager": "pnpm@12.16.1"
 }

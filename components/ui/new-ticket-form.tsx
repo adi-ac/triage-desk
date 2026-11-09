@@ -74,8 +74,8 @@ export function NewTicketForm({ variant }: NewTicketFormProps) {
       onSubmit={(e) => {
         e.preventDefault();
         if (!ready) return;
-        // TODO: add the ticket and triage it with the live model. Needs the
-        // per-visitor limit and the daily spend cap first (docs/brief.md).
+        // TODO: add the ticket and triage it with the live model, through
+        // POST /api/triage (app/api/triage/route.ts, docs/brief.md).
       }}
     >
       <div className={styles.column}>
