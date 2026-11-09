@@ -43,3 +43,4 @@ export { ThemeToggle, useTheme } from "./theme-toggle";
 export { Time, type TimeProps } from "./time";
 export { Timeline, type TimelineProps } from "./timeline";
 export { TimelineRow, type TimelineActor, type TimelineRowProps } from "./timeline-row";
+export { WorkingStatus, type WorkingStatusProps } from "./working-status";

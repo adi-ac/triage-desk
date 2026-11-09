@@ -115,6 +115,25 @@
   opacity: 1;
 }
 
+/* A long placeholder (the sample's subject) ends in an ellipsis on its one
+   line; an input never wraps. */
+input.input,
+input.input::placeholder {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* A field that's too long for the live route, said under it. */
+.input[aria-invalid="true"] {
+  border-color: var(--critical);
+}
+
+.error {
+  margin: 0;
+  color: var(--critical);
+}
+
 .input:focus,
 .input:focus-visible {
   outline: none;

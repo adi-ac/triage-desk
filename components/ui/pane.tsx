@@ -6,6 +6,8 @@ export type PaneProps = Omit<ComponentProps<"section">, "className" | "style" | 
   title: string;
   /** How many items the pane holds, right after the title ("Queue 40"). */
   count?: number;
+  /** Work in progress, right after the title: a WorkingStatus ("Triaging…"). */
+  status?: ReactNode;
   /** A short fact or a Tag at the end of the header, e.g. a ticket ID. Never a model suggestion. Not with action. */
   meta?: ReactNode;
   /**
@@ -28,7 +30,7 @@ export type PaneProps = Omit<ComponentProps<"section">, "className" | "style" | 
  * The card's content scrolls on its own when the shell gives the pane a
  * height; the footer stays pinned at the bottom either way.
  */
-export function Pane({ title, count, meta, action, footer, inset = "default", children, ...props }: PaneProps) {
+export function Pane({ title, count, status, meta, action, footer, inset = "default", children, ...props }: PaneProps) {
   const headingId = useId();
   return (
     <section aria-labelledby={headingId} {...props} className={styles.pane}>
@@ -38,6 +40,7 @@ export function Pane({ title, count, meta, action, footer, inset = "default", ch
             {title}
           </h2>
           {count !== undefined && <span className={`text-small ${styles.count}`}>{count}</span>}
+          {status}
         </div>
         {meta && <div className={`text-small ${styles.meta}`}>{meta}</div>}
         {action && <div className={styles.action}>{action}</div>}

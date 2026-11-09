@@ -6,7 +6,7 @@
 
 import type { ReactNode } from "react";
 
-export type IconName = "monitor" | "sun" | "moon" | "inbox" | "close" | "pencil" | "plus" | "chevron-left";
+export type IconName = "monitor" | "sun" | "moon" | "inbox" | "close" | "pencil" | "plus" | "chevron-left" | "sparkle";
 
 const paths: Record<IconName, ReactNode> = {
   monitor: (
@@ -37,6 +37,8 @@ const paths: Record<IconName, ReactNode> = {
   ),
   plus: <path d="M12 5v14M5 12h14" />,
   "chevron-left": <path d="M14.5 6l-6 6 6 6" />,
+  // A four-point star with curved sides, centred: the AI at work (WorkingStatus).
+  sparkle: <path d="M12 4c.6 5 3 7.4 8 8-5 .6-7.4 3-8 8-.6-5-3-7.4-8-8 5-.6 7.4-3 8-8Z" />,
 };
 
 export function Icon({ name, size = 18 }: { name: IconName; size?: number }) {

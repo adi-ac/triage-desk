@@ -1,0 +1,82 @@
+/* WorkingStatus (DESIGN.md, WorkingStatus and Motion). */
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  align-self: center;
+  gap: 6px;
+  color: var(--ink-3);
+  white-space: nowrap;
+  opacity: 0;
+  visibility: hidden;
+  transition:
+    opacity var(--duration-status-out) var(--ease-out-quart),
+    visibility 0s linear var(--duration-status-out);
+}
+
+.status[data-active] {
+  opacity: 1;
+  visibility: visible;
+  transition: none;
+}
+
+.icon {
+  display: inline-flex;
+}
+
+/* The text in --ink-3 with a lighter band (--ink) running through it. */
+.label {
+  background: linear-gradient(
+    90deg,
+    var(--ink-3) 0%,
+    var(--ink-3) 35%,
+    var(--ink) 50%,
+    var(--ink-3) 65%,
+    var(--ink-3) 100%
+  );
+  background-size: 250% 100%;
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.status[data-active] .icon {
+  animation: turn var(--duration-status-spin) linear infinite;
+}
+
+.status[data-active] .label {
+  animation: shimmer var(--duration-status-shimmer) linear infinite;
+}
+
+@keyframes turn {
+  to {
+    rotate: 360deg;
+  }
+}
+
+@keyframes shimmer {
+  from {
+    background-position: 100% 0;
+  }
+  to {
+    background-position: 0 0;
+  }
+}
+
+/* Reduced motion: still, plain --ink-3 text, gone at once. */
+@media (prefers-reduced-motion: reduce) {
+  .status,
+  .status[data-active] {
+    transition: none;
+  }
+
+  .status[data-active] .icon,
+  .status[data-active] .label {
+    animation: none;
+  }
+
+  .label {
+    background: none;
+    color: var(--ink-3);
+  }
+}

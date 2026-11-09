@@ -26,8 +26,10 @@ import {
   Time,
   Timeline,
   TimelineRow,
+  WorkingStatus,
   confidenceThresholds,
 } from "@/components/ui";
+import { pickSample, sampleEmails } from "@/fixtures/sample-emails";
 import { suggestionFor } from "@/fixtures/suggestions";
 import { autoSendTicketId, firstScreenTicketId, tickets, type Ticket } from "@/fixtures/tickets";
 import { approveBlockers, approveField } from "@/lib/approve";
@@ -47,7 +49,22 @@ const demoBlockers = approveBlockers({
 });
 const excerpt = firstScreen.body.split("\n\n").slice(1, 4).join("\n\n");
 
+/** The demos' sample emails: the placeholders show one, and Use a sample email moves on. Adding does nothing here. */
+function useSampleDemo() {
+  const [i, setI] = useState(0);
+  return {
+    sample: sampleEmails[i],
+    onNextSample: () => {
+      const next = pickSample(i);
+      setI(next);
+      return sampleEmails[next];
+    },
+    onAdd: () => {},
+  };
+}
+
 function DialogDemo() {
+  const samples = useSampleDemo();
   const [open, setOpen] = useState(false);
   const [key, setKey] = useState(0);
   return (
@@ -56,13 +73,32 @@ function DialogDemo() {
         New ticket
       </Button>
       <Dialog open={open} onOpenChange={setOpen} title="New ticket" onClosed={() => setKey((k) => k + 1)}>
-        <NewTicketForm key={key} variant="dialog" />
+        <NewTicketForm key={key} variant="dialog" {...samples} />
       </Dialog>
     </div>
   );
 }
 
+function WorkingStatusDemo() {
+  const [active, setActive] = useState(true);
+  return (
+    <div className={styles.inline}>
+      <Pane title="Triage" status={<WorkingStatus label="Triaging…" active={active} />}>
+        <p className={`text-small ${styles.muted}`}>The pane&apos;s content.</p>
+      </Pane>
+      <Button size="small" onClick={() => setActive((a) => !a)}>
+        {active ? "Done" : "Start again"}
+      </Button>
+    </div>
+  );
+}
+
+function NewTicketFormDemo() {
+  return <NewTicketForm variant="dialog" {...useSampleDemo()} />;
+}
+
 function HeaderPanelDemo() {
+  const samples = useSampleDemo();
   const [open, setOpen] = useState(false);
   const [view, setView] = useState<"queue" | "new-ticket">("queue");
   const [key, setKey] = useState(0);
@@ -92,7 +128,7 @@ function HeaderPanelDemo() {
           title: "New ticket",
           backLabel: "Back to queue",
           onBack: () => setView("queue"),
-          children: <NewTicketForm key={key} variant="panel" />,
+          children: <NewTicketForm key={key} variant="panel" {...samples} />,
         }}
         onClosed={() => {
           setView("queue");
@@ -536,7 +572,7 @@ export function ComponentsSection({ theme }: { theme: string }) {
 
       <Demo
         name="Pane"
-        props="title · count · meta · action · footer · inset: default | list"
+        props="title · count · status · meta · action · footer · inset: default | list"
         intro="A gray tray holding the header and wrapping a white card, with concentric corners (14px tray, 10px card). The title starts exactly where the content does, 20px from the tray's edge. The footer stays pinned at the bottom of the card while the content scrolls. inset=list (the queue) insets the content 4px for rows that carry their own 12px padding. count follows the title on its baseline; action is one small secondary Button on the header's right edge, 6px from the pane's edge, with the softer --shadow-button-on-tray. Screens never build their own."
       >
         <Pane title="Email" meta={<span className="text-mono-small">LL-5040</span>}>
@@ -559,6 +595,14 @@ export function ComponentsSection({ theme }: { theme: string }) {
         >
           <p className="text-small">The triage pane puts ApproveBar in its footer.</p>
         </Pane>
+      </Demo>
+
+      <Demo
+        name="WorkingStatus"
+        props="label · active"
+        intro="Work in progress beside a Pane title (Pane status): “Triaging…” while the AI triages a ticket added with the New ticket form. text-small in --ink-3; a lighter band runs through the words and the sparkle turns slowly. Set active false when the work is done and it fades out over 200ms. Holds still under reduced motion. Toggle it here."
+      >
+        <WorkingStatusDemo />
       </Demo>
 
       <Demo
@@ -597,10 +641,10 @@ export function ComponentsSection({ theme }: { theme: string }) {
       <Demo
         name="NewTicketForm"
         props="variant: dialog | panel"
-        intro="Customer name and Message are required (a red asterisk, never “(optional)”); Add and triage is disabled until both have text, and does nothing yet. Use a sample email fills a fictional SSO outage. Fields: surface fill, 8px corners, a divider-colored border and a light placeholder (a documented contrast exception: the labels carry the meaning), and a strong focus ring. Enter, or Cmd+Enter in Message, submits once it's enabled."
+        intro="Customer name and Message are required (a red asterisk, never “(optional)”); Add and triage is disabled until both have text and no field is longer than the live route takes (the limit is said under the field). In the inbox it adds the ticket and triages it live; here it does nothing. The placeholders show one of nine sample emails, and Use a sample email fills that same one, or the next if Customer name already has text, so pressing it again moves through them. Fields: surface fill, 8px corners, a divider-colored border and a light placeholder (a documented contrast exception: the labels carry the meaning), and a strong focus ring. Enter, or Cmd+Enter in Message, submits once it's enabled."
       >
         <div className={styles.formDemo}>
-          <NewTicketForm variant="dialog" />
+          <NewTicketFormDemo />
         </div>
       </Demo>
 

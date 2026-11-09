@@ -3,9 +3,11 @@
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState, type ReactNode } from "react";
 import { AppHeader, Button, Dialog, HeaderPanel, HeaderPanelButton, NewTicketForm, Pane } from "@/components/ui";
-import { tickets } from "@/fixtures/tickets";
-import { InboxProvider } from "./inbox-state";
+import { pickSample, sampleEmails } from "@/fixtures/sample-emails";
+import { addTicket, type NewTicket } from "./added-tickets";
+import { InboxProvider, useInbox } from "./inbox-state";
 import { QueueList } from "./queue-list";
+import { revealQueueRow } from "./queue-scroll";
 import styles from "./inbox.module.css";
 
 /**
@@ -25,6 +27,7 @@ export function InboxShell({ children }: { children: ReactNode }) {
 
 function Shell({ id, children }: { id: string; children: ReactNode }) {
   const router = useRouter();
+  const inbox = useInbox();
   // A ticket picked in the queue panel that hasn't opened yet (see open below).
   const pending = useRef<{ id: string; timer: number; late: boolean } | null>(null);
   // Whether the queue is open, and whether its next close should first put
@@ -49,6 +52,45 @@ function Shell({ id, children }: { id: string; children: ReactNode }) {
   const [queueView, setQueueView] = useState<"queue" | "new-ticket">("queue");
   const [formKey, setFormKey] = useState(0);
   const clearForm = () => setFormKey((k) => k + 1);
+
+  // The sample email the form's placeholders show: picked at random each
+  // time the form opens, never the one picked last. Clearing the form
+  // keeps it; "Use a sample email" moves on to the next when Customer name
+  // already has text.
+  const [sample, setSample] = useState<number | null>(null);
+  const pick = () => {
+    const next = pickSample(sample);
+    setSample(next);
+    return sampleEmails[next];
+  };
+  const openNewTicket = (where: "dialog" | "panel") => {
+    pick();
+    if (where === "dialog") setNewTicketOpen(true);
+    else setQueueView("new-ticket");
+  };
+
+  // Add and triage: the ticket goes at the top of Needs review, selected,
+  // while the AI triages it. The form closes the way it always does: the
+  // Dialog closes (focus back to New ticket); the queue panel closes as when
+  // a ticket is picked (focus back to the queue's button). The new row is
+  // brought into view in the desktop queue once it has opened.
+  const justAdded = useRef<string | null>(null);
+  const add = (input: NewTicket) => {
+    const ticket = addTicket(input);
+    inbox.triage(ticket.id);
+    justAdded.current = ticket.id;
+    if (newTicketOpen) {
+      setNewTicketOpen(false);
+      router.push(`/tickets/${ticket.id}`);
+    } else {
+      open(ticket.id);
+    }
+  };
+  useEffect(() => {
+    if (justAdded.current !== id) return;
+    justAdded.current = null;
+    revealQueueRow(id, "nearest", false);
+  }, [id]);
 
   // Picking a ticket in the queue panel, in this order, so the page never
   // visibly jumps and the header never blinks: put the page at the top
@@ -163,8 +205,8 @@ function Shell({ id, children }: { id: string; children: ReactNode }) {
       <div className={styles.queuePane}>
         <Pane
           title="Queue"
-          count={tickets.length}
-          action={<NewTicketButton onClick={() => setNewTicketOpen(true)} />}
+          count={inbox.tickets.length}
+          action={<NewTicketButton onClick={() => openNewTicket("dialog")} />}
           inset="list"
         >
           <QueueList currentId={id} onOpen={open} />
@@ -180,8 +222,8 @@ function Shell({ id, children }: { id: string; children: ReactNode }) {
           open={queueOpen}
           onOpenChange={setQueueOpen}
           title="Queue"
-          count={tickets.length}
-          action={<NewTicketButton onClick={() => setQueueView("new-ticket")} />}
+          count={inbox.tickets.length}
+          action={<NewTicketButton onClick={() => openNewTicket("panel")} />}
           id={queueId}
           button={queueButton}
           onOpened={centerCurrent}
@@ -191,7 +233,15 @@ function Shell({ id, children }: { id: string; children: ReactNode }) {
             title: "New ticket",
             backLabel: "Back to queue",
             onBack: () => setQueueView("queue"),
-            children: <NewTicketForm key={formKey} variant="panel" />,
+            children: (
+              <NewTicketForm
+                key={formKey}
+                variant="panel"
+                sample={sampleEmails[sample ?? 0]}
+                onNextSample={pick}
+                onAdd={add}
+              />
+            ),
           }}
           // Closed from either view: back to the queue, and the form is cleared.
           onClosed={() => {
@@ -204,7 +254,13 @@ function Shell({ id, children }: { id: string; children: ReactNode }) {
       </div>
 
       <Dialog open={newTicketOpen} onOpenChange={setNewTicketOpen} title="New ticket" onClosed={clearForm}>
-        <NewTicketForm key={formKey} variant="dialog" />
+        <NewTicketForm
+          key={formKey}
+          variant="dialog"
+          sample={sampleEmails[sample ?? 0]}
+          onNextSample={pick}
+          onAdd={add}
+        />
       </Dialog>
     </main>
   );

@@ -61,6 +61,18 @@
   --duration-view-in: 220ms;
   --ease-view-in: var(--ease-enter);
   --delay-view-in: 40ms;
+
+  /* Live triage (the Triage pane while the AI works). WorkingStatus beside
+     the title: its text's shimmer and its sparkle's turn loop while it
+     waits, slowly, so they never pull the eye; it fades out when the
+     answer arrives. The loops are the one motion over 200ms that isn't
+     the queue panel's. The loading skeleton's Approve bar fades out the
+     same way when the answer has no Approve ("not a request", or an
+     error). The skeleton's own pulse and crossfade are Skullet's (its
+     "pulse" at "slow", and the "together" reveal). */
+  --duration-status-shimmer: 1.8s;
+  --duration-status-spin: 4s;
+  --duration-status-out: 200ms;
 }
 
 /* Switching theme shouldn't animate every color on the page: ThemeToggle

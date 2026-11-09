@@ -86,7 +86,8 @@ export function DraftEditor({
       </label>
       <div className={styles.box}>
         {/* Draws the placeholder highlights behind the textarea's transparent background. */}
-        <div ref={backdrop} className={`text-reading ${styles.backdrop}`} aria-hidden>
+        {/* skullet-ignore: in a loading skeleton the box is one block, with no lines of text. */}
+        <div ref={backdrop} className={`text-reading ${styles.backdrop}`} aria-hidden skullet-ignore="">
           {text.split(placeholderPattern).map((part, i) =>
             i % 2 === 1 ? (
               <mark key={i} className={styles.placeholder}>
@@ -110,6 +111,7 @@ export function DraftEditor({
             if (backdrop.current) backdrop.current.scrollTop = e.currentTarget.scrollTop;
           }}
           className={`text-reading ${styles.textarea}`}
+          skullet-ignore=""
         />
       </div>
       {blocker && (

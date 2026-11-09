@@ -39,3 +39,42 @@
 .empty p {
   margin: 0;
 }
+
+/*
+ * An added ticket's Triage pane (LiveTriagePane). Skullet's theme for its
+ * loading skeleton, set here so it follows a theme scoped with data-theme
+ * too: the neutral ink tints (--skeleton-fill), a slow pulse, 6px corners
+ * on lines and boxes. The wrapper takes no box of its own.
+ */
+.live {
+  display: contents;
+  --skullet-base: var(--skeleton-fill);
+  --skullet-highlight: var(--skeleton-highlight);
+  --skullet-animation: pulse;
+  --skullet-speed: slow;
+  --skullet-radius: 6px;
+}
+
+/* A failed "Triage anyway", above the "Not a request" suggestion it was for. */
+.problem {
+  display: grid;
+  margin-block-end: 24px;
+}
+
+/* The skeleton's Approve bar leaving when the answer has none. */
+.leaving {
+  animation: leave var(--duration-status-out) var(--ease-out-quart) forwards;
+}
+
+@keyframes leave {
+  to {
+    opacity: 0;
+  }
+}
+
+/* Reduced motion: gone at once (1ms, so it still reports that it's done). */
+@media (prefers-reduced-motion: reduce) {
+  .leaving {
+    animation-duration: 1ms;
+  }
+}

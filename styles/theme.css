@@ -49,6 +49,12 @@
      queue panel. Lighter than a suggestion's 7% (--suggested-fill), so a
      neutral tag never reads as an AI one. */
   --tag-fill: var(--surface-2);
+  /* A loading skeleton's bars and blocks (Skullet's base): ink at 7%, the
+     same neutral tint as a suggestion's fill, so a skeleton reads as the
+     pencil it's about to become; its highlight is ink at 3%. Translucent,
+     so it shows on the card, the tray and the panel alike. */
+  --skeleton-fill: color-mix(in oklch, var(--ink) 7%, transparent);
+  --skeleton-highlight: color-mix(in oklch, var(--ink) 3%, transparent);
   --line: var(--gray-100);
   --line-strong: var(--gray-500);
   /* A text field's placeholder. Below 4.5:1 on purpose (DESIGN.md, Text
@@ -90,6 +96,8 @@
     --surface-2: var(--gray-950);
     --hover-fill: color-mix(in oklch, var(--ink) 4%, transparent);
     --tag-fill: color-mix(in oklch, var(--ink) 4%, transparent);
+    --skeleton-fill: color-mix(in oklch, var(--ink) 7%, transparent);
+    --skeleton-highlight: color-mix(in oklch, var(--ink) 3%, transparent);
     --line: var(--gray-900);
     --line-strong: var(--gray-500);
     --placeholder: var(--gray-500);
@@ -130,6 +138,8 @@
   --surface-2: var(--gray-950);
   --hover-fill: color-mix(in oklch, var(--ink) 4%, transparent);
   --tag-fill: color-mix(in oklch, var(--ink) 4%, transparent);
+  --skeleton-fill: color-mix(in oklch, var(--ink) 7%, transparent);
+  --skeleton-highlight: color-mix(in oklch, var(--ink) 3%, transparent);
   --line: var(--gray-900);
   --line-strong: var(--gray-500);
   --placeholder: var(--gray-500);
