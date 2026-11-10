@@ -6,9 +6,11 @@ export function generateStaticParams() {
 }
 
 /**
- * The open ticket's panes. The ticket ID is read on the client (useParams),
- * not from params here: reading params on the server would block instant
- * navigation between tickets under Cache Components.
+ * The open ticket's panes. The ticket ID is read on the client, from the
+ * pathname (ticket-url.ts), not from params here: opening another ticket is
+ * a pushState with no request, and reading params on the server would
+ * block navigation under Cache Components anyway. This route still serves
+ * a reload or a pasted /tickets/<id>.
  */
 export default function TicketPage() {
   return <TicketPanes />;

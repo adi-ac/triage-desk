@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { InboxShell, InboxShellFallback } from "./inbox-shell";
 
 /**
- * The inbox reads the ticket ID with useParams() on the client (DESIGN.md,
+ * The inbox reads the ticket ID from the pathname on the client (DESIGN.md,
  * Layout). With Cache Components that's request-time data for an ID that
  * isn't in generateStaticParams (a ticket added in the browser), so the
  * shell sits in a Suspense boundary: the build prerenders the 40 fixture

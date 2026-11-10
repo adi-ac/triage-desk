@@ -1,6 +1,5 @@
 "use client";
 
-import { useParams, useRouter } from "next/navigation";
 import { useEffect, useId, useRef, useState, type MouseEvent, type ReactNode } from "react";
 import { AppHeader, Button, Dialog, HeaderPanel, HeaderPanelButton, NewTicketForm, Pane } from "@/components/ui";
 import { pickSample, sampleEmails } from "@/fixtures/sample-emails";
@@ -8,6 +7,7 @@ import { addTicket, type NewTicket } from "./added-tickets";
 import { InboxProvider, useInbox } from "./inbox-state";
 import { QueueList } from "./queue-list";
 import { revealQueueRow } from "./queue-scroll";
+import { showTicket, useTicketId } from "./ticket-url";
 import styles from "./inbox.module.css";
 
 /**
@@ -17,7 +17,8 @@ import styles from "./inbox.module.css";
  * and the open ticket's email and triage panes.
  */
 export function InboxShell({ children }: { children: ReactNode }) {
-  const { id } = useParams<{ id: string }>();
+  // From the pathname, which follows pushState (ticket-url.ts).
+  const id = useTicketId();
   return (
     <InboxProvider currentId={id}>
       <Shell id={id}>{children}</Shell>
@@ -26,7 +27,6 @@ export function InboxShell({ children }: { children: ReactNode }) {
 }
 
 function Shell({ id, children }: { id: string; children: ReactNode }) {
-  const router = useRouter();
   const inbox = useInbox();
   // A ticket picked in the queue panel that hasn't opened yet (see open below).
   const pending = useRef<{ id: string; timer: number; late: boolean } | null>(null);
@@ -81,7 +81,7 @@ function Shell({ id, children }: { id: string; children: ReactNode }) {
     justAdded.current = ticket.id;
     if (newTicketOpen) {
       setNewTicketOpen(false);
-      router.push(`/tickets/${ticket.id}`);
+      showTicket(ticket.id);
     } else {
       open(ticket.id);
     }
@@ -95,16 +95,16 @@ function Shell({ id, children }: { id: string; children: ReactNode }) {
   // Picking a ticket in the queue panel, in this order, so the page never
   // visibly jumps and the header never blinks: put the page at the top
   // instantly while the panel and scrim still cover it; a frame later,
-  // navigate without the router's scroll; once the new ticket has rendered
-  // (the route change has committed, then one frame), close the panel
+  // open it (pushState: no request, see ticket-url.ts); once the new ticket
+  // has rendered (the ID has changed, then one frame), close the panel
   // (toTop keeps the page at the top when the lock is released). The scroll
   // and the new ticket's render land in separate frames: in iOS Safari,
   // the two in back-to-back frames left the header's logo and wordmark
   // (and the panel's list) unpainted for a frame. From 1200px the queue is
-  // a pane and nothing covers the page, so the router scrolls as usual.
+  // a pane and nothing covers the page, which never scrolls there.
   const open = (ticketId: string) => {
     if (!queueOpen) {
-      router.push(`/tickets/${ticketId}`);
+      showTicket(ticketId);
       return;
     }
     if (ticketId === id) {
@@ -118,7 +118,9 @@ function Shell({ id, children }: { id: string; children: ReactNode }) {
     const timer = window.setTimeout(() => setQueueOpen(false), 3000);
     pending.current = { id: ticketId, timer, late: false };
     window.scrollTo({ top: 0, left: 0, behavior: "instant" });
-    requestAnimationFrame(() => router.push(`/tickets/${ticketId}`, { scroll: false }));
+    // pushState: the ticket renders from what's already here, with no
+    // request, so the panel's close follows in a frame or two.
+    requestAnimationFrame(() => showTicket(ticketId));
   };
   useEffect(() => {
     const pick = pending.current;

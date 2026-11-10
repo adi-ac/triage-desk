@@ -1,6 +1,6 @@
 "use client";
 
-import { notFound, useParams, useRouter } from "next/navigation";
+import { notFound } from "next/navigation";
 import { createContext, use, useEffect, useRef, useState, type ReactNode } from "react";
 import { Skeleton, SkulletProvider } from "skullet/react";
 import {
@@ -32,6 +32,7 @@ import {
   type Urgency,
 } from "@/lib/suggestion";
 import { couldBeAdded, type AddedTicket, type LiveTriage } from "../added-tickets";
+import { showTicket, useTicketId } from "../ticket-url";
 import {
   initialFor,
   modelRow,
@@ -115,8 +116,18 @@ const blockerSummary = (blockers: readonly Blocker[]) =>
 const readyText = (s: TriageSuggestion, blockers: readonly Blocker[]) =>
   `The AI suggests ${s.category.value} and ${s.urgency.value} urgency. ${blockerSummary(blockers)}`;
 
+/**
+ * The open ticket's panes. The ID comes from the pathname (ticket-url.ts):
+ * opening another ticket is a pushState, not a route change, so this stays
+ * mounted, and the ticket's view is keyed by its ID so each ticket starts
+ * fresh (its cards scrolled to the top, its own status line and state).
+ */
 export function TicketPanes() {
-  const { id: ticketId } = useParams<{ id: string }>();
+  const ticketId = useTicketId();
+  return <TicketView key={ticketId} ticketId={ticketId} />;
+}
+
+function TicketView({ ticketId }: { ticketId: string }) {
   const { ticketFor, addedFor, addedLoaded, effectiveFor } = useInbox();
   const [activeQuote, setActiveQuote] = useState<string | null>(null);
   // The polite status line's words. The count changes them even when the
@@ -243,12 +254,14 @@ const evidenceFor = (email: Email, s: { evidence: TriageSuggestion["evidence"] }
   matchEvidence(email.body, s.evidence, email.subject).filter((e) => e.supports === supports);
 
 function useNext(ticketId: string) {
-  const router = useRouter();
   const { queue } = useInbox();
   return () => {
     const order = flatQueue(queue);
     const i = order.findIndex((t) => t.id === ticketId);
-    router.push(`/tickets/${order[(i + 1) % order.length].id}`);
+    // The next ticket opens at the top of the page, as a route change did
+    // (below 1200px the page scrolls; from 1200px it never does).
+    window.scrollTo({ top: 0, left: 0, behavior: "instant" });
+    showTicket(order[(i + 1) % order.length].id);
   };
 }
 
