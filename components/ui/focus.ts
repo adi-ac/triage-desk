@@ -62,3 +62,14 @@ export function ms(name: string) {
 export function reducedMotion() {
   return matchMedia("(prefers-reduced-motion: reduce)").matches;
 }
+
+/**
+ * Whether every text field in `container` is blank. Escape and a scrim
+ * click only close or go back from a form when it is, so typed or pasted
+ * text is never lost to a stray key or click (Dialog, HeaderPanel's
+ * second view).
+ */
+export function fieldsEmpty(container: Element | null) {
+  const fields = container?.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>("input, textarea") ?? [];
+  return [...fields].every((f) => f.value.trim() === "");
+}

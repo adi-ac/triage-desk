@@ -61,15 +61,27 @@
   cursor: pointer;
 }
 
-/* Soft fill on hover and focus. With the keyboard, the focus ring shows as
-   well (the fill alone is too faint to be the only cue), drawn inside the
-   item so it doesn't overlap its neighbours. */
+/* Touch: each item is 44px tall (the items touch, so a hit area can't grow
+   past them; the item itself grows). */
+@media (pointer: coarse) {
+  .item {
+    display: flex;
+    align-items: center;
+    min-block-size: 44px;
+  }
+}
+
+/* Soft fill on hover and on keyboard focus, never on focus alone: the
+   first item takes focus when the menu opens, and after a click that would
+   leave it filled beside the hovered one. With the keyboard, the focus
+   ring shows as well (the fill alone is too faint to be the only cue),
+   drawn inside the item so it doesn't overlap its neighbours. */
 .item:focus {
   outline: none;
-  background: var(--button-bg-hover);
 }
 
 .item:focus-visible {
+  background: var(--button-bg-hover);
   outline: 2px solid var(--focus-ring);
   outline-offset: -2px;
 }

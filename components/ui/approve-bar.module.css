@@ -41,11 +41,36 @@
   text-underline-offset: 3px;
   text-decoration-thickness: 1px;
   cursor: pointer;
-  transition: color 150ms ease-out;
+  transition: color var(--duration-hover) var(--ease-hover);
 }
 
 @media (hover: hover) {
   .jump:hover {
     color: var(--ink);
+  }
+}
+
+/* Touch: 44px hit areas that never overlap, each stopping short of the
+   middle of a gap (see Button). Approve's grows 7px into the 16px gap
+   beside it; when the summary wraps below Approve, the row gap opens to
+   12px, Approve takes 5.5px of it and a link 5px, the links growing
+   downward the rest of the way, into the card's padding. Sideways a link
+   takes 2px of the ", " (about 6.5px) between it and the next. */
+@media (pointer: coarse) {
+  .bar {
+    --hit-inline: 7px;
+    row-gap: 12px;
+  }
+
+  .jump {
+    position: relative;
+  }
+
+  .jump::after {
+    content: "";
+    position: absolute;
+    inset-block-start: -5px;
+    inset-inline: -2px;
+    block-size: 44px;
   }
 }

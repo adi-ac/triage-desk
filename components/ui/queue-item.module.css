@@ -9,10 +9,12 @@
   border: 0;
   border-radius: 8px;
   text-align: start;
+  /* A link in the inbox: no underline, and its text keeps the row's colours. */
+  text-decoration: none;
   color: var(--ink-2);
   background: transparent;
   cursor: pointer;
-  transition: background-color 150ms ease-out;
+  transition: background-color var(--duration-hover) var(--ease-hover);
 }
 
 @media (hover: hover) {
@@ -23,12 +25,12 @@
 
 /* The open ticket: a petrol tint. Its secondary text steps up to ink-2,
    since ink-3 falls short on accent-soft. */
-.item[aria-current="true"] {
+.item[aria-current] {
   background: var(--accent-soft);
 }
 
-.item[aria-current="true"] .company,
-.item[aria-current="true"] .time {
+.item[aria-current] .company,
+.item[aria-current] .time {
   color: var(--ink-2);
 }
 

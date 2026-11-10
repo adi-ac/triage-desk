@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useEffect, useId, useRef, useState, type ReactNode } from "react";
+import { useEffect, useId, useRef, useState, type MouseEvent, type ReactNode } from "react";
 import { AppHeader, Button, Dialog, HeaderPanel, HeaderPanelButton, NewTicketForm, Pane } from "@/components/ui";
 import { pickSample, sampleEmails } from "@/fixtures/sample-emails";
 import { addTicket, type NewTicket } from "./added-tickets";
@@ -176,6 +176,11 @@ function Shell({ id, children }: { id: string; children: ReactNode }) {
 
   return (
     <main className={styles.shell}>
+      {/* The first Tab stop: past the header and the queue to the Triage
+          pane (on phones, past the email too). Hidden until focused. */}
+      <a href="#triage" className={`text-small ${styles.skip}`} onClick={skipToTriage}>
+        Skip to triage
+      </a>
       {/* The grid row's placeholder; below 1200px the header bar inside is fixed. */}
       <div className={styles.header}>
         <div
@@ -300,9 +305,24 @@ function NewTicketButton({ onClick }: { onClick: () => void }) {
   );
 }
 
+/**
+ * "Skip to triage": focus the Triage pane on screen (Next keeps recently
+ * visited pages mounted but hidden, so its ID can be there twice) and bring
+ * its top into view, clear of the fixed header below 1200px (its scroll
+ * margin). Without script the link still jumps to the first #triage.
+ */
+function skipToTriage(e: MouseEvent<HTMLAnchorElement>) {
+  const pane = [...document.querySelectorAll<HTMLElement>('[id="triage"]')].find((el) => el.getClientRects().length > 0);
+  if (!pane) return;
+  e.preventDefault();
+  pane.focus({ preventScroll: true });
+  const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  pane.scrollIntoView({ block: "start", behavior: reduced ? "instant" : "smooth" });
+}
+
 /** The panel opens with the current ticket scrolled to the middle of its list. */
 function centerCurrent(scroller: HTMLDivElement) {
-  const item = scroller.querySelector('[aria-current="true"]');
+  const item = scroller.querySelector("[aria-current]");
   if (!item) return;
   const list = scroller.getBoundingClientRect();
   const row = item.getBoundingClientRect();

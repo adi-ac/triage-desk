@@ -1,13 +1,13 @@
 "use client";
 
 import { useEffect, useId, useLayoutEffect, useRef, type ReactNode } from "react";
-import { initialFocus, moveFocus, ms, reducedMotion, token, useLastInputWasPointer } from "./focus";
+import { fieldsEmpty, initialFocus, moveFocus, ms, reducedMotion, token, useLastInputWasPointer } from "./focus";
 import { IconButton } from "./icon-button";
 import styles from "./dialog.module.css";
 
 export type DialogProps = {
   open: boolean;
-  /** Called with false on the ×, Escape, or a scrim click when every field is empty. */
+  /** Called with false on the ×, and on Escape or a scrim click when every field is empty. */
   onOpenChange: (open: boolean) => void;
   /** Its heading and name ("New ticket"). */
   title: string;
@@ -24,9 +24,9 @@ export type DialogProps = {
  *
  * Focus goes to the content's [data-autofocus] element (its first field)
  * on open, or, on touch devices, to the heading, so no keyboard pops up;
- * and back to whatever opened it on close. Escape and the × close it. A
- * click on the scrim closes it only when every field in it is empty, so a
- * stray click never loses typed or pasted text.
+ * and back to whatever opened it on close. The × always closes it; Escape
+ * and a click on the scrim close it only when every field in it is empty,
+ * so a stray key or click never loses typed or pasted text.
  *
  * Its entrance and exit run with the Web Animations API (an exit has to:
  * Safari can't animate a top-layer exit in CSS), each from wherever the
@@ -104,14 +104,24 @@ export function Dialog({ open, onOpenChange, title, onClosed, children }: Dialog
     });
   }, [open, pointer]);
 
-  // Escape: closed through onOpenChange, so the exit plays. If the browser
-  // closes it anyway (a second Escape can't be cancelled), settle the state.
+  // Escape follows the scrim's rule: it closes only when every field is
+  // empty, so typed or pasted text is never lost to a stray key. Handled
+  // on keydown, which stops the browser's own close request before it
+  // starts (a cancel event can't be cancelled twice in a row without a
+  // click in between, so a second Escape would close it anyway).
+  // Closed through onOpenChange, so the exit plays. If the browser closes
+  // it anyway (Android's back gesture), settle the state.
   useEffect(() => {
     const dialog = ref.current;
     if (!dialog) return;
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== "Escape" || e.isComposing) return;
+      e.preventDefault();
+      if (fieldsEmpty(dialog)) latest.current.onOpenChange(false);
+    };
     const onCancel = (e: Event) => {
       e.preventDefault();
-      latest.current.onOpenChange(false);
+      if (fieldsEmpty(dialog)) latest.current.onOpenChange(false);
     };
     const onClose = () => {
       if (closing.current) {
@@ -121,9 +131,11 @@ export function Dialog({ open, onOpenChange, title, onClosed, children }: Dialog
       settle.current?.();
       latest.current.onOpenChange(false);
     };
+    dialog.addEventListener("keydown", onKeyDown);
     dialog.addEventListener("cancel", onCancel);
     dialog.addEventListener("close", onClose);
     return () => {
+      dialog.removeEventListener("keydown", onKeyDown);
       dialog.removeEventListener("cancel", onCancel);
       dialog.removeEventListener("close", onClose);
     };
@@ -146,8 +158,7 @@ export function Dialog({ open, onOpenChange, title, onClosed, children }: Dialog
         // A click on the scrim lands on the <dialog> itself, outside its box.
         const dialog = e.currentTarget;
         if (e.target !== dialog || !press.current?.outside || !outside(dialog, e.clientX, e.clientY)) return;
-        const fields = dialog.querySelectorAll<HTMLInputElement | HTMLTextAreaElement>("input, textarea");
-        if ([...fields].every((f) => f.value.trim() === "")) onOpenChange(false);
+        if (fieldsEmpty(dialog)) onOpenChange(false);
       }}
     >
       <div className={styles.header}>

@@ -18,7 +18,7 @@
   background: transparent;
   cursor: pointer;
   user-select: none;
-  transition: color 150ms ease-out;
+  transition: color var(--duration-hover) var(--ease-hover);
 }
 
 @media (hover: hover) {
@@ -44,11 +44,13 @@
   padding: 0;
 }
 
-/* Phones: icon options (ThemeToggle) get an invisible touch target 44px
-   tall, without changing their size. Sideways it fills the 2px gaps and
-   the group's padding, so the options' targets meet without overlapping;
-   they can't be 44px wide, since the options sit 30px apart. */
-@media (max-width: 767px) {
+/* Touch (phones and tablets alike): icon options (ThemeToggle) get an
+   invisible touch target 44px tall, without changing their size. Sideways
+   it leaves the 2px gaps between options to neither (browsers round
+   hit-testing by up to about 1px, so targets that met in a 2px gap could
+   hand a tap to the wrong option) and takes the group's 2px padding at the
+   ends; they can't be 44px wide, since the options sit 30px apart. */
+@media (pointer: coarse) {
   .segment[data-icon] {
     position: relative;
   }
@@ -56,7 +58,7 @@
   .segment[data-icon]::after {
     content: "";
     position: absolute;
-    inset: -8px -1px;
+    inset: -8px 0;
   }
 
   .segment[data-icon]:first-child::after {

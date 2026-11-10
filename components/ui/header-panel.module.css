@@ -49,15 +49,15 @@
   }
 }
 
-/* Phones: an invisible 44px touch target, centered, without changing the
-   button's size. The header leaves 8px between it and the theme toggle,
-   whose options stop 2px short, so the two never overlap. */
-@media (max-width: 767px) {
+/* Touch (phones and tablets alike): an invisible 44px touch target,
+   without changing the button's size. 6px above and below; sideways it
+   takes 3px of the 8px gap to the theme toggle (half, less 1px, as Button's)
+   and 9px on its right, where nothing else is, so the two never overlap. */
+@media (pointer: coarse) {
   .button::after {
     content: "";
     position: absolute;
-    inset: -6px;
-    border-radius: var(--button-radius);
+    inset: -6px -9px -6px -3px;
   }
 }
 

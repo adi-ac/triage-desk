@@ -127,6 +127,19 @@ export function addTicket(input: NewTicket): Ticket {
 /** Requests out now, by ticket ID and kind, so a second press never sends a second request. */
 const inFlight = new Set<string>();
 
+/**
+ * The page is unloading (a reload or leaving the site). The browser aborts
+ * requests still out, and their failure would otherwise be saved as the
+ * AI's ("couldn't triage") just before the page goes; leaving it saved as
+ * "triaging" lets the next load say "Triage stopped when the page reloaded".
+ */
+let unloading = false;
+if (typeof window !== "undefined") {
+  addEventListener("pagehide", () => (unloading = true));
+  // Back from the back/forward cache: the page is live again.
+  addEventListener("pageshow", () => (unloading = false));
+}
+
 type Outcome = { ok: true; suggestion: Suggestion } | { ok: false; error: LiveFailure; resetsAt?: string };
 
 async function request(a: AddedTicket, triageAnyway: boolean): Promise<Outcome> {
@@ -167,6 +180,8 @@ export async function triageAdded(id: string): Promise<Suggestion | null> {
   change(id, (x) => ({ ...x, triage: { status: "triaging" } }));
   const outcome = await request(a, false);
   inFlight.delete(`${id} triage`);
+  // Cut off by a reload: leave it "triaging", which the next load reads as interrupted.
+  if (unloading) return null;
   if (!outcome.ok) {
     change(id, (x) => ({ ...x, triage: { status: "failed", error: outcome.error, resetsAt: outcome.resetsAt } }));
     return null;
@@ -183,6 +198,7 @@ export async function triageAddedAnyway(id: string): Promise<TriageSuggestion | 
   change(id, (x) => ({ ...x, anyway: { status: "triaging" } }));
   const outcome = await request(a, true);
   inFlight.delete(`${id} anyway`);
+  if (unloading) return null;
   if (!outcome.ok || outcome.suggestion.kind !== "triage") {
     const failure: { error: LiveFailure; resetsAt?: string } = outcome.ok ? { error: "model" } : outcome;
     change(id, (x) => ({ ...x, anyway: { status: "failed", error: failure.error, resetsAt: failure.resetsAt } }));

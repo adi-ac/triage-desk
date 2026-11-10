@@ -141,6 +141,14 @@ input.input::placeholder {
   box-shadow: 0 0 0 3px color-mix(in oklch, var(--focus-ring) 22%, transparent);
 }
 
+/* Too long and focused (still typing): the error stays visible, so the
+   border and its ring are --critical, not the focus colour. */
+.input[aria-invalid="true"]:focus,
+.input[aria-invalid="true"]:focus-visible {
+  border-color: var(--critical);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--critical) 22%, transparent);
+}
+
 .message {
   resize: none;
 }
@@ -168,4 +176,11 @@ input.input::placeholder {
 
 .form[data-variant="panel"] .footer {
   padding: 12px 16px;
+}
+
+/* Touch: the two buttons' 44px hit areas stop 1px short of the middle of the 8px gap. */
+@media (pointer: coarse) {
+  .footer {
+    --hit-inline: 3px;
+  }
 }

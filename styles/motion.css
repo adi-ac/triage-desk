@@ -15,6 +15,14 @@
   --duration-sent: 150ms;
   /* The Other menu's entrance and its caret. */
   --duration-menu: 150ms;
+  /* Hover and selection feedback on controls and rows: a button's or a
+     queue row's fill, a quiet link's or a segment's text colour. */
+  --duration-hover: 150ms;
+  --ease-hover: ease-out;
+  /* IconButton's tooltip fading and sliding in beside it. */
+  --duration-tooltip: 120ms;
+  /* ...shown on hover only after a short wait, so passing over it does nothing. */
+  --delay-tooltip: 400ms;
   /* The queue button's icon turning into the close × and back (HeaderPanel). */
   --duration-icon-morph: 260ms;
   --delay-icon-morph: 40ms;

@@ -15,7 +15,7 @@ export function revealQueueRow(id: string, to: "nearest" | "center", smooth: boo
     const scroller = list.parentElement;
     const row = list.querySelector<HTMLElement>(`[data-ticket-id="${CSS.escape(id)}"]`);
     if (!scroller || !row || !scroller.getClientRects().length) continue;
-    if (to === "center" && !row.querySelector('[aria-current="true"]')) continue;
+    if (to === "center" && !row.querySelector("[aria-current]")) continue;
     const box = scroller.getBoundingClientRect();
     const r = row.getBoundingClientRect();
     const top =

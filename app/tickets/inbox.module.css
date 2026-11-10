@@ -49,6 +49,46 @@
   grid-column: 1 / -1;
 }
 
+/* "Skip to triage": out of the grid's flow and invisible until it has
+   keyboard focus, then a raised pill over the header's left end (above
+   the fixed header, z-index 5). Neutral chrome, never Petrol. */
+.skip {
+  position: absolute;
+  inline-size: 1px;
+  block-size: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+/* It covers the logo and wordmark whole (116px wide, 22px tall), 4px
+   clear on each side, so no letter of them peeks out beside it. */
+.skip:focus {
+  position: fixed;
+  inset-block-start: var(--shell-pad);
+  inset-inline-start: calc(var(--shell-pad) - 4px);
+  z-index: 6;
+  inline-size: auto;
+  min-inline-size: 124px;
+  text-align: center;
+  block-size: auto;
+  overflow: visible;
+  clip-path: none;
+  padding: 6px 14px;
+  border-radius: var(--button-radius);
+  font-weight: var(--text-body-weight-strong);
+  text-decoration: none;
+  color: var(--ink);
+  background: var(--surface-raised);
+  box-shadow: var(--shadow-popover);
+}
+
+/* The Triage pane, reached by "Skip to triage": below 1200px its top lands
+   clear of the fixed header. */
+.ticket [id="triage"] {
+  scroll-margin-block-start: var(--fixed-header-clearance, 0px);
+}
+
 /* Below 1200px (phones and tablets) the queue is behind a button in the
    header (HeaderPanelButton, in this 32px slot to the right of the theme
    toggle) and opens in a HeaderPanel below the header. From 1200px it's
@@ -96,8 +136,13 @@
   }
 
   /* The bar below is 100vw wide, which includes a classic scrollbar;
-     clipping keeps it from ever scrolling the page sideways. */
+     clipping keeps it from ever scrolling the page sideways.
+     --fixed-header-clearance: how far below the viewport's top something
+     scrolled into view must land to clear the fixed header and its bar
+     (the shell's padding, the 32px header, the bar's 12px below it), plus
+     12px of air. Evidence marks read it as their scroll margin. */
   .shell {
+    --fixed-header-clearance: calc(var(--shell-pad) + 32px + 12px + 12px);
     overflow-x: clip;
   }
 

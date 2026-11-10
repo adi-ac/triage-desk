@@ -8,6 +8,9 @@
   text-decoration-thickness: 1px;
   box-decoration-break: clone;
   -webkit-box-decoration-break: clone;
+  /* Scrolled to from its evidence item: below 1200px the inbox's header is
+     fixed over the page, and it sets this so the mark lands clear of it. */
+  scroll-margin-block-start: var(--fixed-header-clearance, 0px);
 }
 
 .mark[data-supports="category"] {

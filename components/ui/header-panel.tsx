@@ -11,7 +11,7 @@ import {
   type Ref,
   type RefObject,
 } from "react";
-import { initialFocus, moveFocus, ms, reducedMotion, token, useLastInputWasPointer } from "./focus";
+import { fieldsEmpty, initialFocus, moveFocus, ms, reducedMotion, token, useLastInputWasPointer } from "./focus";
 import { Icon, type IconName } from "./icon";
 import { IconButton } from "./icon-button";
 import styles from "./header-panel.module.css";
@@ -318,13 +318,17 @@ export function HeaderPanel({
 
     // Still held from before if this reopens during a close.
     lock.current ??= lockPage([root, trigger], panel);
-    // Escape goes back from the subview, and closes the panel from the main view.
+    // Escape goes back from the subview, and closes the panel from the main
+    // view. Back clears the subview's form, so from there Escape only goes
+    // back while every field is empty (as the Dialog's Escape): typed or
+    // pasted text is never lost to a stray key. The back button always works.
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key !== "Escape") return;
+      if (e.key !== "Escape" || e.isComposing) return;
       e.preventDefault();
       const sub = latest.current.subview;
-      if (sub?.open) latest.current.goBack();
-      else latest.current.onOpenChange(false);
+      if (sub?.open) {
+        if (fieldsEmpty(subviewRef.current)) latest.current.goBack();
+      } else latest.current.onOpenChange(false);
     };
     document.addEventListener("keydown", onKeyDown);
     addEventListener("resize", onResize);

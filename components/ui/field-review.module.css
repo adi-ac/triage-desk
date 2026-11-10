@@ -41,3 +41,13 @@
   gap: 6px;
 }
 
+/* Touch: the buttons' 44px hit areas take half of the 6px gap each side,
+   less 1px (Button), and a wrapped row sits far enough below for its hit
+   areas not to reach the row above (44px − the 22.8px button). */
+@media (pointer: coarse) {
+  .controls {
+    --hit-inline: 2px;
+    row-gap: 22px;
+  }
+}
+

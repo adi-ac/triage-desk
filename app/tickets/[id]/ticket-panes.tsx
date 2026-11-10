@@ -1,7 +1,7 @@
 "use client";
 
 import { notFound, useParams, useRouter } from "next/navigation";
-import { useState, type ReactNode } from "react";
+import { createContext, use, useEffect, useRef, useState, type ReactNode } from "react";
 import { Skeleton, SkulletProvider } from "skullet/react";
 import {
   ApproveBar,
@@ -20,7 +20,7 @@ import {
 } from "@/components/ui";
 import { skeletonEmail, skeletonSuggestion } from "@/fixtures/skeleton-sample";
 import { ruleSendFor, suggestionFor } from "@/fixtures/suggestions";
-import { approveBlockers, approveField } from "@/lib/approve";
+import { approveBlockers, approveField, type Blocker } from "@/lib/approve";
 import { flatQueue } from "@/lib/queue";
 import { matchEvidence } from "@/lib/evidence";
 import {
@@ -53,10 +53,76 @@ type Email = { body: string; subject: string };
 type Change = (change: (state: TicketState) => TicketState) => void;
 type OnEvidence = (quote: string | null) => void;
 
+/**
+ * Every Triage pane is the inbox's "Skip to triage" target, and where focus
+ * goes when the control that had it goes away with nothing to replace it
+ * (Try again, Triage anyway). Focusable by script only.
+ */
+const triagePane = { id: "triage", tabIndex: -1 } as const;
+
+/** The Triage pane on screen: Next keeps recently visited pages mounted but hidden, so the ID can exist twice. */
+const visibleTriage = () =>
+  [...document.querySelectorAll<HTMLElement>(`[id="${triagePane.id}"]`)].find((e) => e.getClientRects().length > 0) ??
+  null;
+
+/** The button that moves on after a send or a close ("Next ticket"), in the pane on screen. */
+const afterSendButton = () => visibleTriage()?.querySelector<HTMLElement>("[data-after-send]") ?? null;
+
+/**
+ * Says something to screen readers through the pane's polite status line:
+ * what an action did when the control that did it is gone (Approve, Keep),
+ * and how a live triage went.
+ */
+const Announce = createContext<(text: string) => void>(() => {});
+
+/**
+ * When the focused control goes away with the change it made (Approve
+ * becomes the sent line, Keep closes the ticket, Try again starts the
+ * skeleton), moves focus to `find()` in the next frame, unless focus is
+ * already somewhere else. A ring only after keyboard use.
+ */
+function useFocusRescue() {
+  const pointer = useRef(false);
+  useEffect(() => {
+    const onPointer = () => (pointer.current = true);
+    const onKey = () => (pointer.current = false);
+    document.addEventListener("pointerdown", onPointer, true);
+    document.addEventListener("keydown", onKey, true);
+    return () => {
+      document.removeEventListener("pointerdown", onPointer, true);
+      document.removeEventListener("keydown", onKey, true);
+    };
+  }, []);
+  return (find: () => HTMLElement | null) =>
+    requestAnimationFrame(() => {
+      const focused = document.activeElement;
+      // Lost: on <body>, removed, or in content on its way out (the loading
+      // skeleton's reveal keeps the old content, inert, while it crossfades).
+      if (focused && focused !== document.body && focused.isConnected && !focused.closest("[inert]")) return;
+      // focusVisible isn't in TypeScript's DOM types yet; browsers without it use their own guess.
+      find()?.focus({ preventScroll: true, focusVisible: !pointer.current } as FocusOptions);
+    });
+}
+
+const blockerSummary = (blockers: readonly Blocker[]) =>
+  blockers.length === 0
+    ? "Nothing blocks Approve."
+    : `${blockers.length} ${blockers.length === 1 ? "thing" : "things"} to resolve: ${blockers
+        .map((b) => b.target[0].toUpperCase() + b.target.slice(1))
+        .join(", ")}.`;
+
+/** What a screen reader hears when a triage suggestion arrives. */
+const readyText = (s: TriageSuggestion, blockers: readonly Blocker[]) =>
+  `The AI suggests ${s.category.value} and ${s.urgency.value} urgency. ${blockerSummary(blockers)}`;
+
 export function TicketPanes() {
   const { id: ticketId } = useParams<{ id: string }>();
   const { ticketFor, addedFor, addedLoaded, effectiveFor } = useInbox();
   const [activeQuote, setActiveQuote] = useState<string | null>(null);
+  // The polite status line's words. The count changes them even when the
+  // same words are said twice in a row, so they're read again.
+  const [said, setSaid] = useState({ text: "", count: 0 });
+  const announce = (text: string) => setSaid((s) => ({ text, count: s.count + 1 }));
   const ticket = ticketFor(ticketId);
   if (!ticket) {
     // An added ticket's ID before the tab's tickets have been read (the
@@ -71,10 +137,16 @@ export function TicketPanes() {
   const company = ticket.account ? `${ticket.account.company} · ${ticket.account.plan}` : null;
 
   return (
-    <>
+    <Announce value={announce}>
       {/* The page can't read the ID on the server (it would block instant
           navigation), so the tab title comes from here; React puts it in <head>. */}
       <title>{`${ticketId} · TriageDesk`}</title>
+      {/* Out of the grid's flow (absolutely positioned), present from the
+          start so changes to it are read. */}
+      <p role="status" className="visually-hidden">
+        {said.text}
+        {said.count % 2 ? "​" : ""}
+      </p>
       <Pane title="Email" meta={<span className="text-mono-small">{ticket.id}</span>}>
         <article>
           <EmailBody
@@ -112,7 +184,7 @@ export function TicketPanes() {
           onEvidenceActive={setActiveQuote}
         />
       ) : !suggestion ? (
-        <Pane title="Triage">
+        <Pane title="Triage" {...triagePane}>
           <div className={styles.empty}>
             <p className="text-body-strong">The AI hasn&apos;t triaged this ticket yet.</p>
             <p className={`text-small ${styles.secondary}`}>
@@ -140,7 +212,7 @@ export function TicketPanes() {
           onEvidenceActive={setActiveQuote}
         />
       )}
-    </>
+    </Announce>
   );
 }
 
@@ -162,7 +234,7 @@ function WaitingPanes({ ticketId }: { ticketId: string }) {
     <>
       <title>{`${ticketId} · TriageDesk`}</title>
       <Pane title="Email" meta={<span className="text-mono-small">{ticketId}</span>} aria-busy />
-      <Pane title="Triage" aria-busy />
+      <Pane title="Triage" aria-busy {...triagePane} />
     </>
   );
 }
@@ -340,6 +412,8 @@ function TriageFooter({
 }: Pick<TriageViewProps, "ticketId" | "suggestion" | "state" | "update" | "ids">) {
   const next = useNext(ticketId);
   const blockers = blockersFor(suggestion, state);
+  const announce = use(Announce);
+  const rescue = useFocusRescue();
 
   const approve = () => {
     if (blockers.length > 0) return;
@@ -351,6 +425,9 @@ function TriageFooter({
       const rows = [...untouched, "approved and sent the reply"].map(personRow);
       return { ...s, sentAt: rows[rows.length - 1].at, activity: [...s.activity, ...rows] };
     });
+    // Approve becomes the sent line: say so, and focus moves on to Next ticket.
+    announce("Reply sent.");
+    rescue(afterSendButton);
   };
 
   return (
@@ -373,7 +450,7 @@ function Triage(props: FixtureTriageProps) {
   const state = stateFor(props.ticketId);
   const change: Change = (c) => update(props.ticketId, c);
   return (
-    <Pane title="Triage" footer={<TriageFooter {...props} state={state} update={change} />}>
+    <Pane title="Triage" {...triagePane} footer={<TriageFooter {...props} state={state} update={change} />}>
       <TriageFields {...props} state={state} update={change} />
     </Pane>
   );
@@ -387,6 +464,7 @@ function RuleSentTriage({ ticketId, email, suggestion, onEvidenceActive }: Fixtu
   return (
     <Pane
       title="Triage"
+      {...triagePane}
       footer={
         <ApproveBar
           blockers={[]}
@@ -459,11 +537,17 @@ type NoActionProps = {
  * Approve here: there's no reply to approve.
  */
 function NoActionFields({ email, suggestion, state, update, onTriageAnyway, onEvidenceActive }: NoActionProps) {
-  const keep = () =>
+  const announce = use(Announce);
+  const rescue = useFocusRescue();
+  const keep = () => {
     update((s) => {
       const row = personRow("closed the ticket without a reply");
       return { ...s, closedAt: row.at, activity: [...s.activity, row] };
     });
+    // Keep and Triage anyway go: say so, and focus moves on to Next ticket.
+    announce("Ticket closed without a reply.");
+    rescue(afterSendButton);
+  };
 
   return (
     <div className={styles.triage}>
@@ -510,20 +594,27 @@ function NoActionTriage({
   const { stateFor, update } = useInbox();
   const state = stateFor(ticketId);
   const anyway = props.suggestion.triageAnyway;
+  const announce = use(Announce);
+  const rescue = useFocusRescue();
 
   const triageAnyway = anyway
-    ? () =>
+    ? () => {
         update(ticketId, (s) => ({
           ...s,
           triagedAnyway: true,
           draft: anyway.draft,
           activity: [...s.activity, personRow("asked the AI to triage it anyway"), modelRow(modelRowText(anyway))],
-        }))
+        }));
+        // The whole review is replaced: focus goes to the pane, and the new suggestion is read out.
+        announce(readyText(anyway, blockersFor(anyway, { ...initialFor(anyway), draft: anyway.draft })));
+        rescue(visibleTriage);
+      }
     : undefined;
 
   return (
     <Pane
       title="Triage"
+      {...triagePane}
       footer={state.closedAt ? <ClosedFooter ticketId={ticketId} closedAt={state.closedAt} /> : undefined}
     >
       <NoActionFields {...props} state={state} update={(c) => update(ticketId, c)} onTriageAnyway={triageAnyway} />
@@ -633,6 +724,40 @@ function LiveTriagePane({
     body = <LiveProblem failure={added.triage} onRetry={() => inbox.triage(ticketId)} />;
   }
 
+  // Screen readers hear that the AI is working, and then how it went (an
+  // error Banner is an alert and says so itself). Try again and Triage
+  // anyway go away when pressed, so focus goes to the pane.
+  const announce = use(Announce);
+  const rescue = useFocusRescue();
+  const failure =
+    added.anyway?.status === "failed" ? added.anyway : added.triage.status === "failed" ? added.triage : null;
+  const outcome = waiting
+    ? "Triaging this ticket. The AI's suggestion will appear in the Triage pane."
+    : suggestion?.kind === "triage"
+      ? readyText(suggestion, blockersFor(suggestion, state))
+      : suggestion?.kind === "not-a-request" && !failure
+        ? "The AI suggests this isn't a request. Keep closes it without a reply."
+        : failure?.error === "visitor-limit"
+          ? "You've used today's live triages. This ticket stays untriaged."
+          : failure?.error === "daily-cap" || failure?.error === "unavailable"
+            ? "Live triage is paused for today."
+            : null;
+  const announced = useRef<boolean | null>(null);
+  useEffect(() => {
+    const before = announced.current;
+    announced.current = waiting;
+    if (before === waiting) return;
+    // Opened already answered: said only for a ticket added this past
+    // minute (a fast answer, such as the daily limit, can arrive before its
+    // pane is on screen), not every time an older one is opened.
+    const justAdded = Date.now() - Date.parse(added.ticket.receivedAt) < 60_000;
+    if (before === null && !waiting && !justAdded) return;
+    if (outcome) announce(outcome);
+    if (waiting && before === false) rescue(visibleTriage);
+    // Only when waiting starts or ends; the words are read from that render.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [waiting]);
+
   // An answer with no Approve ("not a request", or a failure): the
   // skeleton's Approve bar fades out rather than vanishing.
   const [wasWaiting, setWasWaiting] = useState(waiting);
@@ -662,6 +787,7 @@ function LiveTriagePane({
       <SkulletProvider reveal="together">
         <Pane
           title="Triage"
+          {...triagePane}
           status={<WorkingStatus key={ticketId} steps={TRIAGE_STEPS} active={waiting} />}
           footer={footerSlot}
         >

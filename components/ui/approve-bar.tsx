@@ -52,7 +52,10 @@ export function ApproveBar({ blockers, targets, onApprove, sentAt, sentBy = "you
         <p className={`text-small ${styles.sent}`}>
           {outcome === "closed" ? "Closed by you" : `Sent by ${sentBy === "you" ? "you" : "rule"}`} · <Time dateTime={sentAt} />
         </p>
-        <Button onClick={onAfterSend}>{afterSend === "next-ticket" ? "Next ticket" : "Back to inbox"}</Button>
+        {/* data-after-send: where a screen moves focus once Approve (or Keep) has gone. */}
+        <Button data-after-send="" onClick={onAfterSend}>
+          {afterSend === "next-ticket" ? "Next ticket" : "Back to inbox"}
+        </Button>
       </div>
     );
   }

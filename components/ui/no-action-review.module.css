@@ -32,6 +32,14 @@
   gap: 6px;
 }
 
+/* Touch: as FieldReview's controls, hit areas stop 1px short of the middle of the gap. */
+@media (pointer: coarse) {
+  .controls {
+    --hit-inline: 2px;
+    row-gap: 22px;
+  }
+}
+
 .hint {
   margin: 0;
   color: var(--ink-3);

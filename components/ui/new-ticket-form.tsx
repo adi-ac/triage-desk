@@ -22,9 +22,9 @@ export type NewTicketFormProps = {
    */
   sample: SampleEmail;
   /**
-   * "Use a sample email" when Customer name already has text: the container
-   * picks the next sample (never the same twice in a row) and returns it;
-   * the placeholders follow it, and it's what fills in.
+   * "Use a sample email" while a sample it filled in is still showing: the
+   * container picks the next sample (never the same twice in a row) and
+   * returns it; the placeholders follow it, and it's what fills in.
    */
   onNextSample: () => SampleEmail;
   /** Add and triage, with every field trimmed; blank optional fields are left out. */
@@ -77,7 +77,25 @@ export function NewTicketForm({ variant, sample, onNextSample, onAdd }: NewTicke
     "aria-describedby": errors[key] ? `${id}-${key}-error` : undefined,
     onChange: (e: { target: { value: string } }) => setValues((v) => ({ ...v, [key]: e.target.value })),
   });
-  const fillSample = () => setValues({ ...(values.name.trim() ? onNextSample() : sample) });
+  // "Use a sample email" only ever fills a field that's empty or still holds
+  // the sample it last put there, unedited: never text the person typed or
+  // pasted. If a sample is showing, it moves on to the next one; otherwise
+  // it uses the one the placeholders show. With every field holding the
+  // person's own text there's nothing to fill, and the button is disabled.
+  const [filled, setFilled] = useState<SampleEmail | null>(null);
+  const keys = Object.keys(empty) as (keyof Values)[];
+  const replaceable = (key: keyof Values) => values[key] === "" || (filled !== null && values[key] === filled[key]);
+  const sampleShowing = keys.some((key) => values[key] !== "" && filled !== null && values[key] === filled[key]);
+  const canFill = keys.some(replaceable);
+  const fillSample = () => {
+    const next = sampleShowing ? onNextSample() : sample;
+    setValues((v) => {
+      const out = { ...v };
+      for (const key of keys) if (replaceable(key)) out[key] = next[key];
+      return out;
+    });
+    setFilled(next);
+  };
 
   return (
     <form
@@ -158,7 +176,9 @@ export function NewTicketForm({ variant, sample, onNextSample, onAdd }: NewTicke
           </Field>
         </div>
         <div className={styles.footer}>
-          <Button onClick={fillSample}>Use a sample email</Button>
+          <Button onClick={fillSample} disabled={!canFill}>
+            Use a sample email
+          </Button>
           <Button type="submit" variant="primary" disabled={!ready}>
             Add and triage
           </Button>

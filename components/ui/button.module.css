@@ -16,7 +16,7 @@
   background: var(--button-bg);
   box-shadow: var(--shadow-button);
   cursor: pointer;
-  transition: background-color 150ms ease-out;
+  transition: background-color var(--duration-hover) var(--ease-hover);
 }
 
 .button[data-size="small"] {
@@ -36,6 +36,27 @@
 
 .button > svg {
   flex: none;
+}
+
+/* Touch: every Button, IconButton and Menu trigger has an invisible hit
+   area at least 44px tall, centred on it, without changing its size.
+   Sideways it grows only by --hit-inline: 0 unless the parent sets it to
+   half the gap to its neighbours less 1px, so neighbouring hit areas never
+   overlap and a 2px band in the middle of the gap belongs to neither
+   (browsers round hit-testing by up to about 1px, so hit areas that met
+   exactly could hand a tap just short of the middle to the wrong button).
+   A parent whose buttons can wrap opens its row gap to match. */
+@media (pointer: coarse) {
+  .button {
+    position: relative;
+  }
+
+  .button::after {
+    content: "";
+    position: absolute;
+    inset-block: min(0px, calc(50% - 22px));
+    inset-inline: calc(-1 * var(--hit-inline, 0px));
+  }
 }
 
 /* IconButton: a round button holding one icon, the same height as a
@@ -83,15 +104,15 @@
   opacity: 0;
   transform: translateY(-50%) translateX(-2px);
   transition:
-    opacity 120ms ease-out,
-    transform 120ms ease-out;
+    opacity var(--duration-tooltip) var(--ease-hover),
+    transform var(--duration-tooltip) var(--ease-hover);
 }
 
 @media (hover: hover) {
   .button:hover .tooltip {
     opacity: 1;
     transform: translateY(-50%);
-    transition-delay: 400ms;
+    transition-delay: var(--delay-tooltip);
   }
 }
 

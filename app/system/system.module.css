@@ -499,7 +499,7 @@
   background: var(--button-bg);
   box-shadow: var(--shadow-button);
   cursor: pointer;
-  transition: background 150ms ease-out;
+  transition: background var(--duration-hover) var(--ease-hover);
 }
 
 .primary {
