@@ -33,7 +33,9 @@ export type PaneProps = Omit<ComponentProps<"section">, "className" | "style" | 
 export function Pane({ title, count, status, meta, action, footer, inset = "default", children, ...props }: PaneProps) {
   const headingId = useId();
   return (
-    <section aria-labelledby={headingId} {...props} className={styles.pane}>
+    // data-pane: how a screen finds its panes (the inbox measures the first
+    // one on screen against its fixed header), never by DOM position.
+    <section aria-labelledby={headingId} {...props} className={styles.pane} data-pane="">
       <div className={styles.header}>
         <div className={styles.heading}>
           <h2 id={headingId} className={`text-heading ${styles.title}`}>

@@ -155,8 +155,14 @@ function Shell({ id, children }: { id: string; children: ReactNode }) {
     const check = () => {
       frame = 0;
       const header = headerRef.current;
-      // The first pane (the ticket wrapper is display: contents).
-      const pane = [...(ticketRef.current?.children ?? [])].find((el) => el.getClientRects().length > 0);
+      // The first pane on screen, found by Pane's own marker, never by
+      // position among the wrapper's children: those include helpers that
+      // aren't panes (the visually hidden status line, absolutely placed at
+      // the top, which read as stuck at scrollY 0), and Next keeps recently
+      // visited pages mounted but hidden (no rects).
+      const pane = [...(ticketRef.current?.querySelectorAll("[data-pane]") ?? [])].find(
+        (el) => el.getClientRects().length > 0,
+      );
       if (!header || !pane) return;
       const fixed = getComputedStyle(header).position === "fixed";
       setStuck(fixed && pane.getBoundingClientRect().top < header.getBoundingClientRect().bottom + 12);
