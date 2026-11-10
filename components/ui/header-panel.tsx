@@ -374,9 +374,13 @@ export function HeaderPanel({
         onPointerDown={(e) => (scrimPress.current = { x: e.clientX, y: e.clientY })}
         // Only a tap closes it. The scrim can't pan (it's part of the scroll
         // lock), so on iOS a drag across it would otherwise end in a click.
+        // From the second view, only while every field in it is empty:
+        // closing clears its form, and typed or pasted text is never lost
+        // to a stray tap (as the Dialog's scrim). The × always closes.
         onClick={(e) => {
           const press = scrimPress.current;
           if (press && Math.hypot(e.clientX - press.x, e.clientY - press.y) > 10) return;
+          if (subOpen && !fieldsEmpty(subviewRef.current)) return;
           onOpenChange(false);
         }}
       />
