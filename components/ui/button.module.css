@@ -16,28 +16,7 @@
   background: var(--button-bg);
   box-shadow: var(--shadow-button);
   cursor: pointer;
-  transform-origin: center;
-  /* The fill on hover, and the press springing back (see below). */
-  transition:
-    background-color var(--duration-hover) var(--ease-hover),
-    transform var(--duration-press-out) var(--ease-press);
-}
-
-/* Pressed (held down, by pointer, touch or Space): every variant and size,
-   IconButton and the Menu trigger included, shrinks to 98% about its
-   centre, going in faster than it springs back. Only transform moves: no
-   colour, shadow or size change, so nothing around it shifts, and its
-   focus ring and touch hit area (::after) scale with it, still centred on
-   it. A disabled button (Approve while blocked) doesn't react. None at all
-   under reduced motion. On iOS, :active needs a touchstart listener on the
-   page (lib/press.ts, in the root layout). */
-@media (prefers-reduced-motion: no-preference) {
-  .button:active:not(:disabled) {
-    transform: scale(var(--scale-press));
-    transition:
-      background-color var(--duration-hover) var(--ease-hover),
-      transform var(--duration-press-in) var(--ease-press);
-  }
+  transition: background-color var(--duration-hover) var(--ease-hover);
 }
 
 .button[data-size="small"] {

@@ -1,7 +1,6 @@
 import type { Metadata } from "next";
 import { themeScript } from "@/lib/theme";
 import { timeScript } from "@/lib/time-format";
-import { pressScript } from "@/lib/press";
 import { viewportScript } from "@/lib/viewport";
 import { Geist, Geist_Mono, Schibsted_Grotesk } from "next/font/google";
 import "@/styles/tokens.css";
@@ -33,8 +32,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <script dangerouslySetInnerHTML={{ __html: timeScript }} />
         {/* iOS and iPadOS only: no zoom when a 14px field is tapped (lib/viewport.ts). */}
         <script dangerouslySetInnerHTML={{ __html: viewportScript }} />
-        {/* iOS and iPadOS: lets Button's press state (:active) show on touch (lib/press.ts). */}
-        <script dangerouslySetInnerHTML={{ __html: pressScript }} />
       </head>
       <body>{children}</body>
     </html>
