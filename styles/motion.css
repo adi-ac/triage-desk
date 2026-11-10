@@ -23,6 +23,12 @@
   --duration-tooltip: 120ms;
   /* ...shown on hover only after a short wait, so passing over it does nothing. */
   --delay-tooltip: 400ms;
+  /* A Button held down: it shrinks to 98% fast, and springs back a little
+     slower when let go. Transform only, so nothing around it moves. */
+  --scale-press: 0.98;
+  --duration-press-in: 80ms;
+  --duration-press-out: 160ms;
+  --ease-press: cubic-bezier(0.25, 1, 0.5, 1);
   /* The queue button's icon turning into the close × and back (HeaderPanel). */
   --duration-icon-morph: 260ms;
   --delay-icon-morph: 40ms;
