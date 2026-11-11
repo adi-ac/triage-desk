@@ -61,9 +61,16 @@
   margin-block-end: 24px;
 }
 
-/* The skeleton's Approve bar leaving when the answer has none. */
+/* A short answer's content ("not a request", or a failure), marked for
+   the "clear, then show" reveal (clear-reveal.ts); no box of its own. */
+.clearReveal {
+  display: contents;
+}
+
+/* The skeleton's Approve bar leaving when the answer has none: with the
+   skeleton above it, so the body and the footer clear together. */
 .leaving {
-  animation: leave var(--duration-status-out) var(--ease-out-quart) forwards;
+  animation: leave var(--duration-reveal-clear) var(--ease-reveal-clear) forwards;
 }
 
 @keyframes leave {

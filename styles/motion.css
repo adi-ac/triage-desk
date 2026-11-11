@@ -77,10 +77,9 @@
      step the words crossfade (the outgoing one fades, the incoming one
      starts a little later) while the box holding them eases to the new
      word's width, so the dot glides. It fades out when the answer
-     arrives. The loading skeleton's Approve bar fades out the same way
-     when the answer has no Approve ("not a request", or an error). The
-     skeleton's own pulse and crossfade are Skullet's (its "pulse" at
-     "slow", and the "together" reveal). */
+     arrives. The skeleton's own pulse and crossfade are Skullet's (its
+     "pulse" at "slow", and the "together" reveal); a short answer clears
+     the skeleton first (--*-reveal-*, below). */
   --duration-status-shimmer: 1.8s;
   --duration-status-pulse: 1.4s;
   --ease-status-pulse: cubic-bezier(0.37, 0, 0.63, 1);
@@ -91,6 +90,15 @@
   --duration-status-word-in: 300ms;
   --delay-status-word-in: 60ms;
   --duration-status-out: 200ms;
+  /* A short answer ("not a request", or a failure) replacing the
+     triage-shaped skeleton: clear, then show. The skeleton (and its Approve
+     bar) fades out first; the content starts once it has gone. A triage
+     answer keeps Skullet's crossfade. */
+  --duration-reveal-clear: 140ms;
+  --ease-reveal-clear: ease-out;
+  --delay-reveal-show: 160ms;
+  --duration-reveal-show: 220ms;
+  --ease-reveal-show: ease-out;
 }
 
 /* Switching theme shouldn't animate every color on the page: ThemeToggle

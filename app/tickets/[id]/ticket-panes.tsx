@@ -44,6 +44,7 @@ import {
   type ActivityRow,
   type TicketState,
 } from "../inbox-state";
+import { liveTriageReveal } from "./clear-reveal";
 import styles from "./ticket.module.css";
 
 const targets = { category: "field-category", urgency: "field-urgency", draft: "draft-reply" };
@@ -724,8 +725,9 @@ function LiveTriagePane({
     body = <TriageFields {...props} email={email} prior={prior} onEvidenceActive={onEvidenceActive} />;
     footer = <TriageFooter {...props} />;
   } else if (suggestion?.kind === "not-a-request") {
+    // A short answer: "clear, then show" (clear-reveal.ts) rather than over the triage-shaped skeleton.
     body = (
-      <>
+      <div data-reveal="clear" className={styles.clearReveal}>
         {added.anyway?.status === "failed" && (
           <div className={styles.problem}>
             <LiveProblem failure={added.anyway} onRetry={() => inbox.triageAnyway(ticketId)} />
@@ -739,11 +741,15 @@ function LiveTriagePane({
           onTriageAnyway={() => inbox.triageAnyway(ticketId)}
           onEvidenceActive={onEvidenceActive}
         />
-      </>
+      </div>
     );
     footer = state.closedAt ? <ClosedFooter ticketId={ticketId} closedAt={state.closedAt} /> : null;
   } else if (added.triage.status === "failed") {
-    body = <LiveProblem failure={added.triage} onRetry={() => inbox.triage(ticketId)} />;
+    body = (
+      <div data-reveal="clear" className={styles.clearReveal}>
+        <LiveProblem failure={added.triage} onRetry={() => inbox.triage(ticketId)} />
+      </div>
+    );
   }
 
   // Screen readers hear that the AI is working, and then how it went (an
@@ -806,7 +812,7 @@ function LiveTriagePane({
 
   return (
     <div className={styles.live}>
-      <SkulletProvider reveal="together">
+      <SkulletProvider reveal={liveTriageReveal}>
         <Pane
           title="Triage"
           {...triagePane}
