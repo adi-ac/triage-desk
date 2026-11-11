@@ -234,6 +234,42 @@ export function HeaderPanel({
 
     // Reopened during the close: run the close back to open, then drop it.
     const reopening = exit.current;
+    // The entrance starts on the first painted frame, not on the tap. The
+    // frame that first shows the panel, scrim and button in the top layer
+    // is slow (about 45ms in iOS Safari, more on the first open after a
+    // load), and the transitions' clocks start when their styles change,
+    // so starting them in the tap's task left the first visible frame well
+    // into the entrance and the reveal looked skipped. So the scrim, panel
+    // (and its content) and the button's icons are held at their starting
+    // values (data-hold, no transitions) while the slow frames paint, and
+    // let go at the start of a prompt one (below), where the transitions
+    // run from the beginning with every value unchanged. Not when reopening during
+    // the close (its animations run back from where they are), and not
+    // under reduced motion (nothing animates; the panel appears at once).
+    const hold = !reopening && !reducedMotion();
+    const held = [scrim, panel, trigger];
+    const letGo = () => held.forEach((el) => el.removeAttribute("data-hold"));
+    let holdFrame = 0;
+    if (hold) {
+      held.forEach((el) => el.setAttribute("data-hold", ""));
+      // Let go at the start of the first frame that follows the one before
+      // it promptly (within 34ms, so 30fps counts), so the slow frames are
+      // behind it: the one that first shows the panel, and on the first
+      // open of a visit another after it while a font the queue needs
+      // arrives and its text is laid out again. At most 6 frames.
+      let frames = 0;
+      let last = 0;
+      const step = (now: number) => {
+        frames += 1;
+        if (frames >= 2 && (now - last <= 34 || frames >= 6)) {
+          letGo();
+          return;
+        }
+        last = now;
+        holdFrame = requestAnimationFrame(step);
+      };
+      holdFrame = requestAnimationFrame(step);
+    }
     if (reopening) {
       const run = {};
       reopening.run = run;
@@ -335,6 +371,9 @@ export function HeaderPanel({
     viewport?.addEventListener("resize", fitKeyboard);
     viewport?.addEventListener("scroll", fitKeyboard);
     return () => {
+      // Closed (or the effect re-ran) before the hold was let go.
+      cancelAnimationFrame(holdFrame);
+      letGo();
       panel.removeEventListener("focusin", onFocusIn);
       document.removeEventListener("keydown", onKeyDown);
       removeEventListener("resize", onResize);

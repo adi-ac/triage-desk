@@ -93,6 +93,20 @@
   rotate: 0deg;
 }
 
+/* Held at the start of the entrance while its first frame paints (see
+   the panel's data-hold, below): the icon still the inbox, no turn yet. */
+.button[data-hold] .openIcon {
+  opacity: 1;
+  rotate: none;
+  transition: none;
+}
+
+.button[data-hold] .closeIcon {
+  opacity: 0;
+  rotate: -90deg;
+  transition: none;
+}
+
 /* Scrim: the whole viewport, header included. */
 
 .scrim {
@@ -120,6 +134,12 @@
   .scrim:popover-open {
     opacity: 0;
   }
+}
+
+/* Held at its starting value while the entrance's first frame paints. */
+.scrim:popover-open[data-hold] {
+  opacity: 0;
+  transition: none;
 }
 
 /* Panel
@@ -184,6 +204,20 @@
   .panel:popover-open > * {
     opacity: 0;
   }
+}
+
+/* Held at its starting values (the clip a point at the top-right corner,
+   the content transparent, no transitions) while the frame that first
+   shows it paints; the component lets go at the start of the next frame,
+   so the transitions above run whole from there. */
+.panel:popover-open[data-hold] {
+  clip-path: inset(0 0 100% 100% round 20px);
+  transition: none;
+}
+
+.panel:popover-open[data-hold] > * {
+  opacity: 0;
+  transition: none;
 }
 
 /* The panel takes focus on open (so a tap shows no ring); it's a container,
