@@ -10,7 +10,8 @@ import { usePathname } from "next/navigation";
  * syncs with usePathname (node_modules/next/dist/docs, Linking and
  * navigating, Native History API). Back and Forward restore those entries
  * the same way, without a request. The route and generateStaticParams stay,
- * so a reload or a pasted /tickets/<id> still loads directly.
+ * so a reload or a pasted /tickets/<id> still loads directly (an added
+ * ticket's ID, gone in a fresh page, becomes the first screen's ticket).
  *
  * The ID is read from the pathname, never with useParams: pushState keeps
  * the route tree that was loaded (it doesn't fetch the new segment), so

@@ -20,6 +20,7 @@ import {
 } from "@/components/ui";
 import { skeletonEmail, skeletonSuggestion } from "@/fixtures/skeleton-sample";
 import { ruleSendFor, suggestionFor } from "@/fixtures/suggestions";
+import { firstScreenTicketId } from "@/fixtures/tickets";
 import { approveBlockers, approveField, type Blocker } from "@/lib/approve";
 import { flatQueue } from "@/lib/queue";
 import { matchEvidence } from "@/lib/evidence";
@@ -32,7 +33,7 @@ import {
   type Urgency,
 } from "@/lib/suggestion";
 import { couldBeAdded, type AddedTicket, type LiveTriage } from "../added-tickets";
-import { showTicket, useTicketId } from "../ticket-url";
+import { showTicket, ticketPath, useTicketId } from "../ticket-url";
 import {
   initialFor,
   modelRow,
@@ -136,9 +137,12 @@ function TicketView({ ticketId }: { ticketId: string }) {
   const announce = (text: string) => setSaid((s) => ({ text, count: s.count + 1 }));
   const ticket = ticketFor(ticketId);
   if (!ticket) {
-    // An added ticket's ID before the tab's tickets have been read (the
-    // server, and the render that hydrates): empty panes, not a 404.
-    if (!addedLoaded && couldBeAdded(ticketId)) return <WaitingPanes ticketId={ticketId} />;
+    // An added ticket's ID this page doesn't have: added tickets live only
+    // in memory, so in a fresh page (a reload, a pasted link, Back or
+    // Forward into a new page) it's gone. Not a 404: the empty panes show
+    // while the page hydrates, then the URL is replaced with the first
+    // screen's ticket. Any other unknown ID is a 404.
+    if (couldBeAdded(ticketId)) return <WaitingPanes ticketId={ticketId} replace={addedLoaded} />;
     notFound();
   }
   const added = addedFor(ticketId);
@@ -239,8 +243,15 @@ function Received({ at, justAdded }: { at: string; justAdded: boolean }) {
   );
 }
 
-/** An added ticket's URL before the tab's tickets have been read: the panes' frames, empty. */
-function WaitingPanes({ ticketId }: { ticketId: string }) {
+/**
+ * An added ticket's URL this page doesn't have: the panes' frames, empty;
+ * once hydrated (replace), the URL becomes the first screen's ticket, which
+ * renders from the client with no request (replaceState, ticket-url.ts).
+ */
+function WaitingPanes({ ticketId, replace = false }: { ticketId: string; replace?: boolean }) {
+  useEffect(() => {
+    if (replace) history.replaceState(null, "", ticketPath(firstScreenTicketId));
+  }, [replace]);
   return (
     <>
       <title>{`${ticketId} · TriageDesk`}</title>
@@ -654,8 +665,6 @@ function LiveProblem({
   switch (failure.error) {
     case "model":
       return <Banner tone="error" title="The AI couldn't triage this ticket" action={retry} />;
-    case "interrupted":
-      return <Banner tone="error" title="Triage stopped when the page reloaded" action={retry} />;
     case "visitor-limit":
       return (
         <Banner title="You've used today's live triages">

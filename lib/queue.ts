@@ -64,6 +64,13 @@ export type Queue = { needsReview: Ticket[]; noAction: Ticket[]; untriaged: Tick
  * leaders: a documented demo exception (fixtures `queueLeaders`). Those in
  * Needs review that nobody has decided a field on go first, in the order
  * given; once a person decides a field, the ticket sorts by the rule.
+ *
+ * added: tickets added in this page (newest first). Every one that isn't
+ * done and isn't "not a request" goes at the very top of Needs review,
+ * above the leaders, in that order, whatever its triage: waiting for the
+ * AI, triaged, or failed (no suggestion). Done ones sort into Sent like any
+ * other, and "not a request" ones into Probably no action (newest first,
+ * so at its top).
  */
 export function orderQueue(
   tickets: readonly Ticket[],
@@ -71,6 +78,7 @@ export function orderQueue(
   decisionsFor: (id: string) => FieldDecisions,
   doneAtFor: (id: string) => string | null,
   leaders: readonly string[] = [],
+  added: readonly string[] = [],
 ): Queue {
   const open = tickets.filter((t) => !doneAtFor(t.id));
   const untriaged = open.filter((t) => !suggestionFor(t.id)).sort(newestFirst);
@@ -92,8 +100,16 @@ export function orderQueue(
   const undecidedLeaders = leaders
     .map((id) => needsReview.find((t) => t.id === id))
     .filter((t): t is Ticket => !!t && !decisionsFor(t.id).category && !decisionsFor(t.id).urgency);
-  const rest = needsReview.filter((t) => !undecidedLeaders.includes(t));
-  return { needsReview: [...undecidedLeaders, ...rest], noAction, untriaged, sent };
+  const addedOnTop = added
+    .map((id) => open.find((t) => t.id === id))
+    .filter((t): t is Ticket => !!t && suggestionFor(t.id)?.kind !== "not-a-request");
+  const rest = needsReview.filter((t) => !undecidedLeaders.includes(t) && !addedOnTop.includes(t));
+  return {
+    needsReview: [...addedOnTop, ...undecidedLeaders, ...rest],
+    noAction,
+    untriaged: untriaged.filter((t) => !addedOnTop.includes(t)),
+    sent,
+  };
 }
 
 /** The queue top to bottom, for "Next ticket". */

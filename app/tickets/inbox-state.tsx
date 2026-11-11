@@ -27,12 +27,12 @@ export type TicketState = {
 };
 
 type InboxState = {
-  /** Every ticket: the tab's added ones (newest first), then the fixtures. */
+  /** Every ticket: the page's added ones (newest first), then the fixtures. */
   tickets: readonly Ticket[];
   ticketFor: (id: string) => Ticket | undefined;
   /** An added ticket's live triage; undefined for the fixtures. */
   addedFor: (id: string) => AddedTicket | undefined;
-  /** False until the tab's added tickets have been read (the server, and the render that hydrates). */
+  /** False on the server and in the render that hydrates; true once the page is live. */
   addedLoaded: boolean;
   /** The AI's suggestion, recorded or live, before any "Triage anyway". */
   suggestionOf: (id: string) => Suggestion | undefined;
@@ -107,29 +107,23 @@ export function InboxProvider({ currentId, children }: { currentId: string; chil
   const doneAtFor = (id: string) => ruleSendFor(id)?.sentAt ?? stateFor(id).sentAt ?? stateFor(id).closedAt;
 
   // Re-sort only when a different ticket opens: computed during render the
-  // first time each ticket is current, then held. Also when the tab's added
-  // tickets come or go (read after a reload, or one just added), so a new
-  // row is never missing.
+  // first time each ticket is current, then held. Also when a ticket is
+  // added, so its row is never missing. Added tickets lead Needs review,
+  // newest first, through every re-sort, whatever their triage (orderQueue).
   const key = `${currentId} ${added.map((a) => a.ticket.id).join(",")}`;
   const [snapshot, setSnapshot] = useState<{ key: string; queue: Queue } | null>(null);
   let queue: Queue;
   if (snapshot && snapshot.key === key) {
     queue = snapshot.queue;
   } else {
-    queue = orderQueue(all, effectiveFor, decisionsFor, doneAtFor, queueLeaders);
-    // An added ticket still waiting for the AI goes at the top of Needs
-    // review, newest first, where the person will look for it; so does the
-    // open one if it has no answer (it failed, even before it opened, as an
-    // over-the-limit answer can). Others without an answer sort into Not
-    // triaged yet.
-    const waiting = added
-      .filter((a) => !doneAtFor(a.ticket.id) && !a.suggestion)
-      .filter((a) => a.triage.status === "triaging" || a.ticket.id === currentId)
-      .map((a) => a.ticket);
-    if (waiting.length) {
-      const out = (list: Ticket[]) => list.filter((t) => !waiting.includes(t));
-      queue = { ...queue, needsReview: [...waiting, ...out(queue.needsReview)], untriaged: out(queue.untriaged) };
-    }
+    queue = orderQueue(
+      all,
+      effectiveFor,
+      decisionsFor,
+      doneAtFor,
+      queueLeaders,
+      added.map((a) => a.ticket.id),
+    );
     setSnapshot({ key, queue });
   }
 
