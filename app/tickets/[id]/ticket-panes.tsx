@@ -176,7 +176,7 @@ function TicketView({ ticketId }: { ticketId: string }) {
                   <span className="text-body-strong">{ticket.from.name}</span>{" "}
                   <span className={styles.muted}>{ticket.from.email}</span>
                 </p>
-                <p className={styles.secondary}>
+                <p className={styles.muted}>
                   {company ??
                     (added?.company
                       ? `${added.company} · No matching Ledgerline account`
