@@ -239,7 +239,7 @@ function Received({ at, justAdded }: { at: string; justAdded: boolean }) {
     <>Received just now</>
   ) : (
     <>
-      Received <Time dateTime={at} />
+      Received <Time dateTime={at} font="inherit" />
     </>
   );
 }

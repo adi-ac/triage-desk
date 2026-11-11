@@ -1,0 +1,9 @@
+/* Time with font="inherit": the surrounding text's own font (family, size,
+   weight, letter-spacing and leading), with tabular figures so the digits
+   still line up. Its colour is the surrounding text's too. */
+.inherit {
+  font: inherit;
+  letter-spacing: inherit;
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
