@@ -156,6 +156,22 @@ export function instructionPlaceholders(draft: string): string[] {
   return (draft.match(/\[[^\]\n]+\]/g) ?? []).filter((p) => AGENT_INSTRUCTION.test(p));
 }
 
+/**
+ * An agent note is one or two plain sentences and never contains "{", "}"
+ * or "<". Even with the json_schema output format the model has leaked
+ * debris into the end of the string: a stray "}", "}</br>", or
+ * "}}**Note:** the JSON above has a stray extra brace…". So keep only the
+ * text before the first of those characters, trimmed; if nothing is left,
+ * there's no note (null). Applied to every live answer and every recording
+ * (both go through toSuggestion).
+ */
+export function cleanAgentNote(note: string | null): string | null {
+  if (note === null) return null;
+  const leak = note.search(/[{}<]/);
+  const kept = (leak === -1 ? note : note.slice(0, leak)).trim();
+  return kept === "" ? null : kept;
+}
+
 /** The request a person sends with "Triage anyway". */
 export const TRIAGE_ANYWAY = `A person reviewed your suggestion that this isn't a request and chose "Triage anyway". Set kind to "triage" and give a category, urgency, evidence and draft as for any request.`;
 
@@ -207,12 +223,13 @@ export function toSuggestion(
   const parsed = Output.safeParse(raw);
   if (!parsed.success) return { problem: `invalid: ${parsed.error.issues.map((i) => i.message).join("; ")}` };
   const o = parsed.data;
+  const agentNote = cleanAgentNote(o.agentNote);
   const meta = {
     source: "live" as const,
     suggestedAt: new Date().toISOString(),
     model,
     promptVersion: PROMPT_VERSION,
-    ...(o.agentNote ? { agentNote: o.agentNote } : {}),
+    ...(agentNote ? { agentNote } : {}),
   };
 
   // The schema allows both shapes at once; each kind must fill exactly its own fields.

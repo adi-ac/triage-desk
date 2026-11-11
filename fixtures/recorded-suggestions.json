@@ -73,7 +73,7 @@
       "suggestedAt": "2026-11-04T23:03:55.555Z",
       "model": "claude-sonnet-5-5",
       "promptVersion": "p-48be27bc",
-      "agentNote": "This is an out-of-office auto-reply with no ask, so the category is a low-confidence best fit that I was asked to give. You can probably close it without sending the draft.}}**Note:** the JSON above has a stray extra brace; use the single-line object below instead.{",
+      "agentNote": "This is an out-of-office auto-reply with no ask, so the category is a low-confidence best fit that I was asked to give. You can probably close it without sending the draft.",
       "kind": "triage",
       "category": {
         "value": "How-to",
@@ -180,7 +180,7 @@
     "suggestedAt": "2026-11-04T23:03:45.365Z",
     "model": "claude-sonnet-5-5",
     "promptVersion": "p-48be27bc",
-    "agentNote": "Draft invoices aren't currently shown in the Outstanding total as far as the help center says, but I couldn't confirm that from the articles. Please verify before sending, and log the request with the product team if appropriate.}",
+    "agentNote": "Draft invoices aren't currently shown in the Outstanding total as far as the help center says, but I couldn't confirm that from the articles. Please verify before sending, and log the request with the product team if appropriate.",
     "kind": "triage",
     "category": {
       "value": "Feature request",
@@ -358,7 +358,7 @@
     "suggestedAt": "2026-11-04T23:03:41.657Z",
     "model": "claude-sonnet-5-5",
     "promptVersion": "p-48be27bc",
-    "agentNote": "The help center has nothing on deleting or anonymising client personal data while keeping invoices, so please confirm with the product or compliance team what Ledgerline supports. If it can't be done, this is really a feature request. Katrin's one-month deadline from 20 October falls around 20 November, so reply quickly.}",
+    "agentNote": "The help center has nothing on deleting or anonymising client personal data while keeping invoices, so please confirm with the product or compliance team what Ledgerline supports. If it can't be done, this is really a feature request. Katrin's one-month deadline from 20 October falls around 20 November, so reply quickly.",
     "kind": "triage",
     "category": {
       "value": "How-to",
@@ -1125,7 +1125,7 @@
     "suggestedAt": "2026-11-04T23:02:41.462Z",
     "model": "claude-sonnet-5-5",
     "promptVersion": "p-48be27bc",
-    "agentNote": "Likely a PDF font/encoding issue with Polish diacritics, so please escalate to engineering with the examples from the email. The customer has clients rejecting invoices, so consider asking for a workaround to offer them.}",
+    "agentNote": "Likely a PDF font/encoding issue with Polish diacritics, so please escalate to engineering with the examples from the email. The customer has clients rejecting invoices, so consider asking for a workaround to offer them.",
     "kind": "triage",
     "category": {
       "value": "Bug",
@@ -1214,7 +1214,7 @@
     "suggestedAt": "2026-11-04T23:02:43.854Z",
     "model": "claude-sonnet-5-5",
     "promptVersion": "p-48be27bc",
-    "agentNote": "Escalate right away and check the account's ownership-transfer and identity-verification process. The help articles don't cover ownership transfer or an activity log, so confirm both before replying.}</br>",
+    "agentNote": "Escalate right away and check the account's ownership-transfer and identity-verification process. The help articles don't cover ownership transfer or an activity log, so confirm both before replying.",
     "kind": "triage",
     "category": {
       "value": "How-to",
@@ -1450,7 +1450,7 @@
     "suggestedAt": "2026-11-04T23:02:32.317Z",
     "model": "claude-sonnet-5-5",
     "promptVersion": "p-48be27bc",
-    "agentNote": "This is a repeat of LL-4977, where Joel attributed the shortfall to card fees, but Hannah's figures (£96.20 fees vs £412.80 short, and £388.15 short on 20 Oct) don't support that. Please confirm the payout report attachment came through and consider escalating to whoever handles the Stripe integration, since her month-end close is blocked.}",
+    "agentNote": "This is a repeat of LL-4977, where Joel attributed the shortfall to card fees, but Hannah's figures (£96.20 fees vs £412.80 short, and £388.15 short on 20 Oct) don't support that. Please confirm the payout report attachment came through and consider escalating to whoever handles the Stripe integration, since her month-end close is blocked.",
     "kind": "triage",
     "category": {
       "value": "Bug",

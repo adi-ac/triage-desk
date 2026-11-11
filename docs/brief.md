@@ -506,6 +506,12 @@ What it can't claim is real-world use, so it gets tested with support agents and
 - **The known issue** ("Known issue: the queue panel's entrance", 2026-11-08) fits this cause, a first frame that lands well into the entrance, so it's likely resolved; not yet confirmed in Safari on a device or in Responsive Design Mode.
 - Left for later: trimming the click handling (not re-rendering unchanged queue lists, skipping the hidden desktop queue) and loading the Latin Extended font with the page (16.5 KB).
 
+**Leaked characters in agent notes** (2026-11-11)
+- Six recorded agent notes ended with debris the model leaked into the string, even with the json_schema output format: LL-5002's "Triage anyway" note ended "…without sending the draft.}}**Note:** the JSON above has a stray extra brace; use the single-line object below instead.{", LL-5004, LL-5008, LL-5025 and LL-5032 a trailing "}", and LL-5027 "}</br>". The app showed them as written.
+- **Fixture:** each note cut back to its last real sentence in `fixtures/recorded-suggestions.json`, by hand, not re-recorded: nothing else in the file changed (checked: the same keys, and only those six values differ, each by a removed tail). A rescan of all 925 strings found no other braces, angle brackets or markdown (bold, code, headings, links, list or quote lines), HTML entities, control characters or stray edge whitespace, and every agent note ends in a full stop.
+- **Live and future recordings:** `cleanAgentNote` in `lib/triage-prompt.ts`, applied in `toSuggestion`, which the live route and the recording script both use. An agent note is one or two plain sentences and never contains "{", "}" or "<", so it keeps only the text before the first of them, trimmed; if nothing is left there's no note. The recording script also flags a run that needed it (`agentNoteTrimmed`, with the raw note). Tested with the six notes in `lib/triage-prompt.test.ts` (`pnpm test`).
+- Checked in the app: LL-5027's AI note and LL-5002's after "Triage anyway" end at the full stop.
+
 ## Chain of must-be-trues
 
 1. **← testing now.** A design lead opens the link and, within 60 seconds and with no instructions, sees the model be unsure and the interface stop it: Approve blocked, the reason beside it, the runner-up offered.

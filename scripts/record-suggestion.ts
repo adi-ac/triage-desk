@@ -21,7 +21,9 @@
  * prompt version: a hash of the prompt and schema.
  *
  * The prompt, schema and validation live in lib/triage-prompt.ts, shared
- * with the live route (app/api/triage).
+ * with the live route (app/api/triage), including cleanAgentNote: an agent
+ * note keeps only the text before any "{", "}" or "<" the model leaked into
+ * it (a run that needed it is flagged with agentNoteTrimmed).
  */
 
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
@@ -31,7 +33,16 @@ import { tickets, vagueEmail } from "../fixtures/tickets.ts";
 import { toPercent, unsureReason } from "../lib/confidence.ts";
 import { matchEvidence } from "../lib/evidence.ts";
 import type { NotARequestSuggestion, Suggestion, TriageSuggestion } from "../lib/suggestion.ts";
-import { MODEL, OUTPUT_SCHEMA, PRICE, PROMPT_VERSION, SYSTEM, TRIAGE_ANYWAY, toSuggestion } from "../lib/triage-prompt.ts";
+import {
+  MODEL,
+  OUTPUT_SCHEMA,
+  PRICE,
+  PROMPT_VERSION,
+  SYSTEM,
+  TRIAGE_ANYWAY,
+  cleanAgentNote,
+  toSuggestion,
+} from "../lib/triage-prompt.ts";
 
 // --- The email -------------------------------------------------------------
 
@@ -82,7 +93,11 @@ async function ask(email: Email, forced: boolean) {
   const result = toSuggestion(raw, { model: response.model, forced });
   if (result.problem !== undefined) return { ...base, problem: result.problem, raw };
   const suggestion = { ticketId: email.id, ...result.suggestion } as Suggestion;
-  return { ...base, suggestion };
+  // toSuggestion already cut any leaked characters off the agent note
+  // (cleanAgentNote); say so, so a run that needed it can be looked at.
+  const note: unknown = raw?.agentNote;
+  const noteTrimmed = typeof note === "string" && cleanAgentNote(note) !== note;
+  return { ...base, suggestion, ...(noteTrimmed ? { agentNoteTrimmed: JSON.stringify(note) } : {}) };
 }
 
 /** What to check in a triage suggestion against our rules. */
