@@ -7,7 +7,7 @@ export type ConfidenceLevel = "high" | "medium" | "low";
  * margin: a pick fewer than this many points ahead of its runner-up is
  * unsure, whatever its level.
  */
-export const confidenceThresholds = { high: 85, medium: 60, margin: 15 } as const;
+export const confidenceThresholds = { high: 80, medium: 60, margin: 15 } as const;
 
 export const toPercent = (value: number) => Math.round(Math.min(1, Math.max(0, value)) * 100);
 

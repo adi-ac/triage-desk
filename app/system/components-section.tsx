@@ -483,7 +483,7 @@ export function ComponentsSection({ theme }: { theme: string }) {
         }
       >
         <div className={styles.stack}>
-          {[0.92, 0.85, 0.71, 0.6, 0.48].map((v) => (
+          {[0.92, 0.8, 0.71, 0.6, 0.48].map((v) => (
             <ConfidenceMeter key={v} value={v} />
           ))}
           <p className={`text-overline ${styles.muted}`}>Close call: within 15 points of the runner-up</p>
