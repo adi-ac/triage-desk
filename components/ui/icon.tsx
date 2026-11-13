@@ -2,6 +2,9 @@
  * The interface's icons, drawn for this project: 24-unit grid, 1.75 stroke,
  * currentColor, so they take the text color of whatever holds them. Always
  * decorative: the control that holds one carries the name (aria-label).
+ * One exception to the stroke: chevron-left (the queue panel's "Back to
+ * queue") is 2.0, since two diagonal strokes render lighter than the
+ * straight ones of the + in the New ticket button beside it.
  */
 
 import type { ReactNode } from "react";
@@ -39,6 +42,9 @@ const paths: Record<IconName, ReactNode> = {
   "chevron-left": <path d="M14.5 6l-6 6 6 6" />,
 };
 
+/** Icons drawn heavier than the 1.75 stroke (see above). */
+const strokes: Partial<Record<IconName, number>> = { "chevron-left": 2 };
+
 export function Icon({ name, size = 18 }: { name: IconName; size?: number }) {
   return (
     <svg
@@ -47,7 +53,7 @@ export function Icon({ name, size = 18 }: { name: IconName; size?: number }) {
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
-      strokeWidth={1.75}
+      strokeWidth={strokes[name] ?? 1.75}
       strokeLinecap="round"
       strokeLinejoin="round"
       aria-hidden
